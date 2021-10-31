@@ -1,18 +1,3 @@
-using tBool = System.Boolean;
-
-using tNat8 = System.Byte;
-using tNat16 = System.UInt16;
-using tNat32 = System.UInt32;
-using tNat64 = System.UInt64;
-
-using tInt8 = System.SByte;
-using tInt16 = System.Int16;
-using tInt32 = System.Int32;
-using tInt64 = System.Int64;
-
-using tChar = System.Char;
-using tText = System.String;
-
 public static class
 mMath3D {
 	
@@ -69,10 +54,10 @@ mMath3D {
 			tV3 a1,
 			tInt32 a2
 		) => V3(
-			a1.X / a2,
-			a1.Y / a2,
-			a1.Z / a2
-		);
+			(tInt32)System.Math.Floor((a1.X + 0.5f) / a2),
+			(tInt32)System.Math.Floor((a1.Y + 0.5f) / a2),
+			(tInt32)System.Math.Floor((a1.Z + 0.5f) / a2)
+		);      
 		
 		public override tText
 		ToString() => $"({this.X}, {this.Y}, {this.Z})";
@@ -151,22 +136,22 @@ mMath3D {
 	Invers(
 		this tM3x3 a
 	) {
-		var A = a.X.X;
-		var B = a.X.Y;
-		var C = a.X.Z;
-		var D = a.Y.X;
-		var E = a.Y.Y;
-		var F = a.Y.Z;
-		var G = a.Z.X;
-		var H = a.Z.Y;
-		var I = a.Z.Z;
+		var XX = a.X.X;
+		var XY = a.X.Y;
+		var XZ = a.X.Z;
+		var YX = a.Y.X;
+		var YY = a.Y.Y;
+		var YZ = a.Y.Z;
+		var ZX = a.Z.X;
+		var ZY = a.Z.Y;
+		var ZZ = a.Z.Z;
 		return (
 			M: M3x3(
-				V3(E*I - F*H, C*H - B*I, B*F - C*E),
-				V3(F*G - D*I, A*I - C*G, C*D - A*F),
-				V3(D*H - E*G, B*G - A*H, A*E - B*D)
+				V3(YY*ZZ - YZ*ZY, XZ*ZY - XY*ZZ, XY*YZ - XZ*YY),
+				V3(YZ*ZX - YX*ZZ, XX*ZZ - XZ*ZX, XZ*YX - XX*YZ),
+				V3(YX*ZY - YY*ZX, XY*ZX - XX*ZY, XX*YY - XY*YX)
 			),
-			Det: -C*E*G +B*F*G +C*D*H -A*F*H -B*D*I +A*E*I
+			Det: -XZ*YY*ZX +XY*YZ*ZX +XZ*YX*ZY -XX*YZ*ZY -XY*YX*ZZ +XX*YY*ZZ
 		);
 	}
 	

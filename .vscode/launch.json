@@ -5,7 +5,7 @@
 			"name": ".NET Core Launch (console)",
 			"type": "coreclr",
 			"request": "launch",
-			"program": "${workspaceFolder}/bin/Debug/netcoreapp3.1/PixelGames.exe",
+			"program": "${workspaceFolder}/bin/Debug/net6.0-windows/PixelGames.exe",
 			"args": [],
 			"cwd": "${workspaceFolder}",
 			"console": "internalConsole",

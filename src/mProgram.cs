@@ -1,24 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
 using System.Windows.Forms;
-
-using tBool = System.Boolean;
-
-using tNat8 = System.Byte;
-using tNat16 = System.UInt16;
-using tNat32 = System.UInt32;
-using tNat64 = System.UInt64;
-
-using tInt8 = System.SByte;
-using tInt16 = System.Int16;
-using tInt32 = System.Int32;
-using tInt64 = System.Int64;
-
-using tChar = System.Char;
-using tText = System.String;
 
 static class
 mProgram {
@@ -29,16 +12,32 @@ mProgram {
 	) {
 		const tInt32 MaxX = 400;
 		const tInt32 MaxY = 300;
-		const tInt32 Zoom = 2;
+		const tInt32 Zoom = 4;
 		
-		var Grid = mRenderEngine.CreateSprite(
+		var Sprite = mRenderEngine.CreateSprite(
 			mMath2D.V2(MaxX, MaxY),
 			mMath2D.V2(0, 0)
 		);
 		
 		var Cube = new []{
-			new sbyte[1, 1, 1],
-			new sbyte[3, 3, 3],
+			new sbyte[1, 1, 1] { { { 1 }, }, },
+			new sbyte[3, 3, 3] {
+				{
+					{ 7, 1, 7 },
+					{ 1, 3, 1 },
+					{ 7, 1, 7 },
+				},
+				{
+					{ 1, 4, 1 },
+					{ 5, 2, 5 },
+					{ 1, 4, 1 },
+				},
+				{
+					{ 7, 1, 7 },
+					{ 1, 3, 1 },
+					{ 7, 1, 7 },
+				}
+			},
 			new sbyte[9, 9, 9] {
 				{
 					{ 7, 0, 0, 0, 0, 0, 0, 0, 7 },
@@ -142,7 +141,9 @@ mProgram {
 			},
 		};
 		
-		mRenderEngine.Clear(Grid);
+		var MousePos = mMath2D.V2(0, 0);
+		
+		mRenderEngine.Clear(Sprite);
 		
 		var Image = new Bitmap(1*MaxX, 1*MaxY, PixelFormat.Format32bppArgb);
 		
@@ -155,17 +156,53 @@ mProgram {
 		typeof(Control).GetProperty(
 			"DoubleBuffered",
 			System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
-		).SetValue(Window, true, null);
+		)?.SetValue(Window, true, null);
 		
 		var RenderEnv = new mRenderEngine.tRenderEnv();
 		RenderEnv.Update();
 		
 		Window.Paint += (object _, PaintEventArgs a) => {
-			Grid.Clear();
-			Grid.DrawCube(Cube[2], RenderEnv.NormalPattern, RenderEnv.M);
-			Image.DrawGrid(Grid);
+			var P3D = mMath3D.V3(0, 0, 0);
+			Sprite.Clear();
+			Sprite.DrawCube(Cube[2], RenderEnv.NormalPattern, RenderEnv.M);
+			
+			var P2D = mMath2D.V2(MousePos.X, MousePos.Y);
+			if (P2D.X.InRange(0, MaxX - 1) && P2D.Y.InRange(0, MaxY - 1)) {
+				var CubeLength = Cube[2].GetLength(0);
+				P3D = Sprite.To3D(P2D, RenderEnv, CubeLength);
+				
+				Window.Text = $"{P2D} -> {P3D}";
+			}
+			
+			var Size = Cube[2].GetLength(0);
+			var C = new tInt8[Size, Size, Size];
+			for (var I = 0; I < Size; I += 1) {
+				if (P3D.X.InRange(0, Size-1) &&
+					P3D.Y.InRange(0, Size-1) &&
+					P3D.Z.InRange(0, Size-1)
+				) {
+					C[I, P3D.Y, P3D.Z] = (tInt8)(7 - 128);
+					C[P3D.X, I, P3D.Z] = (tInt8)(7 - 128);
+					C[P3D.X, P3D.Y, I] = (tInt8)(7 - 128);
+				}
+			}
+			Sprite.DrawCube(C, RenderEnv.NormalPattern, RenderEnv.M);
+			Image.DrawSprite(Sprite);
 			a.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
 			a.Graphics.DrawImage(Image, 0, 0, Zoom*MaxX, Zoom*MaxY);
+			
+			//var Font_ = new Font("Arial", 8);
+			//var M = RenderEnv.M;
+			//a.Graphics.DrawString($"{M.X}", Font_, Brushes.Red, new PointF(0, 10));
+			//a.Graphics.DrawString($"{M.Y}", Font_, Brushes.Red, new PointF(0, 20));
+			//a.Graphics.DrawString($"{M.Z}", Font_, Brushes.Red, new PointF(0, 30));
+			//a.Graphics.DrawString($"Dir:{RenderEnv.Dir} Angle:{RenderEnv.Angle}", Font_, Brushes.Red, new PointF(0, 40));
+			//
+			//M = RenderEnv.InvM;
+			//a.Graphics.DrawString($"{M.X}", Font_, Brushes.Red, new PointF(0, 50));
+			//a.Graphics.DrawString($"{M.Y}", Font_, Brushes.Red, new PointF(0, 60));
+			//a.Graphics.DrawString($"{M.Z}", Font_, Brushes.Red, new PointF(0, 70));
+			//a.Graphics.DrawString($"{RenderEnv.Det}", Font_, Brushes.Red, new PointF(0, 80));
 		};
 		
 		void
@@ -173,48 +210,10 @@ mProgram {
 			object _,
 			MouseEventArgs a
 		) {
-			var X = (a.X + ((Zoom + 1)>>1)) / Zoom;
-			var Y = (a.Y + ((Zoom + 1)>>1)) / Zoom;
-			if (X.InRange(0, MaxX - 1) && Y.InRange(0, MaxY - 1)) {
-				switch (a.Button) {
-					case MouseButtons.Left: {
-						var X_ = a.X / Zoom;
-						var Y_ = a.Y / Zoom;
-						var Z_ = Grid.Deep[X, Y];
-						var P2D = mMath3D.V3(X_, Y_, Z_);
-						var P3D = (P2D * RenderEnv.InvM) / RenderEnv.Det;
-						
-						Window.Text = $"{P2D} -> {P3D}";
-						if (Grid.Color[X, Y] != 1) {
-							Grid.Color[X, Y] = 1;
-							Window.Invalidate();
-						}
-						break;
-					}
-					case MouseButtons.Right: {
-						if (Grid.Color[X, Y] != 2) {
-							Grid.Color[X, Y] = 2;
-							Window.Invalidate();
-						}
-						break;
-					}
-					case MouseButtons.Left | MouseButtons.Right: {
-						if (Grid.Color[X, Y] != 3) {
-							Grid.Color[X, Y] = 3;
-							Window.Invalidate();
-						}
-						break;
-					}
-					case MouseButtons.Middle: {
-						if (Grid.Color[X, Y] != 0) {
-							Grid.Color[X, Y] = 0;
-							Window.Invalidate();
-						}
-						break;
-					}
-				}
-			}
-			Window.Refresh();
+			var X = a.X / Zoom;
+			var Y = a.Y / Zoom;
+			MousePos = mMath2D.V2(X, Y);
+			Window.Invalidate();
 		}
 		
 		Window.MouseMove += MouseEvent;
@@ -252,19 +251,19 @@ mProgram {
 			}
 		};
 		
-		Grid.DrawCube(Cube[2], RenderEnv.NormalPattern, RenderEnv.M);
+		Sprite.DrawCube(Cube[2], RenderEnv.NormalPattern, RenderEnv.M);
 		
 		Application.Run(Window);
 		Environment.Exit(0);
 	}
 	
 	static unsafe void
-	DrawGrid(
+	DrawSprite(
 		this Bitmap aImage,
-		mRenderEngine.tSprite aGrid
+		mRenderEngine.tSprite aSprite
 	) {
-		var MaxX = Math.Min(aGrid.Color.GetLength(0), aImage.Width);
-		var MaxY = Math.Min(aGrid.Color.GetLength(1), aImage.Height);
+		var MaxX = Math.Min(aSprite.Color.GetLength(0), aImage.Width);
+		var MaxY = Math.Min(aSprite.Color.GetLength(1), aImage.Height);
 		var DeltaX = MaxX - aImage.Width;
 		
 		var Lock = aImage.LockBits(
@@ -303,7 +302,9 @@ mProgram {
 			var Ptr = (uint*)Lock.Scan0;
 			for (var Y = 0; Y < MaxY; Y += 1) {
 				for (var X = 0; X < MaxX; X += 1) {
-					*Ptr = ColorMap[aGrid.Color[X, Y]];
+					var ColorIndex = aSprite.Color[X, Y];
+					var Color = ColorMap[ColorIndex];
+					*Ptr = Color;
 					Ptr += 1;
 				}
 				Ptr += DeltaX;
@@ -312,5 +313,4 @@ mProgram {
 			aImage.UnlockBits(Lock);
 		}
 	}
-	
 }

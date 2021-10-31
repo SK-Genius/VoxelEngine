@@ -1,24 +1,15 @@
-using static mMath;
+﻿using static mMath;
 using static mMath2D;
 using static mMath3D;
 
-using tBool = System.Boolean;
-
-using tNat8 = System.Byte;
-using tNat16 = System.UInt16;
-using tNat32 = System.UInt32;
-using tNat64 = System.UInt64;
-
-using tInt8 = System.SByte;
-using tInt16 = System.Int16;
-using tInt32 = System.Int32;
-using tInt64 = System.Int64;
-
-using tChar = System.Char;
-using tText = System.String;
-
 public static class
 mRenderEngine {
+	
+	public const tInt32
+	cQuaterParts = 6;
+	
+	public const tInt32
+	cAngleParts = 5;
 	
 	[System.Flags]
 	public enum
@@ -63,110 +54,162 @@ mRenderEngine {
 	}
 	
 	static readonly tM3x3[,]
-	_Matrix = new tM3x3[4, 5] {
+	_Matrix = new tM3x3[cQuaterParts, cAngleParts] {
 		{
 			M3x3(
-				V3( 4,  0,  0),
-				V3( 0,  0,  4),
-				V3( 0,  4,  0)
+				V3( 4, 0, 0),
+				V3( 0, 0, 4),
+				V3( 0, 4, 0)
 			),
 			M3x3(
-				V3( 4,  0,  0),
-				V3( 0, -2,  4),
-				V3( 0,  3,  1)
+				V3( 4, 0, 0),
+				V3( 0, -2, 4),
+				V3( 0, 3, 1)
 			),
 			M3x3(
-				V3( 4,  0,  0),
-				V3( 0, -3,  3),
-				V3( 0,  2,  2)
+				V3( 4, 0, 0),
+				V3( 0, -3, 3),
+				V3( 0, 2, 2)
 			),
 			M3x3(
-				V3( 4,  0,  0),
-				V3( 0, -4,  2),
-				V3( 0,  1,  3)
+				V3( 4, 0, 0),
+				V3( 0, -4, 2),
+				V3( 0, 1, 3)
 			),
 			M3x3(
-				V3( 4,  0,  0),
-				V3( 0, -4,  0),
-				V3( 0,  0,  4)
+				V3( 4, 0, 0),
+				V3( 0, -4, 0),
+				V3( 0, 0, 4)
 			)
 		}, {
 			M3x3(
-				V3( 4,  1,  0),
-				V3( 0,  0,  4),
-				V3(-1,  4,  0)
+				V3( 4, 1, 0),
+				V3( 0, 0, 4),
+				V3(-1, 4, 0)
 			),
 			M3x3(
-				V3( 4,  1,  0),
-				V3( 0, -2,  4),
-				V3(-1,  3,  1)
+				V3( 4, 1, 0),
+				V3( 0, -2, 4),
+				V3(-1, 3, 1)
 			),
 			M3x3(
-				V3( 4,  1,  0),
-				V3( 1, -3,  3),
-				V3(-1,  2,  2)
+				V3( 4, 1, 0),
+				V3( 1, -3, 3),
+				V3(-1, 2, 2)
 			),
 			M3x3(
-				V3( 4,  1,  0),
-				V3( 1, -4,  2),
-				V3(-1,  1,  3)
+				V3( 4, 1, 0),
+				V3( 1, -4, 2),
+				V3(-1, 1, 3)
 			),
 			M3x3(
-				V3( 4,  1,  0),
-				V3( 1, -4,  0),
-				V3( 0,  0,  4)
+				V3( 4, 1, 0),
+				V3( 1, -4, 0),
+				V3( 0, 0, 4)
 			)
 		}, {
 			M3x3(
-				V3( 3,  3,  0),
-				V3( 0,  0,  4),
-				V3(-3,  3,  0)
+				V3( 4, 2, 0),
+				V3( 0, 0, 4),
+				V3(-1, 4, 0)
 			),
 			M3x3(
-				V3( 3,  3,  0),
-				V3( 1, -1,  4),
-				V3(-2,  2,  1)
+				V3( 4, 2, 0),
+				V3( 1, -2, 4),
+				V3(-1, 3, 1)
 			),
 			M3x3(
-				V3( 3,  3,  0),
-				V3( 2, -2,  3),
-				V3(-2,  2,  2)
+				V3( 4, 2, 0),
+				V3( 1, -3, 3),
+				V3(-1, 2, 2)
 			),
 			M3x3(
-				V3( 3,  3,  0),
-				V3( 3, -3,  2),
-				V3(-1,  1,  3)
+				V3( 4, 2, 0),
+				V3( 2, -4, 2),
+				V3(-1, 1, 3)
 			),
 			M3x3(
-				V3( 3,  3,  0),
-				V3( 3, -3,  0),
-				V3( 0,  0,  4)
+				V3( 4, 2, 0),
+				V3( 2, -4, 0),
+				V3( 0, 0, 4)
 			)
 		}, {
 			M3x3(
-				V3( 1,  4,  0),
-				V3( 0,  0,  4),
-				V3(-4,  1,  0)
+				V3( 3, 3, 0),
+				V3( 0, 0, 4),
+				V3(-3, 3, 0)
 			),
 			M3x3(
-				V3( 1,  4,  0),
-				V3( 2,  0,  4),
-				V3(-3,  1,  1)
+				V3( 3, 3, 0),
+				V3( 1, -1, 4),
+				V3(-2, 2, 1)
 			),
 			M3x3(
-				V3( 1,  4,  0),
-				V3( 3, -1,  3),
-				V3(-2,  1,  2)
+				V3( 3, 3, 0),
+				V3( 2, -2, 3),
+				V3(-2, 2, 2)
 			),
 			M3x3(
-				V3( 1,  4,  0),
-				V3( 4, -1,  2),
-				V3(-1,  1,  3)
+				V3( 3, 3, 0),
+				V3( 3, -3, 2),
+				V3(-1, 1, 3)
 			),
 			M3x3(
-				V3( 1,  4,  0),
-				V3( 4, -1,  0),
-				V3( 0,  0,  4)
+				V3( 3, 3, 0),
+				V3( 3, -3, 0),
+				V3( 0, 0, 4)
+			)
+		}, {
+			M3x3(
+				V3( 2, 4, 0),
+				V3( 0, 0, 4),
+				V3(-4, 1, 0)
+			),
+			M3x3(
+				V3( 2, 4, 0),
+				V3( 2, -1, 4),
+				V3(-3, 1, 1)
+			),
+			M3x3(
+				V3( 2, 4, 0),
+				V3( 3, -1, 3),
+				V3(-2, 1, 2)
+			),
+			M3x3(
+				V3( 2, 4, 0),
+				V3( 4, -2, 2),
+				V3(-1, 1, 3)
+			),
+			M3x3(
+				V3( 2, 4, 0),
+				V3( 4, -2, 0),
+				V3( 0, 0, 4)
+			)
+		}, {
+			M3x3(
+				V3( 1, 4, 0),
+				V3( 0, 0, 4),
+				V3(-4, 1, 0)
+			),
+			M3x3(
+				V3( 1, 4, 0),
+				V3( 2, 0, 4),
+				V3(-3, 1, 1)
+			),
+			M3x3(
+				V3( 1, 4, 0),
+				V3( 3, -1, 3),
+				V3(-2, 1, 2)
+			),
+			M3x3(
+				V3( 1, 4, 0),
+				V3( 4, -1, 2),
+				V3(-1, 1, 3)
+			),
+			M3x3(
+				V3( 1, 4, 0),
+				V3( 4, -1, 0),
+				V3( 0, 0, 4)
 			)
 		}
 	};
@@ -176,16 +219,15 @@ mRenderEngine {
 		tInt32 aDir,
 		tInt32 aAngle
 	) {
-		var M = _Matrix[aDir & 0x3, aAngle];
-		aDir &= 0xF;
-		while (aDir >= 4) {
+		var M = _Matrix[aDir % cQuaterParts, aAngle];
+		while (aDir >= cQuaterParts) {
 			M = M * cRotRight;
-			aDir -= 4;
+			aDir -= cQuaterParts;
 		}
 		return M;
 	}
 	
-	static tAxis[,][,] NormalPatterns = new tAxis[,][,] {
+	static tAxis[,][,] NormalPatterns = new tAxis[cQuaterParts, cAngleParts][,] {
 		{
 			new tAxis[,] {
 				{tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y},
@@ -234,11 +276,11 @@ mRenderEngine {
 				{tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis.X, tAxis._},
 			},
 			new tAxis[,] {
-				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y},
-				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y},
-				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y},
-				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y},
-				{tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis._},
+				{tAxis._, tAxis._, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis._},
+				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis._},
+				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis._},
 			},
 			new tAxis[,] {
 				{tAxis._, tAxis._, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis._},
@@ -260,7 +302,7 @@ mRenderEngine {
 				{tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y},
 				{tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y},
 				{tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y},
-				{tAxis.X, tAxis.X, tAxis.X, tAxis.X},
+				{tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y},
 				{tAxis.X, tAxis.X, tAxis.X, tAxis.X},
 				{tAxis.X, tAxis.X, tAxis.X, tAxis.X},
 			},
@@ -268,9 +310,51 @@ mRenderEngine {
 				{tAxis._, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y, tAxis._},
 				{tAxis._, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y, tAxis._},
 				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y},
-				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis.X},
+				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y},
 				{tAxis._, tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis.X, tAxis._},
 				{tAxis._, tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis.X, tAxis._},
+			},
+			new tAxis[,] {
+				{tAxis._, tAxis._, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis._},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis._},
+				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y},
+				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis._},
+				{tAxis._, tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis._, tAxis._},
+			},
+			new tAxis[,] {
+				{tAxis._, tAxis._, tAxis._, tAxis.Z, tAxis.Y, tAxis.Y, tAxis._, tAxis._},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis._},
+				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis._},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis._},
+				{tAxis._, tAxis._, tAxis.Z, tAxis.X, tAxis.X, tAxis._, tAxis._, tAxis._},
+			},
+			new tAxis[,] {
+				{tAxis._, tAxis._, tAxis._, tAxis.Z, tAxis._, tAxis._},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis._},
+				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis._},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis._},
+				{tAxis._, tAxis._, tAxis.Z, tAxis._, tAxis._, tAxis._},
+			},
+		},
+		{
+			new tAxis[,] {
+				{tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y},
+				{tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y},
+				{tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y},
+				{tAxis.X, tAxis.X, tAxis.X, tAxis.X},
+				{tAxis.X, tAxis.X, tAxis.X, tAxis.X},
+				{tAxis.X, tAxis.X, tAxis.X, tAxis.X},
+			},
+			new tAxis[,] {
+				{tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y, tAxis._},
+				{tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y, tAxis._},
+				{tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y},
+				{tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis.X},
+				{tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis.X, tAxis._},
+				{tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis.X, tAxis._},
 			},
 			new tAxis[,] {
 				{tAxis._, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis._},
@@ -300,6 +384,48 @@ mRenderEngine {
 		{
 			new tAxis[,] {
 				{tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y},
+				{tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y},
+				{tAxis.X, tAxis.X, tAxis.X, tAxis.X},
+				{tAxis.X, tAxis.X, tAxis.X, tAxis.X},
+				{tAxis.X, tAxis.X, tAxis.X, tAxis.X},
+				{tAxis.X, tAxis.X, tAxis.X, tAxis.X},
+			},
+			new tAxis[,] {
+				{tAxis._, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y, tAxis._},
+				{tAxis._, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y, tAxis._},
+				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis.X},
+				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis.X},
+				{tAxis._, tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis.X, tAxis._},
+				{tAxis._, tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis.X, tAxis._},
+			},
+			new tAxis[,] {
+				{tAxis._, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis._, tAxis._},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis._},
+				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis.X},
+				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis.X},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis._},
+				{tAxis._, tAxis._, tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis._},
+			},
+			new tAxis[,] {
+				{tAxis._, tAxis._, tAxis.Z, tAxis.Y, tAxis.Y, tAxis._, tAxis._, tAxis._},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis._},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X},
+				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis._},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis._},
+				{tAxis._, tAxis._, tAxis._, tAxis.Z, tAxis.X, tAxis.X, tAxis._, tAxis._},
+			},
+			new tAxis[,] {
+				{tAxis._, tAxis._, tAxis.Z, tAxis._, tAxis._, tAxis._},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis._},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z},
+				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis._},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis._},
+				{tAxis._, tAxis._, tAxis._, tAxis.Z, tAxis._, tAxis._},
+			},
+		},
+		{
+			new tAxis[,] {
+				{tAxis.Y, tAxis.Y, tAxis.Y, tAxis.Y},
 				{tAxis.X, tAxis.X, tAxis.X, tAxis.X},
 				{tAxis.X, tAxis.X, tAxis.X, tAxis.X},
 				{tAxis.X, tAxis.X, tAxis.X, tAxis.X},
@@ -313,11 +439,11 @@ mRenderEngine {
 				{tAxis._, tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis.X},
 			},
 			new tAxis[,] {
-				{tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis._},
-				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis.X},
-				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis.X},
-				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis.X},
-				{tAxis._, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis.X},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis.Y, tAxis._},
+				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis.X},
+				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis.X},
+				{tAxis.Z, tAxis.Z, tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis._},
+				{tAxis._, tAxis._, tAxis.Z, tAxis.X, tAxis.X, tAxis.X, tAxis._},
 			},
 			new tAxis[,] {
 				{tAxis._, tAxis.Z, tAxis.Z, tAxis.Y, tAxis.Y, tAxis._, tAxis._},
@@ -341,8 +467,11 @@ mRenderEngine {
 		tInt32 aDir,
 		tInt32 aAngle
 	) {
-		var P = NormalPatterns[aDir & 3, aAngle];
-		if ((aDir & 4) == 0) {
+		var P = NormalPatterns[aDir % cQuaterParts, aAngle];
+		if (
+			aDir.InRange(0*cQuaterParts, 1*cQuaterParts-1) ||
+			aDir.InRange(2*cQuaterParts, 3*cQuaterParts-1)
+		) {
 			return P;
 		}
 		var MaxX = P.GetLength(0);
@@ -382,16 +511,32 @@ mRenderEngine {
 	Update(
 		this tRenderEnv a
 	) {
-		a.Dir &= 0xF;
-		if (a.Angle > 4) {
-			a.Angle = 4;
-		}
-		if (a.Angle < 0) {
-			a.Angle = 0;
-		}
+		while (a.Dir < 0) { a.Dir += 4 * cQuaterParts; }
+		while (a.Dir >= 4 * cQuaterParts) { a.Dir -= 4 * cQuaterParts; }
+		mMath.Clamp(ref a.Angle, 0, 4);
 		a.M = Matrix(a.Dir, a.Angle);
 		(a.InvM, a.Det) = mMath3D.Invers(a.M);
 		a.NormalPattern = NormalPattern(a.Dir, a.Angle);
+	}
+	
+	public static mMath3D.tV3
+	To3D(
+		this tSprite aGrid,
+		mMath2D.tV2 aPoint,
+		tRenderEnv aRenderEnv,
+		tInt32 aCubeLength
+	) {
+		var X = aPoint.X;
+		var Y = aPoint.Y;
+		var MaxX = aGrid.Size.X;
+		var MaxY = aGrid.Size.Y;
+		if (X.InRange(0, MaxX - 1) && Y.InRange(0, MaxY - 1)) {
+			var P2D = mMath3D.V3(X, Y, aGrid.Deep[X, Y] - 1) - mMath3D.V3(36 + 1, 36 + 1, 0);
+			var CubeLengthHalf = (aCubeLength * aRenderEnv.Det) >> 1;
+			return ((P2D * aRenderEnv.InvM) + mMath3D.V3(CubeLengthHalf, CubeLengthHalf, CubeLengthHalf)) / aRenderEnv.Det;
+		} else {
+			return mMath3D.V3(0, 0, 0);
+		}
 	}
 	
 	public static void
@@ -424,15 +569,18 @@ mRenderEngine {
 							for (var U = 0; U < MaxU; U += 1) {
 								var Axis = aNormal[U, V];
 								var Des = Des_ + V3(U + 4 * CubeLength, V + 4 * CubeLength, 0);
+								if ((Color & 128) != 0 && ((Des.X ^ Des.Y) & 1) == 0) {
+									continue;
+								}
 								if (Axis != tAxis._ && Des.X >= 0 && Des.Y >= 0) {
 									ref var Color_ = ref aGrid.Color[Des.X, Des.Y];
 									ref var Deep_ = ref aGrid.Deep[Des.X, Des.Y];
-									if (Des.Z < Deep_) {
+									if (Des.Z <= Deep_) {
 										Color_ = (sbyte)(
-											Color + Axis switch {
+											(Color & 0b111) | Axis switch {
 												tAxis.X => 16,
 												tAxis.Y => 8,
-												tAxis.Z => 0
+												tAxis.Z => 0,
 											}
 										);
 										Deep_ = (short)Des.Z;
@@ -448,20 +596,27 @@ mRenderEngine {
 	
 	public static void
 	DrawSprite(
-		this tSprite aGrid,
-		tSprite aSprite,
+		this tSprite aDes,
+		tSprite aSrc,
 		tV3 aPos,
 		tM3x3 aMatrix
 	) {
 		var XOffset = 0;
 		var YOffset = 0;
-		for (var Y = 0; Y < aSprite.Size.Y; Y += 1) {
-			for (var X = 0; X < aSprite.Size.X; X += 1) {
-				ref var SrcDeep = ref aSprite.Deep[X, Y];
-				ref var DesDeep = ref aGrid.Deep[X + XOffset, Y + YOffset];
+		
+		var Min = V2(0, 0);
+		var Max = V2(
+			System.Math.Min(aSrc.Size.X, aDes.Size.X),
+			System.Math.Min(aSrc.Size.Y, aDes.Size.Y)
+		);
+		
+		for (var Y = Min.Y; Y < Max.Y; Y += 1) {
+			for (var X = Min.X; X < Max.X; X += 1) {
+				ref var SrcDeep = ref aSrc.Deep[X, Y];
+				ref var DesDeep = ref aDes.Deep[X + XOffset, Y + YOffset];
 				if (SrcDeep <= DesDeep) {
 					DesDeep = SrcDeep;
-					aGrid.Color[X + XOffset, Y + YOffset] =  aSprite.Color[X, Y];
+					aDes.Color[X + XOffset, Y + YOffset] =  aSrc.Color[X, Y];
 				}
 			}
 		}
