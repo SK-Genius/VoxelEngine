@@ -10,5 +10,9 @@ global using tInt16 = System.Int16;
 global using tInt32 = System.Int32;
 global using tInt64 = System.Int64;
 
+global using tReal16 = System.Half;
+global using tReal32 = System.Single;
+global using tReal64 = System.Double;
+
 global using tChar = System.Char;
 global using tText = System.String;

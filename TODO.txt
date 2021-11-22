@@ -1,10 +1,12 @@
-﻿* Mouse position
-* Sprites
-* Layer
+﻿TODO:
 * Shadow Layer
+* Layer
+* Mouse position improofments
 
+DONE:
+* Normal + Shading
 
-
-Qube Colors:
-- 7Bits: 5 x 5 x 5 = 125 Colors + R + G + B + RG + RB + GB
-- 1Bit: 50% Transperent (draw only every second color)
+NOTS:
+* Qube Colors:
+  - 7Bits: 5 x 5 x 5 = 125 Colors + R + G + B + RG + RB + GB
+  - 1Bit: 50% Transperent (draw only every second color)

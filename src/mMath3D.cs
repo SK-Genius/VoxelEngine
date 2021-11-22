@@ -1,6 +1,9 @@
+using System.Diagnostics;
+
 public static class
 mMath3D {
 	
+	[DebuggerDisplay("({X}, {Y}, {Z})")]
 	public struct
 	tV3 {
 		public readonly tInt32 X;
@@ -50,13 +53,29 @@ mMath3D {
 		);
 		
 		public static tV3
-		operator/(
+		operator*(
+			tInt32 a1,
+			tV3 a2
+		) => V3(
+			a1 * a2.X,
+			a1 * a2.Y,
+			a1 * a2.Z
+		);
+		
+		public static tV3
+		operator*(
 			tV3 a1,
 			tInt32 a2
+		) => a2 * a1;
+		
+		public static tV3
+		operator/(
+			tV3 a1,
+			tReal32 a2
 		) => V3(
-			(tInt32)System.Math.Floor((a1.X + 0.5f) / a2),
-			(tInt32)System.Math.Floor((a1.Y + 0.5f) / a2),
-			(tInt32)System.Math.Floor((a1.Z + 0.5f) / a2)
+			mMath.Floor(a1.X / a2),
+			mMath.Floor(a1.Y / a2),
+			mMath.Floor(a1.Z / a2)
 		);      
 		
 		public override tText
@@ -69,6 +88,17 @@ mMath3D {
 		tInt32 aY,
 		tInt32 aZ
 	) => new tV3(aX, aY, aZ);
+	
+	public static tV3
+	V3(
+		mMath2D.tV2 aV2,
+		tInt32 aZ
+	) => new tV3(aV2.X, aV2.Y, aZ);
+	
+	public static mMath2D.tV2
+	V2(
+		tV3 aV2
+	) => mMath2D.V2(aV2.X, aV2.Y);
 	
 	public static tInt32
 	Sum(

@@ -41,7 +41,37 @@ mMath {
 		tInt32 aMin,
 		tInt32 aMax
 	) => aMin <= a && a <= aMax;
-
+	
+	public static tInt32
+	Min(
+		tInt32 a1,
+		tInt32 a2
+	) {
+		return Math.Min(a1, a2);
+	}
+	
+	public static tInt32
+	Max(
+		tInt32 a1,
+		tInt32 a2
+	) {
+		return Math.Max(a1, a2);
+	}	
+	
+	public static tInt32
+	Floor(
+		tReal32 a
+	) {
+		return (tInt32)Math.Floor(a);
+	}
+	
+	public static tInt32
+	Round(
+		tReal32 a
+	) {
+		return Floor(a + 0.5f);
+	}
+	
 	public static tInt32
 	Clamp(
 		this tInt32 a,
