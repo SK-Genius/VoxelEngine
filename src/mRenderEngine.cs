@@ -25,6 +25,8 @@ mRenderEngine {
 		public tInt32 Dir;
 		public tInt32 Angle;
 		
+		public tV3 LightDirection;
+		
 		public tM3x3 M;
 		public tM3x3 InvM;
 		public tInt32 Det;
@@ -36,6 +38,13 @@ mRenderEngine {
 	}
 	
 	public struct
+	tDeep {
+		public tV2 Size;
+		public tV2 Offset;
+		public short[,] Deep;
+	}
+	
+	public struct
 	tSprite {
 		public tV2 Size;
 		public tV2 Offset;
@@ -44,19 +53,27 @@ mRenderEngine {
 		public short[,] Deep;
 	}
 	
+	public static tDeep
+	CreateDeep(
+		tV2 aSize,
+		tV2 aOffset
+	) => new tDeep {
+		Size = aSize,
+		Offset = aOffset,
+		Deep = new short[aSize.X, aSize.Y],
+	};
+	
 	public static tSprite
 	CreateSprite(
 		tV2 aSize,
 		tV2 aOffset
-	) {
-		return new tSprite {
-			Size = aSize,
-			Offset = aOffset,
-			Color = new tNat8[aSize.X, aSize.Y],
-			Deep = new short[aSize.X, aSize.Y],
-			Normal = new (tInt8 U, tInt8 V)[aSize.X, aSize.Y],
-		};
-	}
+	) => new tSprite {
+		Size = aSize,
+		Offset = aOffset,
+		Color = new tNat8[aSize.X, aSize.Y],
+		Deep = new short[aSize.X, aSize.Y],
+		Normal = new (tInt8 U, tInt8 V)[aSize.X, aSize.Y],
+	};
 	
 	static readonly tM3x3[,]
 	_Matrix__ = new tM3x3[cQuaterParts, cAngleParts] {
@@ -506,8 +523,24 @@ mRenderEngine {
 		return P_;
 	}
 	
-	public static void
-	Clear(
+	public static tDeep
+	_Clear(
+		this tDeep aGrid
+	) {
+		var MaxX = aGrid.Size.X;
+		var MaxY = aGrid.Size.Y;
+		
+		for (var X = 0; X < MaxX; X += 1) {
+			for (var Y = 0; Y < MaxY; Y += 1) {
+				aGrid.Deep[X, Y] = short.MaxValue;
+			}
+		}
+		
+		return aGrid;
+	}
+	
+	public static tSprite
+	_Clear(
 		this tSprite aGrid
 	) {
 		var MaxX = aGrid.Size.X;
@@ -519,6 +552,8 @@ mRenderEngine {
 				aGrid.Deep[X, Y] = short.MaxValue;
 			}
 		}
+		
+		return aGrid;
 	}
 	
 	public static void
@@ -544,6 +579,32 @@ mRenderEngine {
 		aV2.Y] - 1
 	) * aRenderEnv.InvM / aRenderEnv.Det;
 	
+	public static tAxis
+	MainAxis(
+		tV3 aDirection
+	) {
+		if (aDirection.Z >= aDirection.X && aDirection.Z >= aDirection.Y) {
+			return tAxis.Z;
+		} else if (aDirection.Y >= aDirection.X) {
+			return tAxis.Y;
+		} else {
+			return tAxis.X;
+		}
+	}
+	
+	public static tV2
+	DeepSize(
+		tV3 LightDirection,
+		tInt32 aCubeSize
+	) {
+		var V = LightDirection * aCubeSize;
+		return V2(aCubeSize, aCubeSize) + MainAxis(LightDirection) switch {
+			tAxis.Z => V2(V.X / LightDirection.Z, V.Y / LightDirection.Z),
+			tAxis.Y => V2(V.X / LightDirection.Y, V.Z / LightDirection.Y),
+			tAxis.X => V2(V.Z / LightDirection.X, V.Y / LightDirection.X),
+		};
+	}	
+	
 	public static tV2
 	SpriteSize(
 		this tRenderEnv aEnv,
@@ -564,14 +625,59 @@ mRenderEngine {
 		var MaxY = 0;
 		foreach (var V3 in V3s) {
 			var V2 = V3 * aEnv.M;
-			MaxX = Math.Max(MaxX, V2.X);
-			MaxY = Math.Max(MaxY, V2.Y);
+			MaxX = mMath.Max(MaxX, V2.X);
+			MaxY = mMath.Max(MaxY, V2.Y);
 		}
 		return V2(MaxX + 2, MaxY + 2);
 	} 
 	
-	public static void
-	DrawCube(
+	public static tDeep
+	_DrawCube(
+		this tDeep aGrid,
+		tNat8[,,] aCube,
+		tV3 aLightDirection
+	) {
+		var CubeLength = aCube.GetLength(0);
+		var CubeLengthHalf = CubeLength >> 1;
+		if (aCube.GetLength(1) != CubeLength) { throw null; }
+		if (aCube.GetLength(2) != CubeLength) { throw null; }
+		
+		var MainAxis_ = MainAxis(aLightDirection);
+		
+		for (var Z = (tInt16)0; Z < CubeLength; Z += 1) {
+			for (var Y = (tInt16)0; Y < CubeLength; Y += 1) {
+				for (var X = (tInt16)0; X < CubeLength; X += 1) {
+					var Color = aCube[X, Y, Z];
+					if (Color == 0) {
+						continue;
+					}
+					
+					switch (MainAxis_) {
+						case tAxis.X: {
+							ref var pP = ref aGrid.Deep[Z, Y];
+							pP = Max(pP, X);
+							break;
+						}
+						case tAxis.Y: {
+							ref var pP = ref aGrid.Deep[X, Z];
+							pP = Max(pP, Y);
+							break;
+						}
+						case tAxis.Z: {
+							ref var pP = ref aGrid.Deep[X, Y];
+							pP = Max(pP, Z);
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		return aGrid;
+	}
+	
+	public static tSprite
+	_DrawCube(
 		this tSprite aGrid,
 		tNat8[,,] aCube,
 		tAxis[,] aNormal,
@@ -634,10 +740,11 @@ mRenderEngine {
 				}
 			}
 		}
+		return aGrid;
 	}
 	
-	public static void
-	DrawSprite(
+	public static tSprite
+	_DrawSprite(
 		this tSprite aDes,
 		tSprite aSrc,
 		mMath3D.tV3 aOffset2D
@@ -657,7 +764,7 @@ mRenderEngine {
 			DesMax.X < 0 ||
 			DesMax.Y < 0
 		) {
-			return;
+			return aDes;
 		}
 		
 		var Size = SrcSize;
@@ -698,8 +805,10 @@ mRenderEngine {
 				}
 			}
 		}
+		
+		return aDes;
 	}
-
+	
 	public static tNat8
 	RGB(
 		tNat8 aR,
@@ -723,10 +832,11 @@ mRenderEngine {
 			return default;
 		}
 		aColor -= 1;
-		var B = 63 * (aColor % 5);
-		var G = 63 * ((aColor / 5) % 5);
-		var R = 63 * ((aColor / 5 / 5) % 5);
-		return mMath3D.V3(R, G, B);
+		return mMath3D.V3(
+			(aColor / 5 / 5) % 5,
+			(aColor / 5) % 5,
+			aColor % 5
+		) * 63;
 	}
 	
 	public static tNat32
@@ -743,16 +853,15 @@ mRenderEngine {
 		return (tNat32)(0xFF000000 | (R << 16) | (G << 8) | B);
 	}
 	
-	
 	public static unsafe tSprite
-	RenderToBuffer(
+	_RenderToBuffer(
 		this tSprite aSprite,
-		IntPtr aBuffer,
+		System.IntPtr aBuffer,
 		mMath2D.tV2 aSize,
 		mMath3D.tV3 aLightVector
 	) {
-		var MaxX = Math.Min(aSprite.Color.GetLength(0), aSize.X);
-		var MaxY = Math.Min(aSprite.Color.GetLength(1), aSize.Y);
+		var MaxX = mMath.Min(aSprite.Color.GetLength(0), aSize.X);
+		var MaxY = mMath.Min(aSprite.Color.GetLength(1), aSize.Y);
 		var DeltaX = aSize.X - MaxX;
 		
 		var YPtr = (uint*)aBuffer;
@@ -769,8 +878,6 @@ mRenderEngine {
 					);
 					var H = mMath.Max((Normal * aLightVector / 128).Sum(), 0);
 					var C = ToRGB(ColorIndex) * H / 256;
-					//var C = mMath3D.V3(H, H, H);
-					//var C = Normal + mMath3D.V3(127, 127, 0);
 					*XPtr = (tNat32)(
 						(0xFF << 24) |
 						((C.X & 0xFF) << 16) |

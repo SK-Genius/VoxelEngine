@@ -42,6 +42,22 @@ mMath {
 		tInt32 aMax
 	) => aMin <= a && a <= aMax;
 	
+	public static tInt16
+	Min(
+		tInt16 a1,
+		tInt16 a2
+	) {
+		return Math.Min(a1, a2);
+	}
+	
+	public static tInt16
+	Max(
+		tInt16 a1,
+		tInt16 a2
+	) {
+		return Math.Max(a1, a2);
+	}	
+	
 	public static tInt32
 	Min(
 		tInt32 a1,

@@ -10,7 +10,7 @@ mProgram {
 	static void
 	Main(
 	) {
-		const tInt32 Zoom = 1;
+		const tInt32 Zoom = 3;
 		
 		var R = mRenderEngine.RGB(4, 0, 0);
 		var G = mRenderEngine.RGB(0, 4, 0);
@@ -168,66 +168,121 @@ mProgram {
 		var RenderEnv = mRenderEngine.CreateEnv();
 		RenderEnv.Update();
 		
-		Window.Paint += (object _, PaintEventArgs a) => {
-			var P3D = mMath3D.V3(0, 0, 0);
-			
-			var Cube_ = Cube[2];
-			
-			var SpriteSize = RenderEnv.SpriteSize(Cube_.GetLength(0));
-			var Sprite = mRenderEngine.CreateSprite(
-				SpriteSize,
-				mMath2D.V2(0, 0)
-			);
-			
-			Sprite.Clear();
-			Sprite.DrawCube(Cube_, RenderEnv.NormalPattern, RenderEnv.M);
-			
-			var P2D = MousePos;
+		Window.Paint += (_, a) => {
 			var Size = Cube[2].GetLength(0);
 			var HSize = Size / 2;
-			if (P2D.X.InRange(0, Canvas.Size.X - 1) && P2D.Y.InRange(0, Canvas.Size.Y - 1)) {
-				P3D = RenderEnv.To3D(Canvas, P2D) + mMath3D.V3(HSize, HSize, HSize);
-				Window.Text = $"{P2D} -> {P3D}";
+			var Cube_ = Cube[2];
+			var SpriteSize = RenderEnv.SpriteSize(Cube_.GetLength(0));
+			
+			{ // cupes
+				var Sprite = mRenderEngine.CreateSprite(
+					SpriteSize,
+					mMath2D.V2(0, 0)
+				)
+				._Clear()
+				._DrawCube(Cube_, RenderEnv.NormalPattern, RenderEnv.M);
+				
+				Canvas
+				._Clear()
+				._DrawSprite(Sprite, 9 * mMath3D.V3(-2, 2, 0) * RenderEnv.M)
+				._DrawSprite(Sprite, 9 * mMath3D.V3(-1, 2, 0) * RenderEnv.M)
+				._DrawSprite(Sprite, 9 * mMath3D.V3(0, 2, 0) * RenderEnv.M)
+				._DrawSprite(Sprite, 9 * mMath3D.V3(1, 2, 0) * RenderEnv.M)
+				._DrawSprite(Sprite, 9 * mMath3D.V3(2, 2, 0) * RenderEnv.M)
+				
+				._DrawSprite(Sprite, 9 * mMath3D.V3(2, -1, 0) * RenderEnv.M)
+				._DrawSprite(Sprite, 9 * mMath3D.V3(2, 0, 0) * RenderEnv.M)
+				._DrawSprite(Sprite, 9 * mMath3D.V3(2, 1, 0) * RenderEnv.M)
+				
+				._DrawSprite(Sprite, 9 * mMath3D.V3(-2, -1, 0) * RenderEnv.M)
+				._DrawSprite(Sprite, 9 * mMath3D.V3(-2, 0, 0) * RenderEnv.M)
+				._DrawSprite(Sprite, 9 * mMath3D.V3(-2, 1, 0) * RenderEnv.M)
+				
+				._DrawSprite(Sprite, 9 * mMath3D.V3(-2, -2, 0) * RenderEnv.M)
+				._DrawSprite(Sprite, 9 * mMath3D.V3(-1, -2, 0) * RenderEnv.M)
+				._DrawSprite(Sprite, 9 * mMath3D.V3(0, -2, 0) * RenderEnv.M)
+				._DrawSprite(Sprite, 9 * mMath3D.V3(1, -2, 0) * RenderEnv.M)
+				._DrawSprite(Sprite, 9 * mMath3D.V3(2, -2, 0) * RenderEnv.M)
+
+				._DrawSprite(Sprite, mMath3D.V3(0, 0, 0));
 			}
 			
-			var C = new tNat8[Size, Size, Size];
-			var BlackTransparent = mRenderEngine.RGBA(0, 0, 0, true);
-			for (var I = 0; I < Size; I += 1) {
-				if (P3D.X.InRange(0, Size-1) &&
-					P3D.Y.InRange(0, Size-1) &&
-					P3D.Z.InRange(0, Size-1)
-				) {
-					C[I, P3D.Y, P3D.Z] = BlackTransparent;
-					C[P3D.X, I, P3D.Z] = BlackTransparent;
-					C[P3D.X, P3D.Y, I] = BlackTransparent;
+			{ // axes lines
+				var P2D = MousePos;
+				var P3D = mMath3D.V3(0, 0, 0);
+				if (P2D.X.InRange(0, Canvas.Size.X - 1) && P2D.Y.InRange(0, Canvas.Size.Y - 1)) {
+					P3D = RenderEnv.To3D(Canvas, P2D) + mMath3D.V3(HSize, HSize, HSize);
+					Window.Text = $"{P2D} -> {P3D}";
 				}
+				
+				var BlockUnderMouse = new tNat8[Size, Size, Size];
+				for (var ZO = -1; ZO <= 1; ZO += 1) {
+					for (var YO = -1; YO <= 1; YO += 1) {
+						for (var XO = -1; XO <= 1; XO += 1) {
+							var X = P3D.X + XO;
+							var Y = P3D.Y + YO;
+							var Z = P3D.Z + ZO;
+							if (X.InRange(0, Size-1) &&
+								Y.InRange(0, Size-1) &&
+								Z.InRange(0, Size-1)
+							) {
+								if (Cube_[X, Y, Z] != 0) {
+									BlockUnderMouse[X, Y, Z] = mRenderEngine.RGBA(
+										(tNat8)(XO + 1),
+										(tNat8)(YO + 1),
+										(tNat8)(ZO + 1),
+										false
+									);
+								}
+							}
+						}
+					}
+				}
+				var TempSprite = mRenderEngine.CreateSprite(
+					SpriteSize,
+					mMath2D.V2(0, 0)
+				)
+				._Clear()
+				._DrawCube(BlockUnderMouse, RenderEnv.NormalPattern, RenderEnv.M);
+				
+				var V2 = P2D - Canvas.Size / 2 + TempSprite.Size / 2;
+				if (V2.X.InRange(0, TempSprite.Size.X - 1) && V2.Y.InRange(0, TempSprite.Size.Y - 1)) {
+					var CInt = TempSprite.Color[V2.X, V2.Y];
+					if (CInt != 0) {
+						var C = mRenderEngine.ToRGB(TempSprite.Color[V2.X, V2.Y]) / 63;
+						P3D += mMath3D.V3(C.X - 1, C.Y - 1, C.Z - 1);
+					}
+				}
+				
+				var BlackTransparent = mRenderEngine.RGBA(0, 0, 0, true);
+				
+				var Axis = new tNat8[Size, Size, Size];
+				for (var I = 0; I < Size; I += 1) {
+					if (P3D.X.InRange(0, Size-1) &&
+						P3D.Y.InRange(0, Size-1) &&
+						P3D.Z.InRange(0, Size-1)
+					) {
+						Axis[I, P3D.Y, P3D.Z] = BlackTransparent;
+						Axis[P3D.X, I, P3D.Z] = BlackTransparent;
+						Axis[P3D.X, P3D.Y, I] = BlackTransparent;
+					}
+				}
+				
+				var Sprite = mRenderEngine.CreateSprite(
+					SpriteSize,
+					mMath2D.V2(0, 0)
+				)
+				._Clear()
+				._DrawCube(Axis, RenderEnv.NormalPattern, RenderEnv.M);
+				
+				Canvas
+				._DrawSprite(Sprite, mMath3D.V3(0, 0, 0));
 			}
-			Canvas.Clear();
-			Canvas.DrawSprite(Sprite, 9 * mMath3D.V3(-2, 2, 0) * RenderEnv.M);
-			Canvas.DrawSprite(Sprite, 9 * mMath3D.V3(-1, 2, 0) * RenderEnv.M);
-			Canvas.DrawSprite(Sprite, 9 * mMath3D.V3(0, 2, 0) * RenderEnv.M);
-			Canvas.DrawSprite(Sprite, 9 * mMath3D.V3(1, 2, 0) * RenderEnv.M);
-			Canvas.DrawSprite(Sprite, 9 * mMath3D.V3(2, 2, 0) * RenderEnv.M);
-			
-			Canvas.DrawSprite(Sprite, 9 * mMath3D.V3(2, -1, 0) * RenderEnv.M);
-			Canvas.DrawSprite(Sprite, 9 * mMath3D.V3(2, 0, 0) * RenderEnv.M);
-			Canvas.DrawSprite(Sprite, 9 * mMath3D.V3(2, 1, 0) * RenderEnv.M);
-			
-			Canvas.DrawSprite(Sprite, 9 * mMath3D.V3(-2, -1, 0) * RenderEnv.M);
-			Canvas.DrawSprite(Sprite, 9 * mMath3D.V3(-2, 0, 0) * RenderEnv.M);
-			Canvas.DrawSprite(Sprite, 9 * mMath3D.V3(-2, 1, 0) * RenderEnv.M);
-			
-			Canvas.DrawSprite(Sprite, 9 * mMath3D.V3(-2, -2, 0) * RenderEnv.M);
-			Canvas.DrawSprite(Sprite, 9 * mMath3D.V3(-1, -2, 0) * RenderEnv.M);
-			Canvas.DrawSprite(Sprite, 9 * mMath3D.V3(0, -2, 0) * RenderEnv.M);
-			Canvas.DrawSprite(Sprite, 9 * mMath3D.V3(1, -2, 0) * RenderEnv.M);
-			Canvas.DrawSprite(Sprite, 9 * mMath3D.V3(2, -2, 0) * RenderEnv.M);
-			
-			Sprite.DrawCube(C, RenderEnv.NormalPattern, RenderEnv.M);
-			Canvas.DrawSprite(Sprite, mMath3D.V3(0, 0, 0));
 			
 			using var Image = new Bitmap(Canvas.Size.X, Canvas.Size.Y, PixelFormat.Format32bppArgb);
-			Image.DrawSprite(Canvas, mMath3D.V3(-70, 170, 170)); // (left, top, front)
+			Image
+			._DrawSprite(Canvas, mMath3D.V3(-70, 170, 170)); // (left, top, front)
+			
 			//a.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
 			a.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Low;
 			a.Graphics.Clear(System.Drawing.Color.White);
@@ -284,8 +339,8 @@ mProgram {
 		Environment.Exit(0);
 	}
 	
-	static void
-	DrawSprite(
+	static Bitmap
+	_DrawSprite(
 		this Bitmap aImage,
 		mRenderEngine.tSprite aSprite,
 		mMath3D.tV3 aLightVector
@@ -297,9 +352,10 @@ mProgram {
 			aImage.PixelFormat
 		);
 		try {
-			aSprite.RenderToBuffer(Lock.Scan0, Size, aLightVector);
+			aSprite._RenderToBuffer(Lock.Scan0, Size, aLightVector);
 		} finally {
 			aImage.UnlockBits(Lock);
 		}
+		return aImage;
 	}
 }

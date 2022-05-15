@@ -57,6 +57,9 @@ mMath2D {
 			mMath.Round(a1.X / a2),
 			mMath.Round(a1.Y / a2)
 		);
+		
+		public override tText
+		ToString() => $"({this.X}, {this.Y})";
 	}
 	
 	public static tV2

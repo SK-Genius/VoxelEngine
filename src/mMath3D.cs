@@ -97,8 +97,8 @@ mMath3D {
 	
 	public static mMath2D.tV2
 	V2(
-		tV3 aV2
-	) => mMath2D.V2(aV2.X, aV2.Y);
+		tV3 aV3
+	) => mMath2D.V2(aV3.X, aV3.Y);
 	
 	public static tInt32
 	Sum(
