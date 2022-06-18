@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 public static class
 mMath2D {
@@ -70,4 +70,14 @@ mMath2D {
 		X = aX,
 		Y = aY,
 	};
+	
+	public static tBool
+	IsInRange(
+		this tV2 aPoint,
+		tV2 aMin,
+		tV2 aMax
+	) => (
+		aPoint.X.IsInRange(aMin.X, aMax.X) &&
+		aPoint.Y.IsInRange(aMin.Y, aMax.Y)
+	);
 }

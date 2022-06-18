@@ -163,7 +163,7 @@ mMath3D {
 	);
 	
 	public static (tM3x3 M, tInt32 Det)
-	Invers(
+	Inverse(
 		this tM3x3 a
 	) {
 		var XX = a.X.X;
