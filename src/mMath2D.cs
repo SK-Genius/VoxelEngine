@@ -50,12 +50,12 @@ mMath2D {
 		) => a2 * a1;
 		
 		public static tV2
-		operator/(
+		operator>>(
 			tV2 a1,
-			tReal32 a2
+			tInt32 a2
 		) => V2(
-			mMath.Round(a1.X / a2),
-			mMath.Round(a1.Y / a2)
+			a1.X >> a2,
+			a1.Y >> a2
 		);
 		
 		public override tText

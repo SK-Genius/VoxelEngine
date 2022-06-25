@@ -2,7 +2,7 @@
 	
 	<PropertyGroup>
 		<TargetFramework>net7.0-windows</TargetFramework>
-		<OutputType>WinExe</OutputType> <!--  Exe | Library | Module | WinExe -->
+		<OutputType>Exe</OutputType> <!--  Exe | Library | Module | WinExe -->
 		<LangVersion>11</LangVersion>
 		<NoWarn>659,661</NoWarn>
 		<Nullable>enable</Nullable>
