@@ -1,12 +1,24 @@
-﻿TODO:
-* Shadow Layer
-* Layer
-* Mouse position improofments
+﻿BUGS:
+* shadow is broken
+
+TODO:
+* shortcut Shadow calculation for using NormalLayer
+  - make it optional for translucent???
+* non cubic "Cubes"
+* Offset for Sprites and Shadow
+* DeepOffsetLayer
+* rename Temp to HotReload
+* HotReload for AppLogic
+* Editor
 
 DONE:
+* HotReload for EngineCode
+* Shadow Layer
+* Layer
+* Mouse position improvements
 * Normal + Shading
 
 NOTS:
 * Qube Colors:
   - 7Bits: 5 x 5 x 5 = 125 Colors + R + G + B + RG + RB + GB
-  - 1Bit: 50% Transperent (draw only every second color)
+  - 1Bit: 50% Transparent (draw only every second color)

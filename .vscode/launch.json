@@ -5,9 +5,9 @@
 			"name": ".NET Core Launch (console)",
 			"type": "coreclr",
 			"request": "launch",
-			"program": "${workspaceFolder}/bin/Debug/net7.0-windows/PixelGames.exe",
+			"program": "${workspaceFolder}/VoxelEditor/bin/Debug/net7.0-windows/VoxelEditor.exe",
 			"args": [],
-			"cwd": "${workspaceFolder}",
+			"cwd": "${workspaceFolder}/VoxelEditor",
 			"console": "internalConsole",
 			"stopAtEntry": false
 		},
