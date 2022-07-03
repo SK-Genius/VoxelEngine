@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
 using System.Windows.Forms;
 
 using static mMath;
@@ -17,16 +16,9 @@ mProgram {
 	static void
 	Main(
 	) {
-		var Zoom = 2;
-		var LoD = 2; // 0..2 // TODO: move into RenderEnv ?
-		var LightDirection = (tV3?)V3(0, 0, 120);
-		
+		var Zoom = 1;
+		var StdBlockSize = 9;
 		var DebugRenderMode = default(tDebugRenderMode);
-		
-		var LoD_Size = 1; // TODO: move into RenderEnv ?
-		for (var I = 0; I < LoD; I += 1) {
-			LoD_Size *= 3;
-		}
 		
 		var R = RGB(4, 0, 0);
 		var G = RGB(0, 4, 0);
@@ -38,29 +30,8 @@ mProgram {
 		var H = RGB(2, 2, 2);
 		var _ = default(tColor);
 		
-		var Cube = new []{
-			new tColor[1, 1, 1] {
-				{
-					{ C },
-				},
-			},
-			new tColor[3, 3, 3] {
-				{
-					{ W, C, W },
-					{ C, B, C },
-					{ W, C, W },
-				},
-				{
-					{ C, G, C },
-					{ R, V, R },
-					{ C, G, C },
-				},
-				{
-					{ W, C, W },
-					{ C, B, C },
-					{ W, C, W },
-				}
-			},
+		var Dice = CreateBlock(
+			V3(0),
 			new tColor[9, 9, 9] {
 				{
 					{ W, _, _, _, _, _, _, _, W },
@@ -161,32 +132,11 @@ mProgram {
 					{ _, _, _, _, _, _, _, _, _ },
 					{ W, _, _, _, _, _, _, _, W },
 				},
-			},
-		};
+			}
+		);
 		
-		var Plane = new []{
-			new tColor[1, 1, 1] {
-				{
-					{ H },
-				},
-			},
-			new tColor[3, 3, 3] {
-				{
-					{ H, H, H },
-					{ H, H, H },
-					{ H, H, H },
-				},
-				{
-					{ _, _, _ },
-					{ _, _, _ },
-					{ _, _, _ },
-				},
-				{
-					{ _, _, _ },
-					{ _, _, _ },
-					{ _, _, _ },
-				}
-			},
+		var Plane = CreateBlock(
+			V3(0),
 			new tColor[9, 9, 9] {
 				{
 					{ _, _, _, _, _, _, _, _, H },
@@ -287,13 +237,14 @@ mProgram {
 					{ _, _, _, _, _, _, _, _, H },
 					{ _, _, _, _, _, _, _, _, H },
 				},
-			},
-		};
+			}
+		);
 		
 		var MousePos = V2(0, 0);
 		
-		var RenderEnv = CreateEnv()
-		._SetLightDirection(LightDirection.Value)
+		var RenderEnv = CreateEnv();
+		RenderEnv
+		._SetLightDirection(V3(0, 0, 9))
 		._Update();
 		
 		var Window = new Form{
@@ -312,40 +263,43 @@ mProgram {
 			System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
 		)?.SetValue(Window, true, null);
 		
-		var Map = new Dictionary<tV3, tColor[,,]>();
-		Map[LoD_Size * V3(-2, 2, 0)] = Cube[LoD];
-		Map[LoD_Size * V3(-1, 2, 0)] = Cube[LoD];
-		Map[LoD_Size * V3(0, 2, 0)] = Cube[LoD];
-		Map[LoD_Size * V3(1, 2, 0)] = Cube[LoD];
-		Map[LoD_Size * V3(2, 2, 0)] = Cube[LoD];
-		Map[LoD_Size * V3(2, -1, 0)] = Cube[LoD];
-		Map[LoD_Size * V3(2, 0, 0)] = Cube[LoD];
-		Map[LoD_Size * V3(2, 1, 0)] = Cube[LoD];
-		Map[LoD_Size * V3(-2, -1, 0)] = Cube[LoD];
-		Map[LoD_Size * V3(-2, 0, 0)] = Cube[LoD];
-		Map[LoD_Size * V3(-2, 1, 0)] = Cube[LoD];
-		Map[LoD_Size * V3(-2, -2, 0)] = Cube[LoD];
-		Map[LoD_Size * V3(-1, -2, 0)] = Cube[LoD];
-		Map[LoD_Size * V3(0, -2, 0)] = Cube[LoD];
-		Map[LoD_Size * V3(1, -2, 0)] = Cube[LoD];
-		Map[LoD_Size * V3(2, -2, 0)] = Cube[LoD];
-		Map[LoD_Size * V3(0, 0, 0)] = Cube[LoD];
-		Map[LoD_Size * V3(0, 0, 1)] = Cube[LoD];
-		{
-			for (var Y_ = -2; Y_ <= 2; Y_ += 1) {
-				for (var X_ = -2; X_ <= 2; X_ += 1) {
-					Map[LoD_Size * V3(X_, Y_, 2)] = Plane[LoD];
-				}
+		var Map = new Dictionary<tV3, tBlock>();
+		Map[StdBlockSize * V3(-2, 2, 0)] = Dice;
+		Map[StdBlockSize * V3(-1, 2, 0)] = Dice;
+		Map[StdBlockSize * V3(0, 2, 0)] = Dice;
+		Map[StdBlockSize * V3(1, 2, 0)] = Dice;
+		Map[StdBlockSize * V3(2, 2, 0)] = Dice;
+		Map[StdBlockSize * V3(2, -1, 0)] = Dice;
+		Map[StdBlockSize * V3(2, 0, 0)] = Dice;
+		Map[StdBlockSize * V3(2, 1, 0)] = Dice;
+		Map[StdBlockSize * V3(-2, -1, 0)] = Dice;
+		Map[StdBlockSize * V3(-2, 0, 0)] = Dice;
+		Map[StdBlockSize * V3(-2, 1, 0)] = Dice;
+		Map[StdBlockSize * V3(-2, -2, 0)] = Dice;
+		Map[StdBlockSize * V3(-1, -2, 0)] = Dice;
+		Map[StdBlockSize * V3(0, -2, 0)] = Dice;
+		Map[StdBlockSize * V3(1, -2, 0)] = Dice;
+		Map[StdBlockSize * V3(2, -2, 0)] = Dice;
+		Map[StdBlockSize * V3(0, 0, 0)] = Dice;
+		Map[StdBlockSize * V3(0, 0, 1)] = Dice;
+		
+		for (var Y_ = -2; Y_ <= 2; Y_ += 1) {
+			for (var X_ = -2; X_ <= 2; X_ += 1) {
+				Map[StdBlockSize * V3(X_, Y_, 2)] = Plane;
 			}
 		}
 		
 		Window.Paint += (_, a) => {
+			if (RenderEnv.HasNewDLL) {
+				RenderEnv._LoadDLL();	
+			}
+			
 			var Shadow = CreateShadow(
 				GetShadowSize(
 					V3(
-						5 * LoD_Size,
-						5 * LoD_Size,
-						5 * LoD_Size
+						5 * StdBlockSize,
+						5 * StdBlockSize,
+						5 * StdBlockSize
 					),
 					RenderEnv.LightDirection
 				),
@@ -353,21 +307,37 @@ mProgram {
 			)._Clear(
 			);
 			
-			RenderEnv._RenderToCanvas(
+			RenderEnv._RenderTo(
+				ref Canvas,
+				ref Shadow,
 				MousePos,
 				Map,
-				LoD_Size,
-				ref Canvas,
-				ref Shadow
+				StdBlockSize
 			);
 			
-			using var Image = new Bitmap(Canvas.Size.X, Canvas.Size.Y, PixelFormat.Format32bppArgb);
-			RenderEnv._RenderToImage(Canvas, Shadow, Image, DebugRenderMode); // (left, top, front)
+			var Image = new Bitmap(
+				Canvas.Size.X,
+				Canvas.Size.Y,
+				PixelFormat.Format32bppArgb
+			);
 			
-			a.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-			//a.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Low;
-			a.Graphics.Clear(System.Drawing.Color.White);
-			a.Graphics.DrawImage(Image, 0, 0, Zoom*Image.Width, Zoom*Image.Height);
+			try {
+				RenderEnv._RenderTo(
+					ref Image,
+					Canvas,
+					Shadow,
+					DebugRenderMode
+				);
+				
+				a.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+				//a.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Low;
+				a.Graphics.Clear(System.Drawing.Color.White);
+				a.Graphics.DrawImage(Image, 0, 0, Zoom*Image.Width, Zoom*Image.Height);
+			} catch (Exception e) {
+				Console.WriteLine(e.Message);
+			} finally {
+				Image.Dispose();
+			}
 		};
 		
 		Window.MouseMove += (_, a) => {
@@ -381,18 +351,24 @@ mProgram {
 				RenderEnv.Dir += D.X / 2;
 				RenderEnv.Angle += D.Y / 2;
 				
-				System.Diagnostics.Debug.WriteLine($"DELTA: ({a.X}, {a.Y}) => D: {RenderEnv.Dir}; A: {RenderEnv.Angle}");
-				
 				RenderEnv._Update();
 				Window.Invalidate();
 			}
 			
-			if (a.Button.HasFlag(MouseButtons.Left)) {
+			//if (a.Button.HasFlag(MouseButtons.Left)) {
 				RenderEnv._Update();
 				Window.Invalidate();
-			}
+			//}
 			
 			MousePos = NewMousePos;
+		};
+		
+		Window.Resize += (_, a) => {
+			Canvas = mVoxelRenderer.CreateSprite(
+				V2(Window.Size.Width, Window.Size.Height),
+				V2(0, 0)
+			);
+			Window.Invalidate();
 		};
 		
 		Window.KeyDown += (_, a) => {
@@ -433,9 +409,9 @@ mProgram {
 				}
 				case Keys.L:
 				case Keys.Right: {
-					LightDirection = LightDirection + V3(10, 0, 0);
+					var LightDirection = RenderEnv.LightDirection;
 					RenderEnv
-					._SetLightDirection(LightDirection.Value)
+					._SetLightDirection(LightDirection + (V3(LightDirection.Z, 0, -LightDirection.X) >> 3))
 					._Update()
 					;
 					Window.Invalidate();
@@ -443,9 +419,9 @@ mProgram {
 				}
 				case Keys.J:
 				case Keys.Left: {
-					LightDirection = LightDirection + V3(-10, 0, 0);
+					var LightDirection = RenderEnv.LightDirection;
 					RenderEnv
-					._SetLightDirection(LightDirection.Value)
+					._SetLightDirection(LightDirection - (V3(LightDirection.Z, 0, -LightDirection.X) >> 3))
 					._Update()
 					;
 					Window.Invalidate();
@@ -453,9 +429,9 @@ mProgram {
 				}
 				case Keys.I:
 				case Keys.Up: {
-					LightDirection = LightDirection + V3(0, 10, 0);
+					var LightDirection = RenderEnv.LightDirection;
 					RenderEnv
-					._SetLightDirection(LightDirection.Value)
+					._SetLightDirection(LightDirection + (V3(0, LightDirection.Z, -LightDirection.Y) >> 3))
 					._Update()
 					;
 					Window.Invalidate();
@@ -463,9 +439,9 @@ mProgram {
 				}
 				case Keys.K:
 				case Keys.Down: {
-					LightDirection = LightDirection + V3(0, -10, 0);
+					var LightDirection = RenderEnv.LightDirection;
 					RenderEnv
-					._SetLightDirection(LightDirection.Value)
+					._SetLightDirection(LightDirection - (V3(0, LightDirection.Z, -LightDirection.Y) >> 3))
 					._Update()
 					;
 					Window.Invalidate();
@@ -503,21 +479,21 @@ mProgram {
 	}
 	
 	static tRenderEnv
-	_RenderToCanvas(
+	_RenderTo(
 		this tRenderEnv aRenderEnv,
-		tV2 aMousePos,
-		Dictionary<tV3, tColor[,,]> aMap,
-		tInt32 aStdCubeSize,
 		ref tSprite aCanvas,
-		ref tShadow aShadow
+		ref tShadow aShadow,
+		tV2 aMousePos,
+		Dictionary<tV3, tBlock> aMap,
+		tInt32 aStdBlockSize
 	) {
-		var Size = aStdCubeSize;
+		var Size = aStdBlockSize;
 		var HSize = Size / 2;
 		
 		{ // cubes
 			aCanvas._Clear();
-			foreach (var (Pos, Cube) in aMap) {
-				aRenderEnv._DrawTo(aCanvas, aShadow, Cube, Pos);
+			foreach (var (Pos, Block) in aMap) {
+				aRenderEnv._DrawTo(aCanvas, aShadow, Block, Pos);
 			}
 		}
 		
@@ -533,17 +509,19 @@ mProgram {
 			
 			var BlackTransparent = RGBA(0, 0, 0, true);
 			
-			var Axis = new tColor[Size, Size, Size];
+			var AxisColors = new tColor[Size, Size, Size];
 			for (var I = 0; I < Size; I += 1) {
 				if (P3D.X.IsInRange(0, Size-1) &&
 					P3D.Y.IsInRange(0, Size-1) &&
 					P3D.Z.IsInRange(0, Size-1)
 				) {
-					Axis[I, P3D.Y, P3D.Z] = BlackTransparent;
-					Axis[P3D.X, I, P3D.Z] = BlackTransparent;
-					Axis[P3D.X, P3D.Y, I] = BlackTransparent;
+					AxisColors[I, P3D.Y, P3D.Z] = BlackTransparent;
+					AxisColors[P3D.X, I, P3D.Z] = BlackTransparent;
+					AxisColors[P3D.X, P3D.Y, I] = BlackTransparent;
 				}
 			}
+			
+			var Axis = CreateBlock(V3(), AxisColors);
 			
 			aRenderEnv._DrawTo(aCanvas, aShadow, Axis, V3(0, 0, 0));
 		}
@@ -566,11 +544,11 @@ mProgram {
 	}
 	
 	static tRenderEnv
-	_RenderToImage(
+	_RenderTo(
 		this tRenderEnv aRenderEnv,
+		ref Bitmap aImage,
 		tSprite aSprite,
 		tShadow aShadow,
-		Bitmap aImage,
 		tDebugRenderMode aDebugRenderMode
 	) {
 		var BufferSize = V2(aImage.Width, aImage.Height);

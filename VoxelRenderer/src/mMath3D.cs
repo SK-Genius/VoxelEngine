@@ -1,5 +1,8 @@
 using System.Diagnostics;
 
+using static mMath;
+using static mMath2D;
+
 public static class
 mMath3D {
 	
@@ -9,6 +12,12 @@ mMath3D {
 		public readonly tInt32 X;
 		public readonly tInt32 Y;
 		public readonly tInt32 Z;
+		
+		public static tV3 cX = V3(1, 0, 0);
+		public static tV3 cY = V3(0, 1, 0);
+		public static tV3 cZ = V3(0, 0, 1);
+		
+		public static tV3 cZero = V3(0, 0, 0);
 		
 		internal
 		tV3 (
@@ -73,29 +82,39 @@ mMath3D {
 			tV3 a1,
 			tInt32 a2
 		) => V3(
-			Div(a1.X + (a2 >> 1), a2),
-			Div(a1.Y + (a2 >> 1), a2),
-			Div(a1.Z + (a2 >> 1), a2)
+			#if !true
+			mMath.Div(a1.X + (a2 >> 1), a2),
+			mMath.Div(a1.Y + (a2 >> 1), a2),
+			mMath.Div(a1.Z + (a2 >> 1), a2)
+			#else
+			a1.X / a2,
+			a1.Y / a2,
+			a1.Z / a2
+			#endif
 		);      
+		
+		public static tV3
+		operator>>(
+			tV3 a1,
+			tInt32 a2
+		) => V3(
+			a1.X >> a2,
+			a1.Y >> a2,
+			a1.Z >> a2
+		);
 		
 		public override tText
 		ToString() => $"({this.X}, {this.Y}, {this.Z})";
 	}
 	
-	private static tInt32
-	Div(
-		tInt32 a1,
-		tInt32 a2
-	) {
-		if (((a1 < 0) ^ (a2 < 0)) && a1 % a2 != 0)
-		{
-			return a1 / a2 - 1;
-		}
-		else
-		{
-			return a1 / a2;
-		}
-	}
+	public static tV3
+	V3(
+	) => tV3.cZero;
+	
+	public static tV3
+	V3(
+		tInt32 a
+	) => new tV3(a, a, a);
 	
 	public static tV3
 	V3(
@@ -106,14 +125,24 @@ mMath3D {
 	
 	public static tV3
 	V3(
-		mMath2D.tV2 aV2,
+		tV2 aV2,
 		tInt32 aZ
 	) => new tV3(aV2.X, aV2.Y, aZ);
 	
-	public static mMath2D.tV2
-	V2(
-		tV3 aV3
+	public static tV2
+	XY(
+		this tV3 aV3
 	) => mMath2D.V2(aV3.X, aV3.Y);
+	
+	public static tV2
+	XZ(
+		this tV3 aV3
+	) => mMath2D.V2(aV3.X, aV3.Z);
+	
+	public static tV2
+	YZ(
+		this tV3 aV3
+	) => mMath2D.V2(aV3.Y, aV3.Z);
 	
 	public static tInt32
 	Sum(
@@ -186,6 +215,24 @@ mMath3D {
 		V3(a.X.Y, a.Y.Y, a.Z.Y),
 		V3(a.X.Z, a.Y.Z, a.Z.Z)
 	);
+	
+	public static tInt32
+	Length2(
+		this tV3 a
+	) => a.X*a.X + a.Y*a.Y + a.Z*a.Z;
+	
+	public static tV3
+	Norm(
+		this tV3 a,
+		tInt32 aScale
+	) {
+		var Length = System.MathF.Sqrt(a.Length2()) / aScale;
+		return V3(
+			mMath.Floor(a.X / Length),
+			mMath.Floor(a.Y / Length),
+			mMath.Floor(a.Z / Length)
+		);
+	}
 	
 	public static (tM3x3 M, tInt32 Det)
 	Inverse(

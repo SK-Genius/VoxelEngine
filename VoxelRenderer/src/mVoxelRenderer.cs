@@ -6,7 +6,8 @@ using static mMath;
 using static mMath2D;
 using static mMath3D;
 using System.Reflection;
-
+using System.IO;
+using System.Diagnostics.CodeAnalysis;
 
 public static class
 mVoxelRenderer {
@@ -15,65 +16,110 @@ mVoxelRenderer {
 	tDLL {
 		public tM3x3[,] Matrixes;
 		public tAxis[,][,] NormalPatterns;
-		public tFunc<tRenderEnv, tColor[,,], tSprite> GetOrCreateSprite;
-		public tFunc<tRenderEnv, tColor[,,], tShadow> GetOrCreateShadow;
+		public tFunc<tRenderEnv, tBlock, tSprite> GetOrCreateSprite;
+		public tFunc<tRenderEnv, tBlock, tShadow> GetOrCreateShadow;
 		public tFunc<tRenderEnv, tSprite, tV2,  tV3> To3D;
-		public tFunc<tRenderEnv, tSprite, tShadow, System.IntPtr, tV2, tDebugRenderMode, tRenderEnv> _RenderToBuffer;
-		public tFunc<tRenderEnv, tSprite, tShadow, tColor[,,], tV3, tRenderEnv> _DrawTo;
+		public tMeth<tRenderEnv, tSprite, tShadow, System.IntPtr, tV2, tDebugRenderMode> _RenderToBuffer;
+		public tMeth<tRenderEnv, tSprite, tShadow, tBlock, tV3> _DrawTo;
 		public tFunc<tRenderEnv, tInt32, tInt32, tM3x3> GetMatrix;
+	}
+	
+	public struct
+	tBlock {
+		public tInt32 Id;
+		public tV3 Offset;
+		public tColor[,,] Colors;
+		
+		public override int
+		GetHashCode(
+		) => this.Id;
+
+		public override bool
+		Equals(
+			object? a
+		) => this.Id == ((tBlock)a).Id;
+	}
+	
+	public static tBlock
+	CreateBlock(
+		tV3 aOffset,
+		tColor[,,] aColors
+	) => new tBlock {
+		Id = HashBlock(aColors),
+		Offset = aOffset,
+		Colors = aColors,
+	};
+	
+	private static tInt32
+	HashBlock(
+		tColor[,,] aColors
+	) {
+		var Hash = 0;
+		for (var Z = 0; Z < aColors.GetLength(2); Z += 1) {
+			for (var Y = 0; Y < aColors.GetLength(1); Y += 1) {
+				for (var X = 0; X < aColors.GetLength(0); X += 1) {
+					Hash ^= Hash << 13;
+					Hash ^= Hash >> 17;
+					Hash ^= Hash << 5;
+					Hash ^= 0x12_34_56_78;
+					Hash ^= aColors[X, Y, Z].Value;
+				}
+			}
+		}
+		return Hash;
 	}
 	
 	public static tSprite
 	GetOrCreateSprite(
-		this tRenderEnv aRenderEnv,
-		tColor[,,] aCube
-	) => aRenderEnv.DLL.GetOrCreateSprite(aRenderEnv, aCube);
+		this ref tRenderEnv aRenderEnv,
+		tBlock aBlock
+	) => aRenderEnv.DLL.GetOrCreateSprite(aRenderEnv, aBlock);
 	
 	public static tShadow
 	GetOrCreateShadow(
-		this tRenderEnv aRenderEnv,
-		tColor[,,] aCube
-	)  =>  aRenderEnv.DLL.GetOrCreateShadow(aRenderEnv, aCube);
+		this ref tRenderEnv aRenderEnv,
+		tBlock aBlock
+	)  =>  aRenderEnv.DLL.GetOrCreateShadow(aRenderEnv, aBlock);
 	
 	private static tM3x3
 	GetMatrix(
-		this tRenderEnv aRenderEnv,
+		this ref tRenderEnv aRenderEnv,
 		tInt32 aDir,
 		tInt32 aAngle
 	) => aRenderEnv.DLL.GetMatrix(aRenderEnv, aDir, aAngle);
-
+	
 	public static tV3
 	To3D(
-		this tRenderEnv aRenderEnv,
+		this ref tRenderEnv aRenderEnv,
 		tSprite aSprite,
 		tV2 aV2
 	) => aRenderEnv.DLL.To3D(aRenderEnv, aSprite, aV2);
 	
-	public static unsafe tRenderEnv
+	public static unsafe ref tRenderEnv
 	_RenderToBuffer(
-		this tRenderEnv aRenderEnv,
+		this ref tRenderEnv aRenderEnv,
 		tSprite aSprite,
 		tShadow aShadow,
 		System.IntPtr aBuffer,
 		tV2 aBufferSize,
 		tDebugRenderMode aDebugRenderMode
-	) => aRenderEnv.DLL._RenderToBuffer(aRenderEnv, aSprite, aShadow, aBuffer, aBufferSize, aDebugRenderMode);
+	) => ref aRenderEnv.DLL._RenderToBuffer(ref aRenderEnv, aSprite, aShadow, aBuffer, aBufferSize, aDebugRenderMode);
 	
-	public static unsafe tRenderEnv
+	public static unsafe ref tRenderEnv
 	_DrawTo(
-		this tRenderEnv aRenderEnv,
+		this ref tRenderEnv aRenderEnv,
 		tSprite aCanvas,
 		tShadow aShadow,
-		tColor[,,] aCube,
+		tBlock aBlock,
 		tV3 aOffset
-	) => aRenderEnv.DLL._DrawTo(
-		aRenderEnv,
+	) => ref aRenderEnv.DLL._DrawTo(
+		ref aRenderEnv,
 		aCanvas,
 		aShadow,
-		aCube,
+		aBlock,
 		aOffset
 	);
-
+	
 	[System.Flags]
 	public enum
 	tAxis {
@@ -83,11 +129,23 @@ mVoxelRenderer {
 		Z = 4,
 	};
 	
-	public sealed class
+	public struct
 	tRenderEnv {
+		public tRenderEnv() {}
 		public tInt32 Dir;
 		public tInt32 Angle;
 		
+		public static FileInfo DLL_File = new DirectoryInfo(
+			".."
+		).GetFiles(
+			"VoxelRenderer.HotReload.dll",
+			new EnumerationOptions {
+				RecurseSubdirectories = true,
+				MatchCasing = MatchCasing.CaseInsensitive,
+			}
+		)[0];
+		public tBool HasNewDLL = false;
+		public FileSystemWatcher DLL_Watcher;
 		public tDLL DLL;
 		public System.Runtime.Loader.AssemblyLoadContext DLL_Context;
 		
@@ -99,8 +157,8 @@ mVoxelRenderer {
 		
 		public tAxis[,] NormalPattern => this.DLL.NormalPatterns[this.Dir % this.DLL.NormalPatterns.GetLength(0), this.Angle];
 		
-		public Dictionary<(mMath3D.tM3x3, tColor[,,]), mVoxelRenderer.tSprite> SpriteBuffer  = new();
-		public Dictionary<(tV3, tColor[,,]), mVoxelRenderer.tShadow> ShadowBuffer  = new();
+		public Dictionary<(mMath3D.tM3x3, tBlock), mVoxelRenderer.tSprite> SpriteBuffer  = new();
+		public Dictionary<(tV3, tBlock), mVoxelRenderer.tShadow> ShadowBuffer  = new();
 	}
 	
 	[DebuggerDisplay("{Value}")]
@@ -146,10 +204,31 @@ mVoxelRenderer {
 	
 	public static tRenderEnv
 	CreateEnv(
-	) => new tRenderEnv {
-	}._LoadDLL(
-	)._Update(
-	);
+	) {
+		var RenderEnv = new tRenderEnv();
+		RenderEnv.DLL_Watcher = new FileSystemWatcher(
+			tRenderEnv.DLL_File.Directory.FullName
+		) {
+            NotifyFilter = NotifyFilters.Attributes
+				| NotifyFilters.CreationTime
+				| NotifyFilters.DirectoryName
+				| NotifyFilters.FileName
+				| NotifyFilters.LastAccess
+				| NotifyFilters.LastWrite
+				| NotifyFilters.Security
+				| NotifyFilters.Size,
+			IncludeSubdirectories = true,
+			Filter = tRenderEnv.DLL_File.Name,
+			EnableRaisingEvents = true,
+		};
+        RenderEnv.DLL_Watcher.Changed += (_, _) => {
+			RenderEnv.HasNewDLL = true;
+		};
+		
+		return RenderEnv
+		._LoadDLL()
+		._Update();
+	}
 	
 	class tDLL_Context : System.Runtime.Loader.AssemblyLoadContext {
 		public tDLL_Context(
@@ -161,9 +240,9 @@ mVoxelRenderer {
 		) => null;
 	}
 	
-	public static tRenderEnv
+	public static ref tRenderEnv
 	_LoadDLL(
-		this tRenderEnv aRenderEnv
+		this ref tRenderEnv aRenderEnv
 	) {
 		aRenderEnv.DLL = null;
 		aRenderEnv.DLL_Context?.Unload();
@@ -172,7 +251,7 @@ mVoxelRenderer {
 		aRenderEnv.DLL = aRenderEnv.DLL_Context.LoadFromStream(
 			new System.IO.MemoryStream(
 				System.IO.File.ReadAllBytes(
-					"../VoxelRenderer.HotReload/bin/Debug/net7.0/VoxelRenderer.HotReload.dll"
+					tRenderEnv.DLL_File.FullName
 				)
 			)
 		).GetType(
@@ -183,38 +262,48 @@ mVoxelRenderer {
 			tFunc<tDLL>
 		>()();
 		
-		return aRenderEnv;
+		aRenderEnv.HasNewDLL = false;
+		return ref aRenderEnv;
 	}
 	
 	public static tV3
 	GetSize(
-		this tColor[,,] aCube
+		this tBlock aBlock
 	) => V3(
-		aCube.GetLength(0),
-		aCube.GetLength(1),
-		aCube.GetLength(2)
+		aBlock.Colors.GetLength(0),
+		aBlock.Colors.GetLength(1),
+		aBlock.Colors.GetLength(2)
 	);
 	
-	public static tRenderEnv
+	public static ref tRenderEnv
 	_SetLightDirection(
-		this tRenderEnv a,
+		this ref tRenderEnv a,
 		mMath3D.tV3 aLightDirection
 	) {
-		a.LightDirection = aLightDirection;
-		return a;
+		a.LightDirection = GetMainAxis(aLightDirection) switch {
+			(tAxis.X, int Sign) => V3(Sign * 9, aLightDirection.Y, aLightDirection.Z),
+			(tAxis.Y, int Sign) => V3(aLightDirection.X, Sign * 9, aLightDirection.Z),
+			(tAxis.Z, int Sign) => V3(aLightDirection.X, aLightDirection.Y, Sign * 9),
+			_ => aLightDirection,
+		};
+		
+		return ref a;
 	}
 	
-	public static tRenderEnv
+	public static ref tRenderEnv
 	_Update(
-		this tRenderEnv a
+		this ref tRenderEnv a
 	) {
+		if (a.HasNewDLL) {
+			a._LoadDLL();
+		}
 		var QuarterParts = a.DLL.Matrixes.GetLength(0);
 		while (a.Dir < 0) { a.Dir += 4 * QuarterParts; }
 		while (a.Dir >= 4 * QuarterParts) { a.Dir -= 4 * QuarterParts; }
 		mMath.Clamp(ref a.Angle, 0, 4);
 		a.M = a.GetMatrix(a.Dir, a.Angle);
 		(a.InvM, a.Det) = mMath3D.Inverse(a.M);
-		return a;
+		return ref a;
 	}
 	
 	public enum
@@ -300,6 +389,41 @@ mVoxelRenderer {
 		return V2(MaxX + 2, MaxY + 2);
 	} 
 	
+	public static tV3
+	GetShadowUV(
+		tV3 aWorldOffset,
+		tV3 aLightDirection
+	) {
+		var (MainAxis, AxisSign) = GetMainAxis(aLightDirection);
+		
+		var X_ = aWorldOffset.X;
+		var Y_ = aWorldOffset.Y;
+		var Z_ = aWorldOffset.Z;
+		
+		var Deep = default(tInt32);
+		var UV = default(tV2);
+		
+		switch (MainAxis) {
+			case tAxis.X: {
+				UV = V2(-Y_, Z_) + aLightDirection.YZ() * X_ / aLightDirection.X;
+				Deep = -X_;
+				break;
+			}
+			case tAxis.Y: {
+				UV = V2(-X_, Z_) + aLightDirection.XZ() * Y_ / aLightDirection.Y;
+				Deep = -Y_;
+				break;
+			}
+			case tAxis.Z: {
+				UV = V2(X_, Y_) + aLightDirection.XY() * Z_ / aLightDirection.Z; 
+				Deep = Z_;
+				break;
+			}
+		}
+		
+		return V3(UV, AxisSign * Deep);
+	}
+	
 	public static tV2
 	GetShadowSize(
 		tV3 aCubeSize,
@@ -307,33 +431,30 @@ mVoxelRenderer {
 	) {
 		var (MainAxis, _) = GetMainAxis(aLightDirection);
 		
-		return MainAxis switch {
-			tAxis.X => mMath2D.V2(
-				aCubeSize.Z + mMath.Abs(aLightDirection.Z * aCubeSize.X / aLightDirection.X),
-				aCubeSize.Y + mMath.Abs(aLightDirection.Y * aCubeSize.X / aLightDirection.X)
-			),
-			tAxis.Y => mMath2D.V2(
-				aCubeSize.X + mMath.Abs(aLightDirection.X * aCubeSize.Y / aLightDirection.Y),
-				aCubeSize.Z + mMath.Abs(aLightDirection.Z * aCubeSize.Y / aLightDirection.Y)
-			),
-			tAxis.Z => mMath2D.V2(
-				aCubeSize.X + mMath.Abs(aLightDirection.X * aCubeSize.Z / aLightDirection.Z),
-				aCubeSize.Y + mMath.Abs(aLightDirection.Y * aCubeSize.Z / aLightDirection.Z)
-			)
-		};
-	}
-	
-	public static tV2
-	GetDeepSize(
-		tV3 LightDirection,
-		tInt32 aCubeSize
-	) {
-		var V = LightDirection * aCubeSize;
-		return V2(aCubeSize, aCubeSize) + GetMainAxis(LightDirection) switch {
-			(tAxis.Z, _) => V2(mMath.Abs(V.X / LightDirection.Z), mMath.Abs(V.Y / LightDirection.Z)),
-			(tAxis.Y, _) => V2(mMath.Abs(V.X / LightDirection.Y), mMath.Abs(V.Z / LightDirection.Y)),
-			(tAxis.X, _) => V2(mMath.Abs(V.Z / LightDirection.X), mMath.Abs(V.Y / LightDirection.X)),
-		};
+		var L = V3(
+			aLightDirection.X.Abs(),
+			aLightDirection.Y.Abs(),
+			aLightDirection.Z.Abs()
+		);
+		
+		var UV = default(tV2);
+		
+		switch (MainAxis) {
+			case tAxis.X: {
+				UV = aCubeSize.YZ() + L.YZ() * aCubeSize.X / L.X;
+				break;
+			}
+			case tAxis.Y: {
+				UV = aCubeSize.XZ() + L.XZ() * aCubeSize.Y / L.Y;
+				break;
+			}
+			case tAxis.Z: {
+				UV = aCubeSize.XY() + L.XY() * aCubeSize.Z / L.Z; 
+				break;
+			}
+		}
+		
+		return UV + V2(2, 2);;
 	}
 	
 	public static tShadow

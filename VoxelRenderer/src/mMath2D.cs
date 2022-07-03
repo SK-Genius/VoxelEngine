@@ -50,6 +50,15 @@ mMath2D {
 		) => a2 * a1;
 		
 		public static tV2
+		operator/(
+			tV2 a1,
+			tInt32 a2
+		) => V2(
+			mMath.Div(a1.X, a2),
+			mMath.Div(a1.Y, a2)
+		);
+		
+		public static tV2
 		operator>>(
 			tV2 a1,
 			tInt32 a2

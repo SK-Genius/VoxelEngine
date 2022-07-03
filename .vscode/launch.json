@@ -9,7 +9,8 @@
 			"args": [],
 			"cwd": "${workspaceFolder}/VoxelEditor",
 			"console": "internalConsole",
-			"stopAtEntry": false
+			"stopAtEntry": false,
+			"preLaunchTask": "build"
 		},
 		{
 			"name": ".NET Core Attach",

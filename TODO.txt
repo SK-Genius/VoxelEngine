@@ -2,12 +2,13 @@
 * shadow is broken
 
 TODO:
-* shortcut Shadow calculation for using NormalLayer
-  - make it optional for translucent???
+* introduce fix raster (maybe 9x9x9) to get proper shadow
+	- on LightDirection the longest/main axis value has to be this raster size (9)
+* shortcut Shadow calculation while using NormalLayer
+	- make it optional for translucent???
 * non cubic "Cubes"
 * Offset for Sprites and Shadow
 * DeepOffsetLayer
-* rename Temp to HotReload
 * HotReload for AppLogic
 * Editor
 
@@ -20,5 +21,5 @@ DONE:
 
 NOTS:
 * Qube Colors:
-  - 7Bits: 5 x 5 x 5 = 125 Colors + R + G + B + RG + RB + GB
-  - 1Bit: 50% Transparent (draw only every second color)
+	- 7Bits: 5 x 5 x 5 = 125 Colors + R + G + B + RG + RB + GB
+	- 1Bit: 50% Transparent (draw only every second color)
