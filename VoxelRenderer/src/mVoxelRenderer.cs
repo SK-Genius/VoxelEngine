@@ -1,23 +1,21 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-
-using static mStd;
+﻿using static mStd;
 using static mMath;
 using static mMath2D;
 using static mMath3D;
+
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.IO;
-using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 public static class
 mVoxelRenderer {
 	
 	public class
-	tDLL {
+	tRendererDLL {
 		public tM3x3[,] Matrixes;
 		public tAxis[,][,] NormalPatterns;
-		public tFunc<tRenderEnv, tBlock, tSprite> GetOrCreateSprite;
-		public tFunc<tRenderEnv, tBlock, tShadow> GetOrCreateShadow;
 		public tFunc<tRenderEnv, tSprite, tV2,  tV3> To3D;
 		public tMeth<tRenderEnv, tSprite, tShadow, System.IntPtr, tV2, tDebugRenderMode> _RenderToBuffer;
 		public tMeth<tRenderEnv, tSprite, tShadow, tBlock, tV3> _DrawTo;
@@ -30,16 +28,19 @@ mVoxelRenderer {
 		public tV3 Offset;
 		public tColor[,,] Colors;
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override int
 		GetHashCode(
 		) => this.Id;
-
+		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override bool
 		Equals(
 			object? a
 		) => this.Id == ((tBlock)a).Id;
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tBlock
 	CreateBlock(
 		tV3 aOffset,
@@ -50,51 +51,64 @@ mVoxelRenderer {
 		Colors = aColors,
 	};
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static tInt32
 	HashBlock(
 		tColor[,,] aColors
 	) {
+		var Size = aColors.GetSize();
+		
 		var Hash = 0;
-		for (var Z = 0; Z < aColors.GetLength(2); Z += 1) {
-			for (var Y = 0; Y < aColors.GetLength(1); Y += 1) {
-				for (var X = 0; X < aColors.GetLength(0); X += 1) {
-					Hash ^= Hash << 13;
-					Hash ^= Hash >> 17;
-					Hash ^= Hash << 5;
-					Hash ^= 0x12_34_56_78;
-					Hash ^= aColors[X, Y, Z].Value;
+		AddToHash(ref Hash, Size.X);
+		AddToHash(ref Hash, Size.Y);
+		AddToHash(ref Hash, Size.Z);
+		for (var Z = 0; Z < Size.Z; Z += 1) {
+			for (var Y = 0; Y < Size.Y; Y += 1) {
+				for (var X = 0; X < Size.X; X += 1) {
+					AddToHash(ref Hash, aColors[X, Y, Z].Value);
 				}
 			}
 		}
 		return Hash;
 	}
 	
-	public static tSprite
-	GetOrCreateSprite(
-		this ref tRenderEnv aRenderEnv,
-		tBlock aBlock
-	) => aRenderEnv.DLL.GetOrCreateSprite(aRenderEnv, aBlock);
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tV3
+	GetSize(
+		this tBlock a
+	) => a.Colors.GetSize();
 	
-	public static tShadow
-	GetOrCreateShadow(
-		this ref tRenderEnv aRenderEnv,
-		tBlock aBlock
-	)  =>  aRenderEnv.DLL.GetOrCreateShadow(aRenderEnv, aBlock);
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private static tInt32
+	AddToHash(
+		ref tInt32 aHash,
+		tInt32 aValue
+	) {
+		aHash ^= aHash << 13;
+		aHash ^= aHash >> 17;
+		aHash ^= aHash << 5;
+		aHash ^= 0x12_34_56_78;
+		aHash ^= aValue;
+		return aHash;
+	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static tM3x3
 	GetMatrix(
 		this ref tRenderEnv aRenderEnv,
 		tInt32 aDir,
 		tInt32 aAngle
-	) => aRenderEnv.DLL.GetMatrix(aRenderEnv, aDir, aAngle);
+	) => aRenderEnv.HotReloat.DLL.GetMatrix(aRenderEnv, aDir, aAngle);
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV3
 	To3D(
 		this ref tRenderEnv aRenderEnv,
 		tSprite aSprite,
 		tV2 aV2
-	) => aRenderEnv.DLL.To3D(aRenderEnv, aSprite, aV2);
+	) => aRenderEnv.HotReloat.DLL.To3D(aRenderEnv, aSprite, aV2);
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static unsafe ref tRenderEnv
 	_RenderToBuffer(
 		this ref tRenderEnv aRenderEnv,
@@ -103,8 +117,9 @@ mVoxelRenderer {
 		System.IntPtr aBuffer,
 		tV2 aBufferSize,
 		tDebugRenderMode aDebugRenderMode
-	) => ref aRenderEnv.DLL._RenderToBuffer(ref aRenderEnv, aSprite, aShadow, aBuffer, aBufferSize, aDebugRenderMode);
+	) => ref aRenderEnv.HotReloat.DLL._RenderToBuffer(ref aRenderEnv, aSprite, aShadow, aBuffer, aBufferSize, aDebugRenderMode);
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static unsafe ref tRenderEnv
 	_DrawTo(
 		this ref tRenderEnv aRenderEnv,
@@ -112,7 +127,7 @@ mVoxelRenderer {
 		tShadow aShadow,
 		tBlock aBlock,
 		tV3 aOffset
-	) => ref aRenderEnv.DLL._DrawTo(
+	) => ref aRenderEnv.HotReloat.DLL._DrawTo(
 		ref aRenderEnv,
 		aCanvas,
 		aShadow,
@@ -131,23 +146,15 @@ mVoxelRenderer {
 	
 	public struct
 	tRenderEnv {
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public tRenderEnv() {}
 		public tInt32 Dir;
 		public tInt32 Angle;
 		
-		public static FileInfo DLL_File = new DirectoryInfo(
-			".."
-		).GetFiles(
-			"VoxelRenderer.HotReload.dll",
-			new EnumerationOptions {
-				RecurseSubdirectories = true,
-				MatchCasing = MatchCasing.CaseInsensitive,
-			}
-		)[0];
-		public tBool HasNewDLL = false;
-		public FileSystemWatcher DLL_Watcher;
-		public tDLL DLL;
-		public System.Runtime.Loader.AssemblyLoadContext DLL_Context;
+		public mHotReload.tHotReload<tRendererDLL> HotReloat = new (
+			new DirectoryInfo(".."),
+			"VoxelRenderer.HotReload.dll"
+		);
 		
 		public tV3 LightDirection;
 		
@@ -155,7 +162,7 @@ mVoxelRenderer {
 		public tM3x3 InvM;
 		public tInt32 Det;
 		
-		public tAxis[,] NormalPattern => this.DLL.NormalPatterns[this.Dir % this.DLL.NormalPatterns.GetLength(0), this.Angle];
+		public tAxis[,] NormalPattern => this.HotReloat.DLL.NormalPatterns[this.Dir % this.HotReloat.DLL.NormalPatterns.GetSize().X, this.Angle];
 		
 		public Dictionary<(mMath3D.tM3x3, tBlock), mVoxelRenderer.tSprite> SpriteBuffer  = new();
 		public Dictionary<(tV3, tBlock), mVoxelRenderer.tShadow> ShadowBuffer  = new();
@@ -166,18 +173,21 @@ mVoxelRenderer {
 	tColor {
 		public tNat8 Value;
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tBool
 		operator==(
 			tColor a1,
 			tColor a2
 		) => a1.Value == a2.Value;
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tBool
 		operator!=(
 			tColor a1,
 			tColor a2
 		) => a1.Value != a2.Value;
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tColor
 		operator&(
 			tColor aColor,
@@ -202,79 +212,15 @@ mVoxelRenderer {
 		public tNat8[,] PosBits;
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tRenderEnv
 	CreateEnv(
 	) {
 		var RenderEnv = new tRenderEnv();
-		RenderEnv.DLL_Watcher = new FileSystemWatcher(
-			tRenderEnv.DLL_File.Directory.FullName
-		) {
-            NotifyFilter = NotifyFilters.Attributes
-				| NotifyFilters.CreationTime
-				| NotifyFilters.DirectoryName
-				| NotifyFilters.FileName
-				| NotifyFilters.LastAccess
-				| NotifyFilters.LastWrite
-				| NotifyFilters.Security
-				| NotifyFilters.Size,
-			IncludeSubdirectories = true,
-			Filter = tRenderEnv.DLL_File.Name,
-			EnableRaisingEvents = true,
-		};
-        RenderEnv.DLL_Watcher.Changed += (_, _) => {
-			RenderEnv.HasNewDLL = true;
-		};
-		
-		return RenderEnv
-		._LoadDLL()
-		._Update();
+		return RenderEnv._Update();
 	}
 	
-	class tDLL_Context : System.Runtime.Loader.AssemblyLoadContext {
-		public tDLL_Context(
-		) : base(isCollectible: true) {
-		}
-		
-		protected override Assembly Load(
-			AssemblyName aName
-		) => null;
-	}
-	
-	public static ref tRenderEnv
-	_LoadDLL(
-		this ref tRenderEnv aRenderEnv
-	) {
-		aRenderEnv.DLL = null;
-		aRenderEnv.DLL_Context?.Unload();
-		
-		aRenderEnv.DLL_Context = new tDLL_Context();
-		aRenderEnv.DLL = aRenderEnv.DLL_Context.LoadFromStream(
-			new System.IO.MemoryStream(
-				System.IO.File.ReadAllBytes(
-					tRenderEnv.DLL_File.FullName
-				)
-			)
-		).GetType(
-			"mVoxelRenderer_HotReload"
-		).GetMethod(
-			"Create"
-		).CreateDelegate<
-			tFunc<tDLL>
-		>()();
-		
-		aRenderEnv.HasNewDLL = false;
-		return ref aRenderEnv;
-	}
-	
-	public static tV3
-	GetSize(
-		this tBlock aBlock
-	) => V3(
-		aBlock.Colors.GetLength(0),
-		aBlock.Colors.GetLength(1),
-		aBlock.Colors.GetLength(2)
-	);
-	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static ref tRenderEnv
 	_SetLightDirection(
 		this ref tRenderEnv a,
@@ -290,14 +236,15 @@ mVoxelRenderer {
 		return ref a;
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static ref tRenderEnv
 	_Update(
 		this ref tRenderEnv a
 	) {
-		if (a.HasNewDLL) {
-			a._LoadDLL();
+		if (a.HotReloat.HasNewDLL) {
+			a.HotReloat._LoadDLL();
 		}
-		var QuarterParts = a.DLL.Matrixes.GetLength(0);
+		var QuarterParts = a.HotReloat.DLL.Matrixes.GetLength(0);
 		while (a.Dir < 0) { a.Dir += 4 * QuarterParts; }
 		while (a.Dir >= 4 * QuarterParts) { a.Dir -= 4 * QuarterParts; }
 		mMath.Clamp(ref a.Angle, 0, 4);
@@ -315,6 +262,7 @@ mVoxelRenderer {
 		PosBits,
 	};
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tColor
 	RGB(
 		tNat8 aR,
@@ -322,6 +270,7 @@ mVoxelRenderer {
 		tNat8 aB
 	) => RGBA(aR, aG, aB, false);
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tColor
 	RGBA(
 		tNat8 aR,
@@ -340,6 +289,7 @@ mVoxelRenderer {
 		)
 	};
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tShadow
 	CreateShadow(
 		tV2 aSize,
@@ -350,6 +300,7 @@ mVoxelRenderer {
 		Deep = new tInt16[aSize.X, aSize.Y],
 	};
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tSprite
 	CreateSprite(
 		tV2 aSize,
@@ -363,21 +314,22 @@ mVoxelRenderer {
 		PosBits = new tNat8[aSize.X, aSize.Y],
 	};
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV2
 	GetSpriteSize(
-		tInt32 aCubeSize,
+		tV3 aBlockSize,
 		mMath3D.tM3x3 aM
 	) {
-		var D = aCubeSize;
+		var D = aBlockSize;
 		var V3s = new [] {
-			V3(+D, +D, +D),
-			V3(+D, +D, -D),
-			V3(+D, -D, +D),
-			V3(+D, -D, -D),
-			V3(-D, +D, +D),
-			V3(-D, +D, -D),
-			V3(-D, -D, +D),
-			V3(-D, -D, -D),
+			V3(+D.X, +D.Y, +D.Z),
+			V3(+D.X, +D.Y, -D.Z),
+			V3(+D.X, -D.Y, +D.Z),
+			V3(+D.X, -D.Y, -D.Z),
+			V3(-D.X, +D.Y, +D.Z),
+			V3(-D.X, +D.Y, -D.Z),
+			V3(-D.X, -D.Y, +D.Z),
+			V3(-D.X, -D.Y, -D.Z),
 		};
 		var MaxX = 0;
 		var MaxY = 0;
@@ -389,6 +341,7 @@ mVoxelRenderer {
 		return V2(MaxX + 2, MaxY + 2);
 	} 
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV3
 	GetShadowUV(
 		tV3 aWorldOffset,
@@ -424,39 +377,41 @@ mVoxelRenderer {
 		return V3(UV, AxisSign * Deep);
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV2
 	GetShadowSize(
-		tV3 aCubeSize,
+		tV3 aBlockSize,
 		mMath3D.tV3 aLightDirection
 	) {
 		var (MainAxis, _) = GetMainAxis(aLightDirection);
 		
 		var L = V3(
-			aLightDirection.X.Abs(),
-			aLightDirection.Y.Abs(),
-			aLightDirection.Z.Abs()
+			aLightDirection.X.IAbs(),
+			aLightDirection.Y.IAbs(),
+			aLightDirection.Z.IAbs()
 		);
 		
 		var UV = default(tV2);
 		
 		switch (MainAxis) {
 			case tAxis.X: {
-				UV = aCubeSize.YZ() + L.YZ() * aCubeSize.X / L.X;
+				UV = aBlockSize.YZ() + L.YZ() * aBlockSize.X / L.X;
 				break;
 			}
 			case tAxis.Y: {
-				UV = aCubeSize.XZ() + L.XZ() * aCubeSize.Y / L.Y;
+				UV = aBlockSize.XZ() + L.XZ() * aBlockSize.Y / L.Y;
 				break;
 			}
 			case tAxis.Z: {
-				UV = aCubeSize.XY() + L.XY() * aCubeSize.Z / L.Z; 
+				UV = aBlockSize.XY() + L.XY() * aBlockSize.Z / L.Z; 
 				break;
 			}
 		}
 		
-		return UV + V2(2, 2);;
+		return UV + V2(2);;
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tShadow
 	_Clear(
 		this tShadow aGrid
@@ -473,6 +428,7 @@ mVoxelRenderer {
 		return aGrid;
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tSprite
 	_Clear(
 		this tSprite aGrid
@@ -490,6 +446,7 @@ mVoxelRenderer {
 		return aGrid;
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static (tAxis, tInt32)
 	GetMainAxis(
 		tV3 aDirection
@@ -508,6 +465,7 @@ mVoxelRenderer {
 		}
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV3
 	ToRGB(
 		tColor aColor
@@ -523,6 +481,7 @@ mVoxelRenderer {
 		) * 63;
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tNat32
 	ToRGB32(
 		tNat8 aColor

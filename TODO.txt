@@ -1,18 +1,20 @@
 ﻿BUGS:
-* shadow is broken
+* shadow sprits don't fit (signed rounding problems ???)
+* transparent sprites dose not align with uneven sprite offset
+	- maybe create two versions ???
 
 TODO:
+* Editor
+* non cubic "Blocks"
+* Offset for Sprites and Shadow
 * introduce fix raster (maybe 9x9x9) to get proper shadow
 	- on LightDirection the longest/main axis value has to be this raster size (9)
 * shortcut Shadow calculation while using NormalLayer
-	- make it optional for translucent???
-* non cubic "Cubes"
-* Offset for Sprites and Shadow
+	- make it optional for translucent ???
 * DeepOffsetLayer
-* HotReload for AppLogic
-* Editor
 
 DONE:
+* HotReload for AppLogic
 * HotReload for EngineCode
 * Shadow Layer
 * Layer
@@ -21,5 +23,5 @@ DONE:
 
 NOTS:
 * Qube Colors:
-	- 7Bits: 5 x 5 x 5 = 125 Colors + R + G + B + RG + RB + GB
+	- 7Bits: 5 x 5 x 5 = 125 Colors + Non + ??? + ???
 	- 1Bit: 50% Transparent (draw only every second color)

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 public static class
 mMath2D {
@@ -8,6 +9,7 @@ mMath2D {
 		public tInt32 X;
 		public tInt32 Y;
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV2
 		operator+(
 			tV2 a1,
@@ -17,6 +19,7 @@ mMath2D {
 			a1.Y + a2.Y
 		);
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV2
 		operator-(
 			tV2 a1,
@@ -26,6 +29,7 @@ mMath2D {
 			a1.Y - a2.Y
 		);
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV2
 		operator-(
 			tV2 a
@@ -34,6 +38,7 @@ mMath2D {
 			a.Y
 		);
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV2
 		operator*(
 			tV2 a1,
@@ -43,12 +48,14 @@ mMath2D {
 			a1.Y * a2
 		);
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV2
 		operator*(
 			tInt32 a1,
 			tV2 a2
 		) => a2 * a1;
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV2
 		operator/(
 			tV2 a1,
@@ -58,6 +65,7 @@ mMath2D {
 			mMath.Div(a1.Y, a2)
 		);
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV2
 		operator>>(
 			tV2 a1,
@@ -67,10 +75,12 @@ mMath2D {
 			a1.Y >> a2
 		);
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override tText
 		ToString() => $"({this.X}, {this.Y})";
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV2
 	V2(
 		tInt32 aX,
@@ -80,6 +90,21 @@ mMath2D {
 		Y = aY,
 	};
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tV2
+	V2(
+		tInt32 a
+	) => new tV2 {
+		X = a,
+		Y = a,
+	};
+	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tV2
+	V2(
+	) => V2(0);
+	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tBool
 	IsInRange(
 		this tV2 aPoint,
@@ -88,5 +113,25 @@ mMath2D {
 	) => (
 		aPoint.X.IsInRange(aMin.X, aMax.X) &&
 		aPoint.Y.IsInRange(aMin.Y, aMax.Y)
+	);
+	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tV2
+	Min(
+		tV2 a1,
+		tV2 a2
+	) => V2(
+		mMath.Min(a1.X, a2.X),
+		mMath.Min(a1.Y, a2.Y)
+	);
+	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tV2
+	Max(
+		tV2 a1,
+		tV2 a2
+	) => V2(
+		mMath.Max(a1.X, a2.X),
+		mMath.Max(a1.Y, a2.Y)
 	);
 }

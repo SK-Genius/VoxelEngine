@@ -1,5 +1,7 @@
 ﻿using System.Linq;
+using System.Runtime.CompilerServices;
 
+using static mStd;
 using static mMath;
 using static mMath2D;
 using static mMath3D;
@@ -410,25 +412,29 @@ mVoxelRenderer_HotReload {
 		},
 	};
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static tSprite
 	GetOrCreateSprite(
 		this tRenderEnv aRenderEnv,
 		tBlock aBlock
 	) {
+		var BlocSize = aBlock.Colors.GetSize();
+		
 		if (!aRenderEnv.SpriteBuffer.TryGetValue((aRenderEnv.M, aBlock), out var Sprite)) {
-			var SpriteSize = GetSpriteSize(aBlock.Colors.GetLength(0), aRenderEnv.M);
+			var SpriteSize = GetSpriteSize(BlocSize, aRenderEnv.M);
 			Sprite = CreateSprite(
 				SpriteSize,
-				mMath2D.V2(0, 0) 
+				mMath2D.V2() 
 			)
 			._Clear()
-			._DrawCube(aBlock, V3(0, 0, 0), aRenderEnv);
+			._DrawBlock(aBlock, V3(), aRenderEnv);
 			
 			aRenderEnv.SpriteBuffer[(aRenderEnv.M, aBlock)] = Sprite;
 		}
 		return Sprite;
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static tShadow
 	GetOrCreateShadow(
 		this tRenderEnv aRenderEnv,
@@ -441,45 +447,46 @@ mVoxelRenderer_HotReload {
 		var ShadowSize = GetShadowSize(aBlock.GetSize(), aRenderEnv.LightDirection);
 		Shadow = CreateShadow(
 			ShadowSize,
-			mMath2D.V2(0, 0)
+			mMath2D.V2()
 		)
 		._Clear()
-		._DrawCube(aBlock, V3(0, 0, 0), aRenderEnv.LightDirection);
+		._DrawBlock(aBlock, V3(), aRenderEnv.LightDirection);
 		
 		aRenderEnv.ShadowBuffer[(aRenderEnv.LightDirection, aBlock)] = Shadow;
 		return Shadow;
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static tM3x3
 	GetMatrix(
 		this tRenderEnv aEnv,
 		tInt32 aDir,
 		tInt32 aAngle
 	) {
-		var M = Matrixes[aDir % Matrixes.GetLength(0), aAngle];
+		var M = Matrixes[aDir % Matrixes.GetSize().X, aAngle];
 		while (aDir >= cQuarterParts) {
-			M = M * cRotRight;
+			M *= cRotRight;
 			aDir -= cQuarterParts;
 		}
 		return M;
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static tAxis[,]
 	GetNormalPattern(
 		this tRenderEnv aEnv
 	) {
-		var P = NormalPatterns[(int)(aEnv.Dir % NormalPatterns.GetLength(0)), aEnv.Angle];
+		var P = NormalPatterns[aEnv.Dir % NormalPatterns.GetSize().X, aEnv.Angle];
 		if (
 			aEnv.Dir.IsInRange(0*cQuarterParts, 1*cQuarterParts-1) ||
 			aEnv.Dir.IsInRange(2*cQuarterParts, 3*cQuarterParts-1)
 		) {
 			return P;
 		}
-		var MaxX = P.GetLength(0);
-		var MaxY = P.GetLength(1);
-		var P_ = new tAxis[MaxX, MaxY];
-		for (var Y = 0; Y < MaxY; Y += 1) {
-			for (var X = 0; X < MaxX; X += 1) {
+		var Max = P.GetSize();
+		var P_ = new tAxis[Max.X, Max.Y];
+		for (var Y = 0; Y < Max.Y; Y += 1) {
+			for (var X = 0; X < Max.X; X += 1) {
 				var Axis = P[X, Y];
 				P_[X, Y] = Axis switch {
 					tAxis.X => tAxis.Y,
@@ -493,6 +500,7 @@ mVoxelRenderer_HotReload {
 		return P_;
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static tV3
 	To3D(
 		this tRenderEnv aRenderEnv,
@@ -516,6 +524,7 @@ mVoxelRenderer_HotReload {
 		#endif
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static tInt32
 	CorrectAxis(
 		tInt32 aAxis,
@@ -533,28 +542,26 @@ mVoxelRenderer_HotReload {
 	}
 	
 	private static tShadow
-	_DrawCube(
+	_DrawBlock(
 		this tShadow aShadow,
 		tBlock aBlock,
 		tV3 aOffset,
 		tV3 aLightDirection
 	) {
-		var CubeLength = aBlock.Colors.GetLength(0);
-		var CubeLengthHalf = CubeLength >> 1;
-		if (aBlock.Colors.GetLength(1) != CubeLength) { throw null; }
-		if (aBlock.Colors.GetLength(2) != CubeLength) { throw null; }
+		var BlockSize = aBlock.Colors.GetSize();
+		var BlockSizeHalf = BlockSize >> 1;
 		
 		var Center = aShadow.Size >> 1;
 		
-		for (var Z = (tInt16)0; Z < CubeLength; Z += 1) {
-			var Z_ = Z - CubeLengthHalf + aOffset.Z;
-			for (var Y = (tInt16)0; Y < CubeLength; Y += 1) {
-				var Y_ = Y - CubeLengthHalf + aOffset.Y;
-				for (var X = (tInt16)0; X < CubeLength; X += 1) {
-					var X_ = X - CubeLengthHalf + aOffset.X;
+		for (var Z = 0; Z < BlockSize.Z; Z += 1) {
+			var Z_ = Z - BlockSizeHalf.Z + aOffset.Z;
+			for (var Y = 0; Y < BlockSize.Y; Y += 1) {
+				var Y_ = Y - BlockSizeHalf.Y + aOffset.Y;
+				for (var X = 0; X < BlockSize.X; X += 1) {
+					var X_ = X - BlockSizeHalf.X + aOffset.X;
 					
 					var Color = aBlock.Colors[X, Y, Z];
-					if (Color == default) {
+					if (Color == default || Color.IsTransparent()) {
 						continue;
 					}
 					
@@ -569,28 +576,26 @@ mVoxelRenderer_HotReload {
 		return aShadow;
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static tBool
 	IsTransparent(
 		this tColor a
 	) => (a.Value & 0b_1000_0000) != 0;
 	
 	private static tSprite
-	_DrawCube(
+	_DrawBlock(
 		this tSprite aGrid,
 		tBlock aBlock,
 		tV3 aOffset,
 		tRenderEnv aRenderEnv
 	) {
-		var CubeLength = aBlock.Colors.GetLength(0);
-		var CubeLengthHalf = CubeLength >> 1;
-		if (aBlock.Colors.GetLength(1) != CubeLength) { throw null; }
-		if (aBlock.Colors.GetLength(2) != CubeLength) { throw null; }
+		var BlockSize = aBlock.Colors.GetSize();
+		var BlockSizeHalf = BlockSize >> 1;
 		
 		var NormalPattern = aRenderEnv.NormalPattern;
 		
-		var MaxU = NormalPattern.GetLength(0);
-		var MaxV = NormalPattern.GetLength(1);
-
+		var Max = NormalPattern.GetSize();
+		
 		var MabAxisToNormal = new [] {
 			V3(0, 0, 0),
 			V3(127, 0, 0),
@@ -603,7 +608,7 @@ mVoxelRenderer_HotReload {
 		};
 		
 		var Rot = M3x3(- tV3.cY, tV3.cX, tV3.cZ);
-		var QDir = aRenderEnv.DLL.NormalPatterns.GetLength(0);
+		var QDir = NormalPatterns.GetLength(0);
 		MabAxisToNormal = ((aRenderEnv.Dir / QDir) % 4) switch {
 			1 => MabAxisToNormal.Select(_ => _ * Rot).ToArray(),
 			2 => MabAxisToNormal.Select(_ => _ * Rot * Rot).ToArray(),
@@ -611,28 +616,24 @@ mVoxelRenderer_HotReload {
 			_ => MabAxisToNormal,
 		};
 		
-		for (var Z = 0; Z < CubeLength; Z += 1) {
-			for (var Y = 0; Y < CubeLength; Y += 1) {
-				for (var X = 0; X < CubeLength; X += 1) {
+		for (var Z = 0; Z < BlockSize.Z; Z += 1) {
+			for (var Y = 0; Y < BlockSize.Y; Y += 1) {
+				for (var X = 0; X < BlockSize.X; X += 1) {
 					var Color = aBlock.Colors[X, Y, Z];
 					if (Color == default) {
 						continue;
 					}
 					
+					var P = V3(X, Y, Z);
 					var DesUVBase = (
-						V3(
-							X - CubeLengthHalf,
-							Y - CubeLengthHalf,
-							Z - CubeLengthHalf
-						) + aOffset
+						(P - BlockSizeHalf) + aOffset
 					) * aRenderEnv.M + V3(
-						(aGrid.Color.GetLength(0) - MaxU) / 2,
-						(aGrid.Color.GetLength(1) - MaxV) / 2,
+						(aGrid.Color.GetSize() - Max) / 2,
 						0
 					);
 					
-					for (var V = 0; V < MaxV; V += 1) {
-						for (var U = 0; U < MaxU; U += 1) {
+					for (var V = 0; V < Max.Y; V += 1) {
+						for (var U = 0; U < Max.X; U += 1) {
 							var Des = DesUVBase + V3(U, V, 0);
 							if (Color.IsTransparent() && ((Des.X ^ Des.Y) & 1) == 0) {
 								continue;
@@ -671,14 +672,14 @@ mVoxelRenderer_HotReload {
 		tV3 aScreenOffset,
 		tNat8[] aBitsMap
 	) {
-		var SrcMin = mMath2D.V2(0, 0);
-		var SrcSize = mMath2D.V2(aSrc.Color.GetLength(0), aSrc.Color.GetLength(1));
+		var SrcMin = mMath2D.V2();
+		var SrcSize = aSrc.Color.GetSize();
 		var SrcMax = SrcMin + SrcSize;
 		
-		var DesSize = mMath2D.V2(aDes.Color.GetLength(0), aDes.Color.GetLength(1));
+		var DesSize = aDes.Color.GetSize();
 		var DesMin = ((DesSize - SrcSize) >> 1) + aScreenOffset.XY();
 		var DesMax = DesMin + SrcSize;
-		var DesMaxY = aSrc.Color.GetLength(1);
+		var DesMaxY = DesSize.Y;
 		
 		if (
 			DesMin.X > DesSize.X ||
@@ -738,7 +739,7 @@ mVoxelRenderer_HotReload {
 		tShadow aSrc,
 		tV3 aOffset2D
 	) {
-		var SrcMin = mMath2D.V2(0, 0);
+		var SrcMin = mMath2D.V2();
 		var SrcMax = SrcMin + aSrc.Size;
 		
 		var DesMin = (aDes.Size >> 1) - (aSrc.Size >> 1) + aOffset2D.XY();
@@ -794,6 +795,7 @@ mVoxelRenderer_HotReload {
 		return aDes;
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static tInt16
 	GetShadowDistance(
 		this tRenderEnv aRenderEnv,
@@ -801,14 +803,9 @@ mVoxelRenderer_HotReload {
 		tV3 aPos
 	) {
 		var UV = GetShadowUV(aPos, aRenderEnv.LightDirection) + V3(aShadow.Size >> 1, 0);
-		var U = UV.X;
-		var V = UV.Y;
 		
-		if (
-			0 <= U && U < aShadow.Size.X &&
-			0 <= V && V < aShadow.Size.Y
-		) {
-			return (tInt16)(UV.Z - aShadow.Deep[U, V]);
+		if (UV.XY().IsInRange(V2(), aShadow.Size - V2(1))) {
+			return (tInt16)(UV.Z - aShadow.Deep[UV.X, UV.Y]);
 		} else {
 			return tInt16.MinValue; 
 		}
@@ -823,14 +820,13 @@ mVoxelRenderer_HotReload {
 		tV2 aBufferSize,
 		tDebugRenderMode aDebugRenderMode
 	) {
-		var MaxX = mMath.Min(aSprite.Color.GetLength(0), aBufferSize.X);
-		var MaxY = mMath.Min(aSprite.Color.GetLength(1), aBufferSize.Y);
-		var DeltaX = aBufferSize.X - MaxX;
+		var Max = Min(aSprite.Color.GetSize(), aBufferSize);
+		var DeltaX = aBufferSize.X - Max.X;
 		
 		var YPtr = (tNat32*)aBuffer;
-		for (var Y = 0; Y < MaxY; Y += 1) {
+		for (var Y = 0; Y < Max.Y; Y += 1) {
 			var XPtr = YPtr;
-			for (var X = 0; X < MaxX; X += 1) {
+			for (var X = 0; X < Max.X; X += 1) {
 				var ColorIndex = aSprite.Color[X, Y];
 				if (ColorIndex == default) {
 					XPtr += 1;
@@ -846,7 +842,7 @@ mVoxelRenderer_HotReload {
 				var Normal = mMath3D.V3(
 					N.U,
 					-N.V,
-					mMath.Sqrt(128*128 - N.U*N.U - N.V*N.V) // * mMath.Sign(N.U) * mMath.Sign(N.V)
+					mMath.FastSqrt(mMath.Abs(128*128 - N.U*N.U - N.V*N.V)) // * mMath.Sign(N.U) * mMath.Sign(N.V)
 				);
 				
 				var H = 50;
@@ -866,21 +862,38 @@ mVoxelRenderer_HotReload {
 						break;
 					}
 					case tDebugRenderMode.Deep: {
-						*XPtr = (tNat32)(0x_FF_00_00_00 | (aSprite.Deep[X, Y] << 4));
+						*XPtr = (tNat32)(
+							0x_FF_00_00_00 |
+							(aSprite.Deep[X, Y] << 4)
+						);
 						break;
 					}
 					case tDebugRenderMode.Normal: {
-						*XPtr = (tNat32)(0x_FF_00_00_00 | ((128 + Normal.X) << 16) | ((128 + Normal.Y) << 8));
+						*XPtr = (tNat32)(
+							0x_FF_00_00_00 |
+							((128 + Normal.X) << 16) |
+							((128 + Normal.Y) << 8)
+						);
 						break;
 					}
 					case tDebugRenderMode.PosBits: {
 						var PosBits = aSprite.PosBits[X, Y];
-						*XPtr = (tNat32)(0x_FF_00_00_00 | ((PosBits & 0b110000) << 17) | ((PosBits & 0b001100) << 11) | ((PosBits & 0b000011) << 5));
+						*XPtr = (tNat32)(
+							0x_FF_00_00_00 |
+							((PosBits & 0b110000) << 17) |
+							((PosBits & 0b001100) << 11) |
+							((PosBits & 0b000011) << 5)
+						);
 						break;
 					}
 					case tDebugRenderMode.Pos: {
 						var Pos = To3D(aRenderEnv, aSprite, V2(X, Y));
-						*XPtr = (tNat32)(0x_FF_00_00_00 | ((Pos.X & 0b0111) << 20) | ((Pos.Y & 0b0111) << 12) | ((Pos.Z & 0b0111) << 4));
+						*XPtr = (tNat32)(
+							0x_FF_00_00_00 |
+							((Pos.X & 0b0111) << 20) |
+							((Pos.Y & 0b0111) << 12) |
+							((Pos.Z & 0b0111) << 4)
+						);
 						break;
 					}
 				}
@@ -895,7 +908,12 @@ mVoxelRenderer_HotReload {
 			var XPtr = YPtr;
 			for (var X = 0; X < Min(aShadow.Size.X, aBufferSize.X); X += 1) {
 				var Deep = (aShadow.Deep[X, Y] << 4) & 0xFF;
-				*XPtr = (tNat32)(0xFF_00_00_00 | (Deep << 16) | (Deep << 8) | (Deep << 0));
+				*XPtr = (tNat32)(
+					0xFF_00_00_00 |
+					(Deep << 16) |
+					(Deep << 8) |
+					(Deep << 0)
+				);
 				XPtr += 1;
 			}
 			YPtr += aBufferSize.X;
@@ -929,22 +947,20 @@ mVoxelRenderer_HotReload {
 			}
 		}
 		
-		var CubeSprite = GetOrCreateSprite(aRenderEnv, aBlock);
-		aCanvas._DrawSprite(CubeSprite, aOffset * aRenderEnv.M, BitsMap);
+		var BlockSprite = GetOrCreateSprite(aRenderEnv, aBlock);
+		aCanvas._DrawSprite(BlockSprite, aOffset * aRenderEnv.M, BitsMap);
 		
-		var CubeShadow = GetOrCreateShadow(aRenderEnv, aBlock);
-		aShadow._DrawShadow(CubeShadow, GetShadowUV(aOffset, aRenderEnv.LightDirection));
+		var BlockShadow = GetOrCreateShadow(aRenderEnv, aBlock);
+		aShadow._DrawShadow(BlockShadow, GetShadowUV(aOffset, aRenderEnv.LightDirection));
 		
 		return ref aRenderEnv;
 	}
 	
-	public static tDLL
+	public static tRendererDLL
 	Create(
-	) => new tDLL {
+	) => new tRendererDLL {
 		Matrixes = Matrixes,
 		NormalPatterns = NormalPatterns,
-		GetOrCreateSprite = GetOrCreateSprite,
-		GetOrCreateShadow = GetOrCreateShadow,
 		GetMatrix = GetMatrix,
 		To3D = To3D,
 		_RenderToBuffer = _RenderToBuffer,

@@ -1,5 +1,5 @@
 using System.Diagnostics;
-
+using System.Runtime.CompilerServices;
 using static mMath;
 using static mMath2D;
 
@@ -19,6 +19,7 @@ mMath3D {
 		
 		public static tV3 cZero = V3(0, 0, 0);
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal
 		tV3 (
 			tInt32 aX,
@@ -30,6 +31,7 @@ mMath3D {
 			this.Z = aZ;
 		}
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV3
 		operator+(
 			tV3 a1,
@@ -40,17 +42,24 @@ mMath3D {
 			a1.Z + a2.Z
 		);
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV3
 		operator-(
 			tV3 a
-		) => V3(-a.X, -a.Y, -a.Z);
+		) => V3(
+			-a.X,
+			-a.Y,
+			-a.Z
+		);
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV3
 		operator-(
 			tV3 a1,
 			tV3 a2
 		) => a1 + -a2;
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV3
 		operator*(
 			tV3 a1,
@@ -61,6 +70,7 @@ mMath3D {
 			a1.Z * a2.Z
 		);
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV3
 		operator*(
 			tInt32 a1,
@@ -71,12 +81,14 @@ mMath3D {
 			a1 * a2.Z
 		);
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV3
 		operator*(
 			tV3 a1,
 			tInt32 a2
 		) => a2 * a1;
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV3
 		operator/(
 			tV3 a1,
@@ -93,6 +105,7 @@ mMath3D {
 			#endif
 		);      
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV3
 		operator>>(
 			tV3 a1,
@@ -103,19 +116,23 @@ mMath3D {
 			a1.Z >> a2
 		);
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override tText
 		ToString() => $"({this.X}, {this.Y}, {this.Z})";
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV3
 	V3(
 	) => tV3.cZero;
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV3
 	V3(
 		tInt32 a
 	) => new tV3(a, a, a);
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV3
 	V3(
 		tInt32 aX,
@@ -123,27 +140,32 @@ mMath3D {
 		tInt32 aZ
 	) => new tV3(aX, aY, aZ);
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV3
 	V3(
 		tV2 aV2,
 		tInt32 aZ
 	) => new tV3(aV2.X, aV2.Y, aZ);
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV2
 	XY(
 		this tV3 aV3
 	) => mMath2D.V2(aV3.X, aV3.Y);
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV2
 	XZ(
 		this tV3 aV3
 	) => mMath2D.V2(aV3.X, aV3.Z);
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV2
 	YZ(
 		this tV3 aV3
 	) => mMath2D.V2(aV3.Y, aV3.Z);
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tInt32
 	Sum(
 		this tV3 a
@@ -155,6 +177,7 @@ mMath3D {
 		public readonly tV3 Y;
 		public readonly tV3 Z;
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal
 		tM3x3 (
 			tV3 aX,
@@ -166,6 +189,7 @@ mMath3D {
 			this.Z = aZ;
 		}
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV3
 		operator *(
 			tV3 aV,
@@ -176,6 +200,7 @@ mMath3D {
 			aM.Z.X * aV.X + aM.Z.Y * aV.Y + aM.Z.Z * aV.Z
 		);
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tM3x3
 		operator *(
 			tInt32 aS,
@@ -186,6 +211,7 @@ mMath3D {
 			V3(aM.Z.X * aS, aM.Z.Y * aS, aM.Z.Z * aS)
 		);
 		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tM3x3
 		operator *(
 			tM3x3 aM1,
@@ -200,6 +226,7 @@ mMath3D {
 		}
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tM3x3
 	M3x3(
 		tV3 aX,
@@ -207,6 +234,7 @@ mMath3D {
 		tV3 aZ
 	) => new tM3x3(aX, aY, aZ);
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tM3x3
 	T(
 		this tM3x3 a
@@ -216,17 +244,19 @@ mMath3D {
 		V3(a.X.Z, a.Y.Z, a.Z.Z)
 	);
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tInt32
-	Length2(
+	Abs2(
 		this tV3 a
 	) => a.X*a.X + a.Y*a.Y + a.Z*a.Z;
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV3
 	Norm(
 		this tV3 a,
 		tInt32 aScale
 	) {
-		var Length = System.MathF.Sqrt(a.Length2()) / aScale;
+		var Length = System.MathF.Sqrt(a.Abs2()) / aScale;
 		return V3(
 			mMath.Floor(a.X / Length),
 			mMath.Floor(a.Y / Length),
@@ -234,6 +264,7 @@ mMath3D {
 		);
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static (tM3x3 M, tInt32 Det)
 	Inverse(
 		this tM3x3 a
@@ -263,6 +294,7 @@ mMath3D {
 		return Res;
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int
 	Det(
 		tInt32 a11,
@@ -283,6 +315,7 @@ mMath3D {
 		-a12*a21*a33
 	);
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int
 	Det(
 		tInt32 a11,
@@ -308,4 +341,37 @@ mMath3D {
 		V3( 0,  0,  1)
 	);
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tV3
+	Min(
+		tV3 a1,
+		tV3 a2
+	) => V3(
+		mMath.Min(a1.X, a2.X),
+		mMath.Min(a1.Y, a2.Y),
+		mMath.Min(a1.Z, a2.Z)
+	);
+	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tV3
+	Max(
+		tV3 a1,
+		tV3 a2
+	) => V3(
+		mMath.Max(a1.X, a2.X),
+		mMath.Max(a1.Y, a2.Y),
+		mMath.Max(a1.Z, a2.Z)
+	);
+	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tBool
+	IsInRange(
+		this tV3 a,
+		tV3 aMin,
+		tV3 aMax
+	) => (
+		a.X.IsInRange(aMin.X, aMax.X) &
+		a.Y.IsInRange(aMin.Y, aMax.Y) &
+		a.Z.IsInRange(aMin.Z, aMax.Z)
+	);
 }

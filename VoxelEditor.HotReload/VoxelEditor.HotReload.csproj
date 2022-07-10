@@ -11,7 +11,7 @@
 	</PropertyGroup>
 	
 	<ItemGroup>
-		<ProjectReference Include="../VoxelRenderer/VoxelRenderer.csproj" />
+		<ProjectReference Include="../VoxelEditor/VoxelEditor.csproj" />
 	</ItemGroup>
 	
 </Project>

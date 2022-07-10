@@ -5,9 +5,9 @@
 			"name": ".NET Core Launch (console)",
 			"type": "coreclr",
 			"request": "launch",
-			"program": "${workspaceFolder}/VoxelEditor/bin/Debug/net7.0-windows/VoxelEditor.exe",
+			"program": "${workspaceFolder}/VoxelEditor.Windows/bin/Debug/net7.0-windows/VoxelEditor.Windows.exe",
 			"args": [],
-			"cwd": "${workspaceFolder}/VoxelEditor",
+			"cwd": "${workspaceFolder}/VoxelEditor.Windows",
 			"console": "internalConsole",
 			"stopAtEntry": false,
 			"preLaunchTask": "build"
