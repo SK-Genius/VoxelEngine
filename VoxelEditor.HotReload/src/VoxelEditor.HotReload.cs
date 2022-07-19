@@ -30,23 +30,29 @@ mVoxelEditor_HotReload {
 		)._Clear(
 		);
 		
-		var P2D = aMousePos;
-		var P3D = V3(0);
-		if (P2D.IsInRange(V2(), aEditorState.Canvas.Size - V2(1))) {
-			P3D = RenderEnv.To3D(aEditorState.Canvas, P2D) + V3(4);
-		}
-		
-		var Map_ = aEditorState.Map;
-		if (P3D.IsInRange(V3(-2 * 9 - 4), V3(2 * 9 + 4))) {
-			for (var I = -2; I < 2; I += 1) {
-				Map_ = Map_.Add((V3(9 * I, P3D.Y, P3D.Z), XAxis));
-				Map_ = Map_.Add((V3(P3D.X, 9 * I, P3D.Z), YAxis));
-				Map_ = Map_.Add((V3(P3D.X, P3D.Y, 9 * I), ZAxis));
+		{ // blocks
+			Canvas._Clear();
+			foreach (var (Pos, Block) in aEditorState.Map) {
+				RenderEnv._DrawTo(Canvas, Shadow, Block, Pos);
 			}
 		}
 		
-		{ // blocks
-			Canvas._Clear();
+		var P2D = aMousePos;
+		var P3D = V3(0);
+		if (P2D.IsInRange(V2(), aEditorState.Canvas.Size - V2(1))) {
+			P3D = RenderEnv.To3D(aEditorState.Canvas, P2D);
+		}
+		
+		{ // 3d Marker
+			var Map_ = System.Collections.Immutable.ImmutableList.Create<(tV3,tBlock)>();
+			if (P3D.IsInRange(V3(-2 * 9 - 4), V3(2 * 9 + 4))) {
+				for (var I = -2; I <= 2; I += 1) {
+					Map_ = Map_.Add((V3(9 * I, P3D.Y, P3D.Z), XAxis));
+					Map_ = Map_.Add((V3(P3D.X, 9 * I, P3D.Z), YAxis));
+					Map_ = Map_.Add((V3(P3D.X, P3D.Y, 9 * I), ZAxis));
+				}
+			}
+			
 			foreach (var (Pos, Block) in Map_) {
 				RenderEnv._DrawTo(Canvas, Shadow, Block, Pos);
 			}

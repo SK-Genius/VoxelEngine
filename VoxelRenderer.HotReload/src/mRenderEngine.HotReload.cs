@@ -513,15 +513,11 @@ mVoxelRenderer_HotReload {
 		) * aRenderEnv.InvM / aRenderEnv.Det;
 		
 		var PosBits = aSprite.PosBits[aV2.X, aV2.Y];
-		#if !true
-			return Pos;
-		#else
-			return V3(
-				CorrectAxis(Pos.X, (PosBits >> 4) & 0b11),
-				CorrectAxis(Pos.Y, (PosBits >> 2) & 0b11),
-				CorrectAxis(Pos.Z, (PosBits >> 0) & 0b11)
-			);
-		#endif
+		return V3(
+			CorrectAxis(Pos.X, (PosBits >> 4) & 0b11),
+			CorrectAxis(Pos.Y, (PosBits >> 2) & 0b11),
+			CorrectAxis(Pos.Z, (PosBits >> 0) & 0b11)
+		);
 	}
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -628,7 +624,7 @@ mVoxelRenderer_HotReload {
 					var DesUVBase = (
 						(P - BlockSizeHalf) + aOffset
 					) * aRenderEnv.M + V3(
-						(aGrid.Color.GetSize() - Max) / 2,
+						(aGrid.Color.GetSize() - Max) >> 1,
 						0
 					);
 					
@@ -662,6 +658,18 @@ mVoxelRenderer_HotReload {
 				}
 			}
 		}
+		
+		var MarkerColor = RGB(4, 0, 0);
+		aGrid.Color[0, 0] = MarkerColor;
+		aGrid.Color[aGrid.Size.X - 1, 0] = MarkerColor;
+		aGrid.Color[0, aGrid.Size.Y - 1] = MarkerColor;
+		aGrid.Color[aGrid.Size.X - 1, aGrid.Size.Y - 1] = MarkerColor;
+		
+		aGrid.Deep[0, 0] = 0;
+		aGrid.Deep[aGrid.Size.X - 1, 0] = 0;
+		aGrid.Deep[0, aGrid.Size.Y - 1] = 0;
+		aGrid.Deep[aGrid.Size.X - 1, aGrid.Size.Y - 1] = 0;
+		
 		return aGrid;
 	}
 	
@@ -847,7 +855,7 @@ mVoxelRenderer_HotReload {
 				
 				var H = 50;
 				if (ShadowDistance < 3) {
-					H = mMath.Max((Normal * aRenderEnv.LightDirection / 9).Sum(), H);
+					H = mMath.Max((tInt32)mMath.Abs((Normal * aRenderEnv.LightDirection / 9).Sum()), H);
 				}
 				
 				switch (aDebugRenderMode) {

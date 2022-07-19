@@ -92,6 +92,15 @@ mVoxelEditorWin {
 			a.Graphics.Clear(System.Drawing.Color.White);
 			a.Graphics.DrawImage(Image, 0, 0, EditorState.Zoom*Image.Width, EditorState.Zoom*Image.Height);
 			a.Graphics.DrawString($"{NewTime - Time} ms", new Font("Arial", 10), Brushes.Black, 100, 0);
+			
+			
+			var P2D = MousePos;
+			var P3D = V3(0);
+			if (P2D.IsInRange(V2(), EditorState.Canvas.Size - V2(1))) {
+				P3D = RenderEnv.To3D(EditorState.Canvas, P2D);
+			}
+			
+			a.Graphics.DrawString($"({P3D.X}, {P3D.Y}, {P3D.Z})", new Font("Arial", 10), Brushes.Black, 200, 0);
 			Time = NewTime;
 		};
 		
