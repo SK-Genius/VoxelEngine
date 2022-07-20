@@ -28,8 +28,10 @@ mVoxelEditor {
 	public static tColor H = RGB(c050p, c050p, c050p);
 	public static tColor _ = default;
 	
+	public static tBlock EmptyBlock = CreateBlock(V3(), new tColor[0, 0, 0]);
+	
 	public static tBlock XAxis = CreateBlock(
-		V3(0),
+		V3(),
 		new tColor[9, 1, 1] {
 			{
 				{ T },
@@ -62,7 +64,7 @@ mVoxelEditor {
 	);
 	
 	public static tBlock YAxis = CreateBlock(
-		V3(0),
+		V3(),
 		new tColor[1, 9, 1] {
 			{
 				{ T },
@@ -79,7 +81,7 @@ mVoxelEditor {
 	);
 	
 	public static tBlock ZAxis = CreateBlock(
-		V3(0),
+		V3(),
 		new tColor[1, 1, 9] {
 			{
 				{ T, T, T, T, T, T, T, T, T },

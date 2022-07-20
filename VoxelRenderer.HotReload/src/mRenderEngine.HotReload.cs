@@ -659,6 +659,7 @@ mVoxelRenderer_HotReload {
 			}
 		}
 		
+		#if !true
 		var MarkerColor = RGB(4, 0, 0);
 		aGrid.Color[0, 0] = MarkerColor;
 		aGrid.Color[aGrid.Size.X - 1, 0] = MarkerColor;
@@ -669,6 +670,7 @@ mVoxelRenderer_HotReload {
 		aGrid.Deep[aGrid.Size.X - 1, 0] = 0;
 		aGrid.Deep[0, aGrid.Size.Y - 1] = 0;
 		aGrid.Deep[aGrid.Size.X - 1, aGrid.Size.Y - 1] = 0;
+		#endif
 		
 		return aGrid;
 	}

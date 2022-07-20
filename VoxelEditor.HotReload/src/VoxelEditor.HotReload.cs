@@ -37,19 +37,40 @@ mVoxelEditor_HotReload {
 			}
 		}
 		
-		var P2D = aMousePos;
-		var P3D = V3(0);
-		if (P2D.IsInRange(V2(), aEditorState.Canvas.Size - V2(1))) {
-			P3D = RenderEnv.To3D(aEditorState.Canvas, P2D);
-		}
-		
 		{ // 3d Marker
+			var X_ = XAxis;
+			var Y_ = YAxis;
+			var Z_ = ZAxis;
+			
+			var P2D = aMousePos;
+			var P3D = V3();
+			if (P2D.IsInRange(V2(), aEditorState.Canvas.Size - V2(1))) {
+				P3D = RenderEnv.To3D(aEditorState.Canvas, P2D);
+				
+				var N = aEditorState.Canvas.Normal[P2D.X, P2D.Y];
+				switch (N) {
+					case (0, 0): {
+						Z_ = EmptyBlock;
+						break;
+					}
+					case (_, 0): {
+						X_ = EmptyBlock;
+						break;
+					}
+					case (0, _): {
+						Y_ = EmptyBlock;
+						break;
+					}
+				};
+			}
+			
+			
 			var Map_ = System.Collections.Immutable.ImmutableList.Create<(tV3,tBlock)>();
 			if (P3D.IsInRange(V3(-2 * 9 - 4), V3(2 * 9 + 4))) {
 				for (var I = -2; I <= 2; I += 1) {
-					Map_ = Map_.Add((V3(9 * I, P3D.Y, P3D.Z), XAxis));
-					Map_ = Map_.Add((V3(P3D.X, 9 * I, P3D.Z), YAxis));
-					Map_ = Map_.Add((V3(P3D.X, P3D.Y, 9 * I), ZAxis));
+					Map_ = Map_.Add((V3(9 * I, P3D.Y, P3D.Z), X_));
+					Map_ = Map_.Add((V3(P3D.X, 9 * I, P3D.Z), Y_));
+					Map_ = Map_.Add((V3(P3D.X, P3D.Y, 9 * I), Z_));
 				}
 			}
 			
