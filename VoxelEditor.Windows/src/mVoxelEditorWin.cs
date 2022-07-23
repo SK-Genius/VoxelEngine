@@ -25,7 +25,9 @@ mVoxelEditorWin {
 	Main(
 	) {
 		var MousePos = V2(0);
-		var Zoom = 4;
+		var Zoom = 3;
+		
+		var DefaultFont = new Font("Arial", 10);
 		
 		var Window = new Form{
 			Width = 1000,
@@ -58,10 +60,12 @@ mVoxelEditorWin {
 			
 			var NewTime = SW.ElapsedMilliseconds;
 			
+			EditorState.MousePosOld = EditorState.MousePosNew;
+			EditorState.MousePosNew = MousePos;
+			
 			mVoxelEditor.Loop(
 				ref EditorState,
-				NewTime - Time,
-				MousePos
+				NewTime - Time
 			);
 			
 			unsafe {
@@ -91,7 +95,7 @@ mVoxelEditorWin {
 			//a.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Low;
 			a.Graphics.Clear(System.Drawing.Color.White);
 			a.Graphics.DrawImage(Image, 0, 0, EditorState.Zoom*Image.Width, EditorState.Zoom*Image.Height);
-			a.Graphics.DrawString($"{NewTime - Time} ms", new Font("Arial", 10), Brushes.Black, 100, 0);
+			a.Graphics.DrawString($"{NewTime - Time} ms", DefaultFont, Brushes.Black, 100, 0);
 			
 			
 			var P2D = MousePos;
@@ -100,7 +104,7 @@ mVoxelEditorWin {
 				P3D = RenderEnv.To3D(EditorState.Canvas, P2D);
 			}
 			
-			a.Graphics.DrawString($"({P3D.X}, {P3D.Y}, {P3D.Z})", new Font("Arial", 10), Brushes.Black, 200, 0);
+			a.Graphics.DrawString($"({P3D.X}, {P3D.Y}, {P3D.Z})", DefaultFont, Brushes.Black, 200, 0);
 			Time = NewTime;
 		};
 		
@@ -117,10 +121,8 @@ mVoxelEditorWin {
 				Window.Invalidate();
 			}
 			
-			//if (a.Button.HasFlag(MouseButtons.Left)) {
-				RenderEnv._Update();
-				Window.Invalidate();
-			//}
+			RenderEnv._Update();
+			Window.Invalidate();
 			
 			MousePos = NewMousePos;
 		};
@@ -138,31 +140,31 @@ mVoxelEditorWin {
 		};
 		
 		Window.KeyDown += (_, a) => {
+			var NeedsUpdate = true;
 			
 			switch (a.KeyCode) {
 				case Keys.F1: {
 					EditorState.DebugRenderMode = tDebugRenderMode.None;
-					Window.Invalidate();
 					break;
 				}
 				case Keys.F2: {
 					EditorState.DebugRenderMode = tDebugRenderMode.Deep;
-					Window.Invalidate();
 					break;
 				}
 				case Keys.F3: {
 					EditorState.DebugRenderMode = tDebugRenderMode.Normal;
-					Window.Invalidate();
 					break;
 				}
 				case Keys.F4: {
 					EditorState.DebugRenderMode = tDebugRenderMode.Pos;
-					Window.Invalidate();
 					break;
 				}
 				case Keys.F5: {
 					EditorState.DebugRenderMode = tDebugRenderMode.PosBits;
-					Window.Invalidate();
+					break;
+				}
+				case Keys.F6: {
+					EditorState.DebugRenderMode = tDebugRenderMode.Pattern;
 					break;
 				}
 				case Keys.Escape: {
@@ -172,67 +174,59 @@ mVoxelEditorWin {
 				case Keys.L:
 				case Keys.Right: {
 					var LightDirection = EditorState.RenderEnv.LightDirection;
-					EditorState.RenderEnv
-					._SetLightDirection(LightDirection + (V3(LightDirection.Z, 0, -LightDirection.X) >> 3))
-					._Update()
-					;
-					Window.Invalidate();
+					EditorState.RenderEnv._SetLightDirection(
+						LightDirection + (V3(LightDirection.Z, 0, -LightDirection.X) >> 3)
+					);
 					break;
 				}
 				case Keys.J:
 				case Keys.Left: {
 					var LightDirection = EditorState.RenderEnv.LightDirection;
-					EditorState.RenderEnv
-					._SetLightDirection(LightDirection - (V3(LightDirection.Z, 0, -LightDirection.X) >> 3))
-					._Update()
-					;
-					Window.Invalidate();
+					EditorState.RenderEnv._SetLightDirection(
+						LightDirection - (V3(LightDirection.Z, 0, -LightDirection.X) >> 3)
+					);
 					break;
 				}
 				case Keys.I:
 				case Keys.Up: {
 					var LightDirection = EditorState.RenderEnv.LightDirection;
-					EditorState.RenderEnv
-					._SetLightDirection(LightDirection + (V3(0, LightDirection.Z, -LightDirection.Y) >> 3))
-					._Update()
-					;
-					Window.Invalidate();
+					EditorState.RenderEnv._SetLightDirection(
+						LightDirection + (V3(0, LightDirection.Z, -LightDirection.Y) >> 3)
+					);
 					break;
 				}
 				case Keys.K:
 				case Keys.Down: {
 					var LightDirection = EditorState.RenderEnv.LightDirection;
-					EditorState.RenderEnv
-					._SetLightDirection(LightDirection - (V3(0, LightDirection.Z, -LightDirection.Y) >> 3))
-					._Update()
-					;
-					Window.Invalidate();
+					EditorState.RenderEnv._SetLightDirection(
+						LightDirection - (V3(0, LightDirection.Z, -LightDirection.Y) >> 3)
+					);
 					break;
 				}
 				case Keys.D: {
 					EditorState.RenderEnv.Dir += 1;
-					EditorState.RenderEnv._Update();
-					Window.Invalidate();
 					break;
 				}
 				case Keys.A: {
 					EditorState.RenderEnv.Dir -= 1;
-					EditorState.RenderEnv._Update();
-					Window.Invalidate();
 					break;
 				}
 				case Keys.W: {
 					EditorState.RenderEnv.Angle += 1;
-					EditorState.RenderEnv._Update();
-					Window.Invalidate();
 					break;
 				}
 				case Keys.S: {
 					EditorState.RenderEnv.Angle -= 1;
-					EditorState.RenderEnv._Update();
-					Window.Invalidate();
 					break;
 				}
+				default: {
+					NeedsUpdate = false;
+					break;
+				}
+			}
+			if (NeedsUpdate) {
+				EditorState.RenderEnv._Update();
+				Window.Invalidate();
 			}
 		};
 		

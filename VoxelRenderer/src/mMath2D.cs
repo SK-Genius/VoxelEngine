@@ -76,6 +76,20 @@ mMath2D {
 		);
 		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static tBool
+		operator==(
+			tV2 a1,
+			tV2 a2
+		) => a1.X == a2.X & a1.Y == a2.Y;
+		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static tBool
+		operator!=(
+			tV2 a1,
+			tV2 a2
+		) => !(a1 == a2);
+		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override tText
 		ToString() => $"({this.X}, {this.Y})";
 	}

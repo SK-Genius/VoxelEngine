@@ -16,6 +16,7 @@ mVoxelRenderer {
 	tRendererDLL {
 		public tM3x3[,] Matrixes;
 		public tAxis[,][,] NormalPatterns;
+		public tInt16 [,][,] DeepPatterns;
 		public tFunc<tRenderEnv, tSprite, tV2,  tV3> To3D;
 		public tMeth<tRenderEnv, tSprite, tShadow, System.IntPtr, tV2, tDebugRenderMode> _RenderToBuffer;
 		public tMeth<tRenderEnv, tSprite, tShadow, tBlock, tV3> _DrawTo;
@@ -163,6 +164,7 @@ mVoxelRenderer {
 		public tInt32 Det;
 		
 		public tAxis[,] NormalPattern => this.HotReloat.DLL.NormalPatterns[this.Dir % this.HotReloat.DLL.NormalPatterns.GetSize().X, this.Angle];
+		public tInt16[,] DeepPattern => this.HotReloat.DLL.DeepPatterns[this.Dir % this.HotReloat.DLL.DeepPatterns.GetSize().X, this.Angle];
 		
 		public Dictionary<(mMath3D.tM3x3, tBlock), mVoxelRenderer.tSprite> SpriteBuffer  = new();
 		public Dictionary<(tV3, tBlock), mVoxelRenderer.tShadow> ShadowBuffer  = new();
@@ -260,6 +262,7 @@ mVoxelRenderer {
 		Deep,
 		Pos,
 		PosBits,
+		Pattern,
 	};
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]

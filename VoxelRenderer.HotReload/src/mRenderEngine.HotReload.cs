@@ -22,22 +22,22 @@ mVoxelRenderer_HotReload {
 			M3x3(
 				V3( 4, 0, 0),
 				V3( 0, 0, 4),
-				V3( 0, 4, 0)
+				V3( 0, 8, 0)
 			),
 			M3x3(
 				V3( 4, 0, 0),
 				V3( 0, -2, 4),
-				V3( 0, 3, 1)
+				V3( 0, 8, 1)
 			),
 			M3x3(
 				V3( 4, 0, 0),
 				V3( 0, -3, 3),
-				V3( 0, 2, 2)
+				V3( 0, 6, 3)
 			),
 			M3x3(
 				V3( 4, 0, 0),
 				V3( 0, -4, 2),
-				V3( 0, 1, 3)
+				V3( 0, 4, 4)
 			),
 			M3x3(
 				V3( 4, 0, 0),
@@ -48,22 +48,22 @@ mVoxelRenderer_HotReload {
 			M3x3(
 				V3( 4, 1, 0),
 				V3( 0, 0, 4),
-				V3(-1, 4, 0)
+				V3(-2, 6, 0)
 			),
 			M3x3(
 				V3( 4, 1, 0),
 				V3( 0, -2, 4),
-				V3(0, 3, 1)
+				V3(0, 8, 1)
 			),
 			M3x3(
 				V3( 4, 1, 0),
 				V3( 1, -3, 3),
-				V3(-1, 3, 2)
+				V3(-2, 6, 3)
 			),
 			M3x3(
 				V3( 4, 1, 0),
 				V3( 1, -4, 2),
-				V3(-1, 3, 3)
+				V3( -1, 4, 4)
 			),
 			M3x3(
 				V3( 4, 1, 0),
@@ -74,22 +74,22 @@ mVoxelRenderer_HotReload {
 			M3x3(
 				V3( 4, 2, 0),
 				V3( 0, 0, 4),
-				V3(-1, 4, 0)
+				V3(-2, 4, 0)
 			),
 			M3x3(
 				V3( 4, 2, 0),
 				V3( 1, -1, 4),
-				V3(-2, 2, 1)
+				V3(-4, 4, 1)
 			),
 			M3x3(
 				V3( 4, 2, 0),
 				V3( 1, -3, 3),
-				V3(-1, 3, 2)
+				V3(-2, 6, 3)
 			),
 			M3x3(
 				V3( 4, 2, 0),
 				V3( 2, -4, 2),
-				V3(-1, 2, 3)
+				V3(-2, 4, 4)
 			),
 			M3x3(
 				V3( 4, 2, 0),
@@ -100,22 +100,22 @@ mVoxelRenderer_HotReload {
 			M3x3(
 				V3( 3, 3, 0),
 				V3( 0, 0, 4),
-				V3(-3, 3, 0)
+				V3(-6, 6, 0)
 			),
 			M3x3(
 				V3( 3, 3, 0),
 				V3( 1, -1, 4),
-				V3(-2, 2, 1)
+				V3(-4, 4, 1)
 			),
 			M3x3(
 				V3( 3, 3, 0),
 				V3( 2, -2, 3),
-				V3(-2, 2, 2)
+				V3(-4, 4, 3)
 			),
 			M3x3(
 				V3( 3, 3, 0),
 				V3( 3, -3, 2),
-				V3(-1, 1, 3)
+				V3(-3, 3, 4)
 			),
 			M3x3(
 				V3( 3, 3, 0),
@@ -126,22 +126,22 @@ mVoxelRenderer_HotReload {
 			M3x3(
 				V3( 2, 4, 0),
 				V3( 0, 0, 4),
-				V3(-4, 1, 0)
+				V3(-8, 2, 0)
 			),
 			M3x3(
 				V3( 2, 4, 0),
 				V3( 1, -1, 4),
-				V3(-2, 2, 1)
+				V3(-4, 4, 1)
 			),
 			M3x3(
 				V3( 2, 4, 0),
 				V3( 3, -1, 3),
-				V3(-3, 1, 2)
+				V3(-6, 2, 3)
 			),
 			M3x3(
 				V3( 2, 4, 0),
 				V3( 4, -2, 2),
-				V3(-2, 1, 3)
+				V3(-4, 2, 4)
 			),
 			M3x3(
 				V3( 2, 4, 0),
@@ -152,22 +152,22 @@ mVoxelRenderer_HotReload {
 			M3x3(
 				V3( 1, 4, 0),
 				V3( 0, 0, 4),
-				V3(-4, 1, 0)
+				V3(-8, 2, 0)
 			),
 			M3x3(
 				V3( 1, 4, 0),
 				V3( 2, 0, 4),
-				V3(-3, 0, 1)
+				V3(-8, 0, 1)
 			),
 			M3x3(
 				V3( 1, 4, 0),
 				V3( 3, -1, 3),
-				V3(-3, 1, 2)
+				V3(-6, 2, 3)
 			),
 			M3x3(
 				V3( 1, 4, 0),
 				V3( 4, -1, 2),
-				V3(-3, 1, 3)
+				V3(-4, 1, 4)
 			),
 			M3x3(
 				V3( 1, 4, 0),
@@ -412,6 +412,242 @@ mVoxelRenderer_HotReload {
 		},
 	};
 	
+	private const tInt16 M = tInt16.MaxValue;
+	private static tInt16[,][,] DeepPatterns = new tInt16[cQuarterParts, cAngleParts][,] {
+		{
+			new tInt16[,] {
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+			},
+			new tInt16[,] {
+				{3, 1, 0, 0, 0, 0},
+				{3, 1, 0, 0, 0, 0}, 
+				{3, 1, 0, 0, 0, 0},
+				{3, 1, 0, 0, 0, 0},
+			},             
+			new tInt16[,] {
+				{4, 2, 0, 0, 1, 2},
+				{4, 2, 0, 0, 1, 2},
+				{4, 2, 0, 0, 1, 2},
+				{4, 2, 0, 0, 1, 2},
+			},
+			new tInt16[,] {
+				{3, 2, 1, 0, 0, 2},
+				{3, 2, 1, 0, 0, 2},
+				{3, 2, 1, 0, 0, 2},
+				{3, 2, 1, 0, 0, 2},
+			},
+			new tInt16[,] {
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+			},
+		},
+		{
+			new tInt16[,] {
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{2, 2, 2, 2},
+			},
+			new tInt16[,] {
+				{M, 1, 0, 0, 0, 0},
+				{3, 1, 0, 0, 0, 0},
+				{3, 1, 0, 0, 0, 0},
+				{3, 1, 0, 0, 0, 0},
+				{3, 2, 2, 2, 2, M},
+			},
+			new tInt16[,] {
+				{M, M, 2, 1, 2, 3, M},
+				{6, 4, 2, 1, 2, 3, M},
+				{6, 4, 2, 0, 0, 1, 2},
+				{M, 4, 2, 0, 0, 1, 2},
+				{M, 4, 2, 1, 2, 3, M},
+			},
+			new tInt16[,] {
+				{M, M, 2, 1, 1, 3, M},
+				{4, 3, 2, 1, 1, 3, M},
+				{4, 3, 2, 1, 0, 1, 3},
+				{M, 3, 2, 1, 0, 1, 3},
+				{M, 3, 2, 2, 3, M, M},
+			},
+			new tInt16[,] {
+				{M, M, 0, 0, M},
+				{0, 0, 0, 0, M},
+				{0, 0, 0, 0, 0},
+				{M, 0, 0, 0, 0},
+				{M, 0, 0, M, M},
+			},
+		},
+		{
+			new tInt16[,] {
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{1, 1, 1, 1},
+				{3, 3, 3, 3},
+			},
+			new tInt16[,] {
+				{M, 4, 3, 3, 4, 4, M},
+				{M, 4, 2, 3, 3, 3, M},
+				{8, 4, 2, 1, 1, 2, 2},
+				{8, 4, 2, 0, 0, 1, 1},
+				{M, 4, 1, 1, 2, 2, M},
+				{M, 4, 3, 3, 4, 4, M},
+			},
+			new tInt16[,] {
+				{M, M, 2, 1, 2, 3, M},
+				{M, 4, 2, 1, 2, 3, M},
+				{6, 4, 2, 0, 0, 1, 2},
+				{6, 4, 2, 0, 0, 1, 2},
+				{M, 4, 2, 1, 2, 3, M},
+				{M, 4, 4, 5, 6, M, M},
+			},
+			new tInt16[,] {
+				{M, M, M, 2, 2, 4, M, M},
+				{M, 4, 3, 2, 1, 2, 4, M},
+				{5, 4, 3, 2, 1, 1, 3, M},
+				{M, 4, 3, 2, 1, 0, 1, 3},
+				{M, 4, 3, 2, 1, 1, 3, M},
+				{M, M, 3, 3, 5, M, M, M},
+			},
+			new tInt16[,] {
+				{M, M, M, 0, M, M},
+				{M, 0, 0, 0, 0, M},
+				{0, 0, 0, 0, 0, M},
+				{M, 0, 0, 0, 0, 0},
+				{M, 0, 0, 0, 0, M},
+				{M, M, 0, M, M, M},
+			},
+		},
+		{
+			new tInt16[,] {
+				{4, 4, 4, 4},
+				{2, 2, 2, 2},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{2, 2, 2, 2},
+				{4, 4, 4, 4},
+			},
+			new tInt16[,] {
+				{4, 3, 3, 3, 3, M},
+				{4, 2, 2, 2, 2, M},
+				{4, 1, 0, 0, 1, 1},
+				{4, 1, 0, 0, 1, 1},
+				{4, 2, 2, 2, 2, M},
+				{4, 3, 3, 3, 3, M},
+			},
+			new tInt16[,] {
+				{M, 2, 3, 4, 4, M},
+				{4, 2, 1, 2, 3, M},
+				{4, 2, 0, 0, 1, 2},
+				{4, 2, 0, 0, 1, 2},
+				{4, 2, 1, 2, 3, M},
+				{M, 2, 3, 4, 4, M},
+			},
+			new tInt16[,] {
+				{M, M, 2, 3, 4, M, M},
+				{M, 3, 2, 1, 2, 4, M},
+				{4, 3, 2, 1, 0, 2, 3},
+				{4, 3, 2, 1, 0, 2, 3},
+				{M, 3, 2, 1, 2, 4, M},
+				{M, M, 2, 3, 4, M, M},
+			},
+			new tInt16[,] {
+				{M, M, 0, M, M},
+				{M, 0, 0, 0, M},
+				{0, 0, 0, 0, 0},
+				{0, 0, 0, 0, 0},
+				{M, 0, 0, 0, M},
+				{M, M, 0, M, M},
+			},
+		},
+		{
+			new tInt16[,] {
+				{2, 2, 2, 2},
+				{1, 1, 1, 1},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+			},
+			new tInt16[,] {
+				{M, 4, 3, 3, 4, 4, M},
+				{M, 4, 1, 1, 2, 2, M},
+				{8, 4, 2, 0, 0, 1, 1},
+				{8, 4, 2, 1, 1, 2, 2},
+				{M, 4, 2, 3, 3, 3, M},
+				{M, 4, 3, 3, 4, 4, M},
+			},
+			new tInt16[,] {
+				{M, 4, 4, 5, 6, M, M},
+				{M, 4, 2, 1, 2, 3, M},
+				{6, 4, 2, 0, 0, 1, 2},
+				{6, 4, 2, 0, 0, 1, 2},
+				{M, 4, 2, 1, 2, 3, M},
+				{M, M, 2, 1, 2, 3, M},
+			},
+			new tInt16[,] {
+				{M, M, 3, 3, 5, M, M, M},
+				{M, 4, 3, 2, 1, 1, 3, M},
+				{M, 4, 3, 2, 1, 0, 1, 3},
+				{5, 4, 3, 2, 1, 1, 3, M},
+				{M, 4, 3, 2, 1, 2, 4, M},
+				{M, M, M, 2, 3, 4, M, M},
+			},
+			new tInt16[,] {
+				{M, M, 0, M, M, M},
+				{M, 0, 0, 0, 0, M},
+				{M, 0, 0, 0, 0, 0},
+				{0, 0, 0, 0, 0, M},
+				{M, 0, 0, 0, 0, M},
+				{M, M, M, 0, M, M},
+			},
+		},
+		{
+			new tInt16[,] {
+				{1, 1, 1, 1},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+				{0, 0, 0, 0},
+			},
+			new tInt16[,] {
+				{3, 2, 2, 2, 2, M},
+				{3, 1, 0, 0, 0, 0},
+				{3, 1, 0, 0, 0, 0},
+				{3, 1, 0, 0, 0, 0},
+				{M, 1, 0, 0, 0, 0},
+			},
+			new tInt16[,] {
+				{M, 4, 2, 1, 2, 3, M},
+				{M, 4, 2, 0, 0, 1, 2},
+				{6, 4, 2, 0, 0, 1, 2},
+				{6, 4, 2, 1, 2, 3, M},
+				{M, M, 2, 1, 2, 3, M},
+			},
+			new tInt16[,] {
+				{M, 3, 2, 2, 3, M, M},
+				{M, 3, 2, 1, 0, 1, 3},
+				{4, 3, 2, 1, 0, 1, 3},
+				{4, 3, 2, 1, 1, 3, M},
+				{M, M, 2, 1, 1, 3, M},
+			},
+			new tInt16[,] {
+				{M, 0, 0, M, M},
+				{M, 0, 0, 0, 0},
+				{0, 0, 0, 0, 0},
+				{0, 0, 0, 0, M},
+				{M, M, 0, 0, M},
+			},
+		},
+	};
+	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static tSprite
 	GetOrCreateSprite(
@@ -589,6 +825,7 @@ mVoxelRenderer_HotReload {
 		var BlockSizeHalf = BlockSize >> 1;
 		
 		var NormalPattern = aRenderEnv.NormalPattern;
+		var DeepPattern = aRenderEnv.DeepPattern;
 		
 		var Max = NormalPattern.GetSize();
 		
@@ -637,9 +874,10 @@ mVoxelRenderer_HotReload {
 							
 							var Axis = NormalPattern[U, V];
 							if (Axis != tAxis._ && Des.X >= 0 && Des.Y >= 0) {
+								var Deep = Des.Z + DeepPattern[U, V];
 								ref var pDeep = ref aGrid.Deep[Des.X, Des.Y];
-								if (Des.Z <= pDeep) {
-									pDeep = (short)Des.Z;
+								if (Deep <= pDeep) {
+									pDeep = (short)Deep;
 									
 									aGrid.Color[Des.X, Des.Y] = Color & 0b_0111_1111;
 									
@@ -871,6 +1109,19 @@ mVoxelRenderer_HotReload {
 						);
 						break;
 					}
+					case tDebugRenderMode.Pattern: {
+						var d = ((aSprite.Deep[X, Y] & 0b0000_0111) << 5) | 0b0001_1111;
+						var c = aSprite.Normal[X, Y] switch {
+							(0, 0) => d << 16,
+							(_, 0) => d << 8,
+							_ => d	
+						};
+						*XPtr = (tNat32)(
+							0x_FF_00_00_00 |
+							c
+						);
+						break;
+					}
 					case tDebugRenderMode.Deep: {
 						*XPtr = (tNat32)(
 							0x_FF_00_00_00 |
@@ -960,8 +1211,10 @@ mVoxelRenderer_HotReload {
 		var BlockSprite = GetOrCreateSprite(aRenderEnv, aBlock);
 		aCanvas._DrawSprite(BlockSprite, aOffset * aRenderEnv.M, BitsMap);
 		
-		var BlockShadow = GetOrCreateShadow(aRenderEnv, aBlock);
-		aShadow._DrawShadow(BlockShadow, GetShadowUV(aOffset, aRenderEnv.LightDirection));
+		if (aShadow.Size != V2()) {
+			var BlockShadow = GetOrCreateShadow(aRenderEnv, aBlock);
+			aShadow._DrawShadow(BlockShadow, GetShadowUV(aOffset, aRenderEnv.LightDirection));
+		}
 		
 		return ref aRenderEnv;
 	}
@@ -971,6 +1224,7 @@ mVoxelRenderer_HotReload {
 	) => new tRendererDLL {
 		Matrixes = Matrixes,
 		NormalPatterns = NormalPatterns,
+		DeepPatterns = DeepPatterns,
 		GetMatrix = GetMatrix,
 		To3D = To3D,
 		_RenderToBuffer = _RenderToBuffer,

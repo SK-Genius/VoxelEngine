@@ -97,6 +97,8 @@ mVoxelEditor {
 		public tSprite Canvas;
 		public ImmutableList<(tV3, tBlock)> Map;
 		public tShadow Shadow;
+		public tV2 MousePosOld;
+		public tV2 MousePosNew;
 		
 		public tHotReload<tEditorDLL> HotReload = new (
 			new DirectoryInfo(".."),
@@ -108,6 +110,7 @@ mVoxelEditor {
 		tV2 aCanvasSize,
 		tInt32 aZoom
 	){
+		#if true
 		var Dice = CreateBlock(
 			V3(0),
 			new tColor[9, 9, 9] {
@@ -212,9 +215,115 @@ mVoxelEditor {
 				},
 			}
 		);
+		#else
+		var Dice = CreateBlock(
+			V3(),
+			new tColor[9, 9, 9] {
+				{
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+				},
+				{
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+				},
+				{
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+				},
+				{
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+				},
+				{
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+				},
+				{
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+				},
+				{
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+				},
+				{
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+				},
+				{
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+					{ H, H, H, H, H, H, H, H, H },
+				},
+			}
+		) ;
+		#endif
 		
 		var Plane = CreateBlock(
-			V3(0),
+			V3(),
 			new tColor[9, 9, 9] {
 				{
 					{ _, _, _, _, _, _, _, _, H },
@@ -359,7 +468,7 @@ mVoxelEditor {
 			Zoom = aZoom,
 			Canvas = CreateSprite(
 				V2(aCanvasSize.X, aCanvasSize.Y) / aZoom,
-				V2(0)
+				V2()
 			),
 			StdBlockSize = StdBlockSize,
 			Map = Map,
@@ -370,16 +479,15 @@ mVoxelEditor {
 	public static ref tEditorState
 	Loop(
 		ref tEditorState aEditorState,
-		tInt64 aElapsedMilliSeconds,
-		tV2 aMousePos
+		tInt64 aElapsedMilliSeconds
 	) {
 		if (aEditorState.HotReload.HasNewDLL) {
 			aEditorState.HotReload._LoadDLL();
 		}
-		return ref aEditorState.HotReload.DLL.Loop(ref aEditorState, aElapsedMilliSeconds, aMousePos);
+		return ref aEditorState.HotReload.DLL.Loop(ref aEditorState, aElapsedMilliSeconds);
 	}
 	
 	public class tEditorDLL {
-		public tMeth<tEditorState, tInt64, tV2> Loop;
+		public tMeth<tEditorState, tInt64> Loop;
 	}
 }

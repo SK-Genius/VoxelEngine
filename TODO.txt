@@ -1,4 +1,5 @@
 ﻿BUGS:
+* 3Dto2D bug
 * shadow sprits don't fit (signed rounding problems ???)
 * transparent sprites dose not align with uneven sprite offset
 	- maybe create two versions ???
@@ -10,11 +11,10 @@ TODO:
 	- on LightDirection the longest/main axis value has to be this raster size (9)
 * shortcut Shadow calculation while using NormalLayer
 	- make it optional for translucent ???
-* DeepOffsetLayer
-* deep offset buffers for voxel
 * view from bottom
 
 DONE:
+* deep offset buffers for voxel
 * non cubic "Blocks"
 * HotReload for AppLogic
 * HotReload for EngineCode

@@ -11,8 +11,7 @@ mVoxelEditor_HotReload {
 	public static ref tEditorState
 	Loop(
 		ref tEditorState aEditorState,
-		tInt64 aElapsedMilliSeconds,
-		tV2 aMousePos
+		tInt64 aElapsedMilliSeconds
 	) {
 		var RenderEnv = aEditorState.RenderEnv;
 		var Canvas = aEditorState.Canvas;
@@ -37,12 +36,13 @@ mVoxelEditor_HotReload {
 			}
 		}
 		
+		var P2D = aEditorState.MousePosNew;
+		
 		{ // 3d Marker
 			var X_ = XAxis;
 			var Y_ = YAxis;
 			var Z_ = ZAxis;
 			
-			var P2D = aMousePos;
 			var P3D = V3();
 			if (P2D.IsInRange(V2(), aEditorState.Canvas.Size - V2(1))) {
 				P3D = RenderEnv.To3D(aEditorState.Canvas, P2D);
@@ -81,10 +81,10 @@ mVoxelEditor_HotReload {
 		
 		{ // Mouse
 			var Color = RGB(c100p, c000p, c100p);
-			if (aMousePos.IsInRange(V2(5), Canvas.Size - V2(5 + 1))) {
+			if (P2D.IsInRange(V2(5), Canvas.Size - V2(5 + 1))) {
 				for (var I = -5; I <= 5; I += 1) {
-					Canvas.Color[aMousePos.X + I, aMousePos.Y] = Color;
-					Canvas.Color[aMousePos.X, aMousePos.Y + I] = Color;
+					Canvas.Color[P2D.X + I, P2D.Y] = Color;
+					Canvas.Color[P2D.X, P2D.Y + I] = Color;
 				}
 			}
 		}
