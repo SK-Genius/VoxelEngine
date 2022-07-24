@@ -2,10 +2,12 @@
 using static mMath;
 using static mMath2D;
 using static mMath3D;
+using static mHotReload;
+using static mFileWatcher;
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
+using System.Linq;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -14,9 +16,6 @@ mVoxelRenderer {
 	
 	public class
 	tRendererDLL {
-		public tM3x3[,] Matrixes;
-		public tAxis[,][,] NormalPatterns;
-		public tInt16 [,][,] DeepPatterns;
 		public tFunc<tRenderEnv, tSprite, tV2,  tV3> To3D;
 		public tMeth<tRenderEnv, tSprite, tShadow, System.IntPtr, tV2, tDebugRenderMode> _RenderToBuffer;
 		public tMeth<tRenderEnv, tSprite, tShadow, tBlock, tV3> _DrawTo;
@@ -152,9 +151,18 @@ mVoxelRenderer {
 		public tInt32 Dir;
 		public tInt32 Angle;
 		
-		public mHotReload.tHotReload<tRendererDLL> HotReloat = new (
+		public  tM3x3[,] Matrixes;
+		public  tAxis[,][,] NormalPatterns;
+		public   tInt16[,][,] DeepPatterns;
+		
+		public tHotReload<tRendererDLL> HotReloat = new (
 			new DirectoryInfo(".."),
 			"VoxelRenderer.HotReload.dll"
+		);
+		
+		public tFileWatcher PatternFile = new (
+			new DirectoryInfo("."),
+			"Patterns4.txt"
 		);
 		
 		public tV3 LightDirection;
@@ -163,8 +171,8 @@ mVoxelRenderer {
 		public tM3x3 InvM;
 		public tInt32 Det;
 		
-		public tAxis[,] NormalPattern => this.HotReloat.DLL.NormalPatterns[this.Dir % this.HotReloat.DLL.NormalPatterns.GetSize().X, this.Angle];
-		public tInt16[,] DeepPattern => this.HotReloat.DLL.DeepPatterns[this.Dir % this.HotReloat.DLL.DeepPatterns.GetSize().X, this.Angle];
+		public tAxis[,] NormalPattern;
+		public tInt16[,] DeepPattern;
 		
 		public Dictionary<(mMath3D.tM3x3, tBlock), mVoxelRenderer.tSprite> SpriteBuffer  = new();
 		public Dictionary<(tV3, tBlock), mVoxelRenderer.tShadow> ShadowBuffer  = new();
@@ -214,12 +222,129 @@ mVoxelRenderer {
 		public tNat8[,] PosBits;
 	}
 	
+	public static t[,]
+	ToArray2D<t>(
+		this List<t[]> a
+	) {
+		return a
+		.SelectMany((aRow, aRowNr) => aRow.Select((aVal, aColNr) => (V: aRowNr, U: aColNr, Val: aVal)))
+		.Aggregate(
+			new t[a[0].Length, a.Count],
+			(aRes, a) => {
+				aRes[a.U, a.V] = a.Val;
+				return aRes;
+			}
+		);
+	}
+	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tRenderEnv
 	CreateEnv(
 	) {
 		var RenderEnv = new tRenderEnv();
-		return RenderEnv._Update();
+		return RenderEnv
+		._LoadPatterns()
+		._Update()
+		;
+	}
+	
+	public static ref tRenderEnv
+	_LoadPatterns(
+		this ref tRenderEnv aRenderEnv
+	) {
+		var AngelParts = 0;
+		var QuoterParts = 0;
+		var Angel = 0;
+		var Dir = -1;
+		
+		var MRow = 0;
+		var M = M3x3();
+		var NormalPattern = new List<tAxis[]>();
+		var DeepPattern = new List<tInt16[]>();
+		
+		var IsFirstLine = true;
+		foreach (var Line in File.ReadAllLines(aRenderEnv.PatternFile.File.FullName)) {
+			if (IsFirstLine) {
+				IsFirstLine = false;
+				
+				var Parts = Line.Split('x');
+				AngelParts = int.Parse(Parts[0]);
+				QuoterParts = int.Parse(Parts[1]);
+				aRenderEnv.Matrixes = new tM3x3[AngelParts, QuoterParts];
+				aRenderEnv.DeepPatterns = new tInt16[AngelParts, QuoterParts][,];
+				aRenderEnv.NormalPatterns = new tAxis[AngelParts, QuoterParts][,];
+			} else if (Line.StartsWith('#') || string.IsNullOrWhiteSpace(Line)) {
+				if (Dir < 0) {
+					Dir += 1;
+					continue;
+				}
+				
+				aRenderEnv.Matrixes[Dir, Angel] = M;
+				MRow = 0;
+				
+				aRenderEnv.DeepPatterns[Dir, Angel] = DeepPattern.ToArray2D();
+				DeepPattern.Clear();
+				
+				aRenderEnv.NormalPatterns[Dir, Angel] = NormalPattern.ToArray2D();
+				NormalPattern.Clear();
+				
+				if (Line.StartsWith('#')) {
+					Angel = 0;
+					Dir += 1;
+				} else {
+					Angel += 1;
+				}
+			} else if (Line.StartsWith('|')) {
+				var Row = Line
+				.Substring(1)
+				.Split(' ', System.StringSplitOptions.RemoveEmptyEntries | System.StringSplitOptions.TrimEntries)
+				.Select(int.Parse)
+				.ToArray()
+				;
+				
+				M = MRow switch {
+					0 => M3x3(
+						V3(Row[0], Row[1], Row[2]),
+						M.Y,
+						M.Z
+					),
+					1 => M3x3(
+						M.X,
+						V3(Row[0], Row[1], Row[2]),
+						M.Z
+					),
+					2 => M3x3(
+						M.X,
+						M.Y,
+						V3(Row[0], Row[1], Row[2])
+					),
+					_ => M
+				};
+				MRow += 1;
+			} else {
+				var Row = Line
+				.Split(' ', System.StringSplitOptions.RemoveEmptyEntries | System.StringSplitOptions.TrimEntries)
+				.Select(
+					_ => (
+						Axis: _[0] switch {
+							'x' => tAxis.X,
+							'y' => tAxis.Y,
+							'z' => tAxis.Z,
+							_ => tAxis._,
+						},
+						Deep: (tInt16)(_[1] - '0')
+					)
+				)
+				.ToArray();
+				
+				NormalPattern.Add(Row.Select(_ => _.Axis).ToArray());
+				DeepPattern.Add(Row.Select(_ => _.Deep).ToArray());
+			}
+		}		
+		
+		aRenderEnv.PatternFile.HasUpdated = false;
+		
+		return ref aRenderEnv;
 	}
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -246,11 +371,18 @@ mVoxelRenderer {
 		if (a.HotReloat.HasNewDLL) {
 			a.HotReloat._LoadDLL();
 		}
-		var QuarterParts = a.HotReloat.DLL.Matrixes.GetLength(0);
+		if (a.PatternFile.HasUpdated) {
+			a._LoadPatterns();
+		}
+		var (QuarterParts, AngleParts) = a.Matrixes.GetSize();
 		while (a.Dir < 0) { a.Dir += 4 * QuarterParts; }
 		while (a.Dir >= 4 * QuarterParts) { a.Dir -= 4 * QuarterParts; }
-		mMath.Clamp(ref a.Angle, 0, 4);
+		mMath.Clamp(ref a.Angle, 0, AngleParts - 1);
+		
 		a.M = a.GetMatrix(a.Dir, a.Angle);
+		a.NormalPattern = a.NormalPatterns[a.Dir % QuarterParts, a.Angle];
+		a.DeepPattern = a.DeepPatterns[a.Dir % QuarterParts, a.Angle];
+		
 		(a.InvM, a.Det) = mMath3D.Inverse(a.M);
 		return ref a;
 	}

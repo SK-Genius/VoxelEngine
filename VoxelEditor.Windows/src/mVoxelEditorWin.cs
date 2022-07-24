@@ -56,7 +56,7 @@ mVoxelEditorWin {
 		);
 		
 		Window.Paint += (_, a) => {
-			var RenderEnv = EditorState.RenderEnv;
+			ref var pRenderEnv = ref EditorState.RenderEnv;
 			
 			var NewTime = SW.ElapsedMilliseconds;
 			
@@ -84,7 +84,7 @@ mVoxelEditorWin {
 				Image.UnlockBits(x);
 			} 
 			
-			RenderEnv._RenderTo(
+			pRenderEnv._RenderTo(
 				ref Image,
 				EditorState.Canvas,
 				EditorState.Shadow,
@@ -101,7 +101,7 @@ mVoxelEditorWin {
 			var P2D = MousePos;
 			var P3D = V3(0);
 			if (P2D.IsInRange(V2(), EditorState.Canvas.Size - V2(1))) {
-				P3D = RenderEnv.To3D(EditorState.Canvas, P2D);
+				P3D = pRenderEnv.To3D(EditorState.Canvas, P2D);
 			}
 			
 			a.Graphics.DrawString($"({P3D.X}, {P3D.Y}, {P3D.Z})", DefaultFont, Brushes.Black, 200, 0);
@@ -109,7 +109,7 @@ mVoxelEditorWin {
 		};
 		
 		Window.MouseMove += (_, a) => {
-			var RenderEnv = EditorState.RenderEnv;
+			ref var RenderEnv = ref EditorState.RenderEnv;
 			var NewMousePos = V2(1) + V2(a.X, a.Y) / Zoom;
 			
 			if (a.Button.HasFlag(MouseButtons.Right)) {

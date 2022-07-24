@@ -32,6 +32,14 @@ mMath3D {
 		}
 		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void Deconstruct(out tInt32 aX, out tInt32 aY, out tInt32 aZ)
+		{
+			aX = this.X;
+			aY = this.Y;
+			aZ = this.Z;
+		}
+		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV3
 		operator+(
 			tV3 a1,
@@ -94,15 +102,9 @@ mMath3D {
 			tV3 a1,
 			tInt32 a2
 		) => V3(
-			#if !true
-			mMath.Div(a1.X + (a2 >> 1), a2),
-			mMath.Div(a1.Y + (a2 >> 1), a2),
-			mMath.Div(a1.Z + (a2 >> 1), a2)
-			#else
 			a1.X / a2,
 			a1.Y / a2,
 			a1.Z / a2
-			#endif
 		);      
 		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -233,6 +235,11 @@ mMath3D {
 		tV3 aY,
 		tV3 aZ
 	) => new tM3x3(aX, aY, aZ);
+	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tM3x3
+	M3x3(
+	) => new tM3x3(V3(), V3(), V3());
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tM3x3

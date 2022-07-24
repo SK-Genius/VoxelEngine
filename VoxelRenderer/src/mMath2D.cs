@@ -10,6 +10,13 @@ mMath2D {
 		public tInt32 Y;
 		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void Deconstruct(out tInt32 aX, out tInt32 aY)
+		{
+			aX = this.X;
+			aY = this.Y;
+		}
+		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV2
 		operator+(
 			tV2 a1,
@@ -61,8 +68,8 @@ mMath2D {
 			tV2 a1,
 			tInt32 a2
 		) => V2(
-			mMath.Div(a1.X, a2),
-			mMath.Div(a1.Y, a2)
+			a1.X / a2,
+			a1.Y / a2
 		);
 		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

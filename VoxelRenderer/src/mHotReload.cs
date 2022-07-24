@@ -1,4 +1,5 @@
 using static mStd;
+using static mFileWatcher;
 
 using System.IO;
 using System.Linq;
@@ -19,45 +20,19 @@ mHotReload {
 	
 	public class
 	tHotReload<t> {
+		public tFileWatcher DLL_File;
+		public t DLL;
+		public System.Runtime.Loader.AssemblyLoadContext DLL_Context;
+		
+		public tBool HasNewDLL => this.DLL_File.HasUpdated;
+		
 		public tHotReload(
 			DirectoryInfo aFolder,
 			string aFileName
 		) {
-			this.DLL_File = aFolder.GetFiles(
-				aFileName,
-				new EnumerationOptions {
-					RecurseSubdirectories = true,
-					MatchCasing = MatchCasing.CaseInsensitive,
-				}
-			)[0];
-			
-			this.DLL_Watcher = new FileSystemWatcher(
-				this.DLL_File.Directory.FullName
-			) {
-				NotifyFilter = NotifyFilters.Attributes
-					| NotifyFilters.CreationTime
-					| NotifyFilters.DirectoryName
-					| NotifyFilters.FileName
-					| NotifyFilters.LastAccess
-					| NotifyFilters.LastWrite
-					| NotifyFilters.Security
-					| NotifyFilters.Size,
-				IncludeSubdirectories = true,
-				Filter = this.DLL_File.Name,
-				EnableRaisingEvents = true,
-			};
-			this.DLL_Watcher.Changed += (_, _) => {
-				this.HasNewDLL = true;
-			};
-			
+			this.DLL_File = new tFileWatcher(aFolder, aFileName);
 			this._LoadDLL();
 		}
-		
-		public FileInfo DLL_File;
-		public tBool HasNewDLL = false;
-		public FileSystemWatcher DLL_Watcher;
-		public t DLL;
-		public System.Runtime.Loader.AssemblyLoadContext DLL_Context;
 	}
 	
 	public static tHotReload<t>
@@ -70,7 +45,7 @@ mHotReload {
 		a.DLL = a.DLL_Context.LoadFromStream(
 			new System.IO.MemoryStream(
 				System.IO.File.ReadAllBytes(
-					a.DLL_File.FullName
+					a.DLL_File.File.FullName
 				)
 			)
 		).GetTypes(
@@ -82,7 +57,7 @@ mHotReload {
 			tFunc<t>
 		>()();
 		
-		a.HasNewDLL = false;
+		a.DLL_File.HasUpdated = false;
 		return a;
 	}
 }

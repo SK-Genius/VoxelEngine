@@ -5,22 +5,6 @@ public static class
 mMath {
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static tInt32
-	Div(
-		tInt32 a1,
-		tInt32 a2
-	) {
-		if (((a1 ^ a2) & 0x80_00__00_00) == 0)
-		{
-			return a1 / a2;
-		}
-		else
-		{
-			return (a1 - a2 + 1) / a2;
-		}
-	}
-	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tInt8
 	Sign(
 		this tInt32 a
