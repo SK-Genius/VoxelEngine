@@ -162,7 +162,7 @@ mVoxelRenderer {
 		
 		public tFileWatcher PatternFile = new (
 			new DirectoryInfo("."),
-			"Patterns4.txt"
+			"Patterns4_6x9.txt"
 		);
 		
 		public tV3 LightDirection;
