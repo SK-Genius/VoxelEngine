@@ -119,6 +119,24 @@ mMath3D {
 		);
 		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static tBool
+		operator==(
+			tV3 a1,
+			tV3 a2
+		) => (
+			a1.X == a2.X &&
+			a1.Y == a2.Y &&
+			a1.Z == a2.Z
+		);
+		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static tBool
+		operator!=(
+			tV3 a1,
+			tV3 a2
+		) => !(a1 == a2);
+		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override tText
 		ToString() => $"({this.X}, {this.Y}, {this.Z})";
 	}
@@ -153,25 +171,41 @@ mMath3D {
 	public static tV2
 	XY(
 		this tV3 aV3
-	) => mMath2D.V2(aV3.X, aV3.Y);
+	) => V2(aV3.X, aV3.Y);
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV2
 	XZ(
 		this tV3 aV3
-	) => mMath2D.V2(aV3.X, aV3.Z);
+	) => V2(aV3.X, aV3.Z);
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV2
 	YZ(
 		this tV3 aV3
-	) => mMath2D.V2(aV3.Y, aV3.Z);
+	) => V2(aV3.Y, aV3.Z);
+	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tV2
+	ZY(
+		this tV3 aV3
+	) => V2(aV3.Z, aV3.Y);
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tInt32
 	Sum(
 		this tV3 a
 	) => a.X + a.Y + a.Z;
+	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tV3
+	Sign(
+		this tV3 a
+	) => V3(
+		a.X.Sign(),
+		a.Y.Sign(),
+		a.Z.Sign()
+	);
 	
 	public struct
 	tM3x3 {
@@ -265,9 +299,9 @@ mMath3D {
 	) {
 		var Length = System.MathF.Sqrt(a.Abs2()) / aScale;
 		return V3(
-			mMath.Floor(a.X / Length),
-			mMath.Floor(a.Y / Length),
-			mMath.Floor(a.Z / Length)
+			Floor(a.X / Length),
+			Floor(a.Y / Length),
+			Floor(a.Z / Length)
 		);
 	}
 	

@@ -7,18 +7,18 @@ mMath {
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tInt8
 	Sign(
-		this tInt32 a
-	) => (tInt8)Math.Sign(a);
-	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static tInt8
-	Sign(
 		this tInt8 a
 	) => (tInt8)Math.Sign(a);
 	
 	public static tInt8
 	Sign(
 		this tInt16 a
+	) => (tInt8)Math.Sign(a);
+	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tInt8
+	Sign(
+		this tInt32 a
 	) => (tInt8)Math.Sign(a);
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]

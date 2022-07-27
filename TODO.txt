@@ -1,5 +1,6 @@
 ﻿BUGS:
-* shadow sprits don't fit (signed rounding problems ???)
+* still some issues with shadow
+* can't reconstruct the sign of the ZAxis part of the normal right now
 * transparent sprites dose not align with uneven sprite offset
 	- maybe create two versions ???
 

@@ -64,6 +64,16 @@ mMath2D {
 		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV2
+		operator*(
+			tV2 a1,
+			tV2 a2
+		) => V2(
+			a1.X * a2.X,
+			a1.Y * a2.Y
+		);
+		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static tV2
 		operator/(
 			tV2 a1,
 			tInt32 a2

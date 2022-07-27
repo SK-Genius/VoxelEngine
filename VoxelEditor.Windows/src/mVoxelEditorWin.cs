@@ -24,7 +24,7 @@ mVoxelEditorWin {
 	static void
 	Main(
 	) {
-		var MousePos = V2(0);
+		var MousePos = V2();
 		var Zoom = 3;
 		
 		var DefaultFont = new Font("Arial", 10);
@@ -129,7 +129,7 @@ mVoxelEditorWin {
 		
 		Window.Resize += (_, a) => {
 			var Size = V2(Window.Size.Width, Window.Size.Height) / EditorState.Zoom;
-			EditorState.Canvas = mVoxelRenderer.CreateSprite(
+			EditorState.Canvas = CreateSprite(
 				Size,
 				V2()
 			);

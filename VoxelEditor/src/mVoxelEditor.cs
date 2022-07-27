@@ -30,6 +30,17 @@ mVoxelEditor {
 	
 	public static tBlock EmptyBlock = CreateBlock(V3(), new tColor[0, 0, 0]);
 	
+	public static tBlock OneBlock = CreateBlock(
+		V3(),
+		new tColor[1, 1, 1] {
+			{
+				{
+					R
+				}
+			}
+		}
+	);
+	
 	public static tBlock XAxis = CreateBlock(
 		V3(),
 		new tColor[9, 1, 1] {

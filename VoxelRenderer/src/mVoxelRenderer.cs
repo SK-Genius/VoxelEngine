@@ -175,7 +175,7 @@ mVoxelRenderer {
 		public tInt16[,] DeepPattern;
 		
 		public Dictionary<(mMath3D.tM3x3, tBlock), mVoxelRenderer.tSprite> SpriteBuffer  = new();
-		public Dictionary<(tV3, tBlock), mVoxelRenderer.tShadow> ShadowBuffer  = new();
+		public Dictionary<(tV3 LightDirection, tInt32 LayerOffset, tBlock Block), mVoxelRenderer.tShadow> ShadowBuffer  = new();
 	}
 	
 	[DebuggerDisplay("{Value}")]
@@ -474,42 +474,6 @@ mVoxelRenderer {
 			MaxY = mMath.Max(MaxY, V2.Y);
 		}
 		return V2(MaxX + 2, MaxY + 2);
-	} 
-	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static tV3
-	GetShadowUV(
-		tV3 aWorldOffset,
-		tV3 aLightDirection
-	) {
-		var (MainAxis, AxisSign) = GetMainAxis(aLightDirection);
-		
-		var X_ = aWorldOffset.X;
-		var Y_ = aWorldOffset.Y;
-		var Z_ = aWorldOffset.Z;
-		
-		var Deep = default(tInt32);
-		var UV = default(tV2);
-		
-		switch (MainAxis) {
-			case tAxis.X: {
-				UV = V2(-Y_, Z_) + aLightDirection.YZ() * X_ / aLightDirection.X;
-				Deep = -X_;
-				break;
-			}
-			case tAxis.Y: {
-				UV = V2(-X_, Z_) + aLightDirection.XZ() * Y_ / aLightDirection.Y;
-				Deep = -Y_;
-				break;
-			}
-			case tAxis.Z: {
-				UV = V2(X_, Y_) + aLightDirection.XY() * Z_ / aLightDirection.Z; 
-				Deep = Z_;
-				break;
-			}
-		}
-		
-		return V3(UV, AxisSign * Deep);
 	}
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -530,7 +494,7 @@ mVoxelRenderer {
 		
 		switch (MainAxis) {
 			case tAxis.X: {
-				UV = aBlockSize.YZ() + L.YZ() * aBlockSize.X / L.X;
+				UV = aBlockSize.ZY() + L.ZY() * aBlockSize.X / L.X;
 				break;
 			}
 			case tAxis.Y: {
@@ -582,7 +546,7 @@ mVoxelRenderer {
 	}
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static (tAxis, tInt32)
+	public static (tAxis Axis, tInt32 Sign)
 	GetMainAxis(
 		tV3 aDirection
 	) {
@@ -632,4 +596,13 @@ mVoxelRenderer {
 		return (tNat32)((A << 24) | (R << 16) | (G << 8) | B);
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tV3
+	GetNormal3D(
+		(tInt8 U, tInt8 V) a
+	) => mMath3D.V3(
+		a.U,
+		-a.V,
+		-mMath.FastSqrt(mMath.Abs(127*127 - a.U*a.U - a.V*a.V))
+	);
 }

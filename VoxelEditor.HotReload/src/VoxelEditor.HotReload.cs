@@ -37,13 +37,13 @@ mVoxelEditor_HotReload {
 		}
 		
 		var P2D = aEditorState.MousePosNew;
+		var P3D = V3();
 		
 		{ // 3d Marker
 			var X_ = XAxis;
 			var Y_ = YAxis;
 			var Z_ = ZAxis;
 			
-			var P3D = V3();
 			if (P2D.IsInRange(V2(), aEditorState.Canvas.Size - V2(1))) {
 				P3D = RenderEnv.To3D(aEditorState.Canvas, P2D);
 				
@@ -64,7 +64,6 @@ mVoxelEditor_HotReload {
 				};
 			}
 			
-			
 			var Map_ = System.Collections.Immutable.ImmutableList.Create<(tV3,tBlock)>();
 			if (P3D.IsInRange(V3(-2 * 9 - 4), V3(2 * 9 + 4))) {
 				for (var I = -2; I <= 2; I += 1) {
@@ -77,6 +76,14 @@ mVoxelEditor_HotReload {
 			foreach (var (Pos, Block) in Map_) {
 				RenderEnv._DrawTo(Canvas, Shadow, Block, Pos);
 			}
+		}
+		
+		{ // new cube
+			var N = aEditorState.Canvas.Normal[P2D.X, P2D.Y];
+			var Normal = GetNormal3D(N);
+			
+			var NewCube = System.Collections.Immutable.ImmutableList.Create<(tV3,tBlock)>();
+			RenderEnv._DrawTo(Canvas, Shadow, OneBlock, P3D + Normal.Sign());
 		}
 		
 		{ // Mouse
