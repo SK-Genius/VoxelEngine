@@ -123,7 +123,7 @@ mVoxelEditor {
 	){
 		#if true
 		var Dice = CreateBlock(
-			V3(0),
+			V3(),
 			new tColor[9, 9, 9] {
 				{
 					{ W, _, _, _, _, _, _, _, W },
@@ -481,7 +481,6 @@ mVoxelEditor {
 				V2(aCanvasSize.X, aCanvasSize.Y) / aZoom,
 				V2()
 			),
-			StdBlockSize = StdBlockSize,
 			Map = Map,
 			DebugRenderMode = default,
 		};

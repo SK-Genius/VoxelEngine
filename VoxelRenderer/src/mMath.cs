@@ -10,6 +10,7 @@ mMath {
 		this tInt8 a
 	) => (tInt8)Math.Sign(a);
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tInt8
 	Sign(
 		this tInt16 a
@@ -61,17 +62,13 @@ mMath {
 	public static tInt32
 	Floor(
 		tReal32 a
-	) {
-		return (tInt32)Math.Floor(a);
-	}
+	) => (tInt32)Math.Floor(a);
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tInt32
 	Round(
 		tReal32 a
-	) {
-		return Floor(a + 0.5f);
-	}
+	) => Floor(a + 0.5f);
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tInt32

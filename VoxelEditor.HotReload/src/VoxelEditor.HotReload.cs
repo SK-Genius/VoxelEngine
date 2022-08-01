@@ -22,7 +22,7 @@ mVoxelEditor_HotReload {
 		
 		var Shadow = CreateShadow(
 			GetShadowSize(
-				V3(5 * aEditorState.StdBlockSize),
+				V3(5 * 9),
 				RenderEnv.LightDirection
 			),
 			V2()

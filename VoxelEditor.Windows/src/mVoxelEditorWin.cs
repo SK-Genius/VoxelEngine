@@ -99,7 +99,7 @@ mVoxelEditorWin {
 			
 			
 			var P2D = MousePos;
-			var P3D = V3(0);
+			var P3D = V3();
 			if (P2D.IsInRange(V2(), EditorState.Canvas.Size - V2(1))) {
 				P3D = pRenderEnv.To3D(EditorState.Canvas, P2D);
 			}

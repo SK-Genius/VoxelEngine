@@ -133,14 +133,14 @@ mVoxelRenderer_HotReload {
 		tInt32 aAxis,
 		tInt32 aBits
 	) {
-		if (((aAxis ^ aBits) & 0b11) == 0) {
+		if ((aAxis & 0b11) == aBits) {
 			return aAxis;
 		}
-		var Axis = aAxis + 1;
-		if (((Axis ^ aBits) & 0b11) == 0) {
-			return Axis;
+		var Axis1 = aAxis + 1;
+		if ((Axis1 & 0b11) == aBits) {
+			return Axis1;
 		} else {
-			return aAxis -1;
+			return aAxis - 1;
 		}
 	}
 	
@@ -234,9 +234,9 @@ mVoxelRenderer_HotReload {
 						continue;
 					}
 					
-					var P = V3(X, Y, Z);
+					var P = V3(X, Y, Z) - BlockSizeHalf;
 					var DesUVBase = (
-						(P - BlockSizeHalf) + aOffset
+						P + aOffset
 					) * aRenderEnv.M + V3(
 						(aGrid.Color.GetSize() - Max) >> 1,
 						0
@@ -262,9 +262,9 @@ mVoxelRenderer_HotReload {
 									aGrid.Normal[Des.X, Des.Y] = ((tInt8)Normal.X, (tInt8)Normal.Y);
 									
 									aGrid.PosBits[Des.X, Des.Y] = (tNat8)(
-										((X & 0b11) << 4) |
-										((Y & 0b11) << 2) |
-										((Z & 0b11) << 0)
+										((P.X & 0b11) << 4) |
+										((P.Y & 0b11) << 2) |
+										((P.Z & 0b11) << 0)
 									);
 								}
 							}

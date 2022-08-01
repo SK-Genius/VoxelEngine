@@ -222,6 +222,7 @@ mVoxelRenderer {
 		public tNat8[,] PosBits;
 	}
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static t[,]
 	ToArray2D<t>(
 		this List<t[]> a
@@ -507,7 +508,7 @@ mVoxelRenderer {
 			}
 		}
 		
-		return UV + V2(2);;
+		return UV + V2(2);
 	}
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
