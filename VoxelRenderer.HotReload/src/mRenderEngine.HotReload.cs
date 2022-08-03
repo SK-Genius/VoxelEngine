@@ -114,6 +114,10 @@ mVoxelRenderer_HotReload {
 		tSprite aSprite,
 		tV2 aV2
 	) {
+		if (!aV2.IsInRange(V2(), aSprite.Size))
+		{
+			return V3();
+		}
 		var Pos = V3(
 			aV2 - (aSprite.Size >> 1),
 			aSprite.Deep[aV2.X, aV2.Y] - 4

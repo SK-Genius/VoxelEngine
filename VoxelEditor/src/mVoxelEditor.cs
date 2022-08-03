@@ -3,10 +3,12 @@ using static mStd;
 using static mMath;
 using static mMath2D;
 using static mMath3D;
+using static mEvents;
 using static mVoxelRenderer;
 
 using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 
 public static class
 mVoxelEditor {
@@ -100,28 +102,32 @@ mVoxelEditor {
 		}
 	);
 	
-	public class tEditorState {
+	public struct tEditorState {
 		public tInt32 Zoom;
-		public tInt32 StdBlockSize;
 		public tDebugRenderMode DebugRenderMode;
 		public tRenderEnv RenderEnv;
 		public tSprite Canvas;
-		public ImmutableList<(tV3, tBlock)> Map;
+		public ImmutableList<(tV3 Pos, tBlock Block)> Map;
+		public tColor[,,] TargetBlock;
 		public tShadow Shadow;
-		public tV2 MousePosOld;
-		public tV2 MousePosNew;
+		public tV3 Pos3D;
+		public tV2 MousePos;
+		public tMouseKeys MouseKeys;
 		
 		public tHotReload<tEditorDLL> HotReload = new (
-			new DirectoryInfo(".."),
+			new DirectoryInfo("./"),
 			"VoxelEditor.HotReload.dll"
 		);
+		
+		public tEditorState() {
+		}
 	}
 	
 	public static tEditorState Create (
 		tV2 aCanvasSize,
 		tInt32 aZoom
 	){
-		#if true
+		#if !true
 		var Dice = CreateBlock(
 			V3(),
 			new tColor[9, 9, 9] {
@@ -474,6 +480,24 @@ mVoxelEditor {
 			}
 		}
 		
+		var TargetSize = V3(27);
+		var TargetBlock = new tColor[TargetSize.X, TargetSize.Y, TargetSize.Z];
+		for (var Z = (tNat8)0; Z < TargetSize.Z; Z += 1) {
+			for (var Y = (tNat8)0; Y < TargetSize.Y; Y += 1) {
+				for (var X = (tNat8)0; X < TargetSize.X; X += 1) {
+					TargetBlock[X, Y, Z] = RGB(
+						(tNat8)(X % 5),
+						(tNat8)(Y % 5),
+						(tNat8)(Z % 5)
+					);
+				}
+			}
+		}
+		
+		Map = TargetBlock.Split(V3(27/2), V3(3))
+		.Select(_ => (_.Pos * 3, CreateBlock(V3(), _.Block.Scale3())))
+		.ToImmutableList();
+		
 		return new tEditorState {
 			RenderEnv = RenderEnv,
 			Zoom = aZoom,
@@ -481,23 +505,44 @@ mVoxelEditor {
 				V2(aCanvasSize.X, aCanvasSize.Y) / aZoom,
 				V2()
 			),
+			TargetBlock = TargetBlock,
 			Map = Map,
 			DebugRenderMode = default,
 		};
 	}
 	
 	public static ref tEditorState
-	Loop(
+	Update(
+		this ref tEditorState aEditorState,
+		tInt64 aElapsedMilliSeconds,
+		iEvent aEvent
+	) {
+		if (aEditorState.HotReload.HasNewDLL) {
+			aEditorState.HotReload._LoadDLL();
+		}
+		return ref aEditorState.HotReload.DLL.Update(
+			ref aEditorState,
+			aElapsedMilliSeconds,
+			ImmutableStack.Create(aEvent)
+		);
+	}
+	
+	public static ref tEditorState
+	Render(
 		ref tEditorState aEditorState,
 		tInt64 aElapsedMilliSeconds
 	) {
 		if (aEditorState.HotReload.HasNewDLL) {
 			aEditorState.HotReload._LoadDLL();
 		}
-		return ref aEditorState.HotReload.DLL.Loop(ref aEditorState, aElapsedMilliSeconds);
+		return ref aEditorState.HotReload.DLL.Render(
+			ref aEditorState,
+			aElapsedMilliSeconds
+		);
 	}
 	
 	public class tEditorDLL {
-		public tMeth<tEditorState, tInt64> Loop;
+		public tMeth<tEditorState, tInt64, ImmutableStack<iEvent>> Update;
+		public tMeth<tEditorState, tInt64> Render;
 	}
 }

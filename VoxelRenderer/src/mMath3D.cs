@@ -109,6 +109,28 @@ mMath3D {
 		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV3
+		operator/(
+			tV3 a1,
+			tV3 a2
+		) => V3(
+			a1.X / a2.X,
+			a1.Y / a2.Y,
+			a1.Z / a2.Z
+		);      
+		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static tV3
+		operator%(
+			tV3 a1,
+			tV3 a2
+		) => V3(
+			a1.X % a2.X,
+			a1.Y % a2.Y,
+			a1.Z % a2.Z
+		);      
+		
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static tV3
 		operator>>(
 			tV3 a1,
 			tInt32 a2
@@ -415,4 +437,9 @@ mMath3D {
 		a.Y.IsInRange(aMin.Y, aMax.Y) &
 		a.Z.IsInRange(aMin.Z, aMax.Z)
 	);
+	
+	public static t[,,]
+	CreateArray<t>(
+		this tV3 aSize
+	) => new t[aSize.X, aSize.Y, aSize.Z];
 }

@@ -4,12 +4,80 @@ using static mMath2D;
 using static mMath3D;
 using static mVoxelEditor;
 using static mVoxelRenderer;
+using static mEvents;
+
+using System.Collections.Immutable;
+using System.Linq;
 
 public static class
 mVoxelEditor_HotReload {
 	
 	public static ref tEditorState
-	Loop(
+	Update(
+		ref tEditorState aEditorState,
+		tInt64 aElapsedMilliSeconds,
+		ImmutableStack<iEvent> aEvents
+	) {
+		foreach (var Event in aEvents) {
+			switch (Event) {
+				case tMouseKeyDown(var Key): {
+					aEditorState.MouseKeys |= Key;
+					break;
+				}
+				case tMouseKeyUp(var Key): {
+					aEditorState.MouseKeys &= ~Key;
+					break;
+				}
+				case tMouseMove(var Old, var New): {
+					aEditorState.MousePos = New;
+					aEditorState.Pos3D = aEditorState.RenderEnv.To3D(aEditorState.Canvas, New);
+					
+					var Size = aEditorState.TargetBlock.GetSize();
+					var Index3D = aEditorState.Pos3D / 3 + (Size >> 1);
+					if (Index3D.IsInRange(V3(), Size - V3(1))) {
+						var BlockPos = mBlockModifier.BlockCenter(aEditorState.Pos3D, V3(9));
+						
+						#if !true
+							var Old_ = aEditorState.Map.First(_ => _.Pos == BlockPos).Block;
+							var New_ = CreateBlock(
+								V3(),
+								aEditorState.TargetBlock
+									.SliceByMinSize(BlockPos / 3 + Size / 2 - V3(1), V3(3))
+									.Scale3()
+							);
+							
+							if (Old_.Id != New_.Id) {
+								1.ToString();
+							}
+						#endif
+						
+						aEditorState.TargetBlock[Index3D.X, Index3D.Y, Index3D.Z] = default;
+						aEditorState.Map = aEditorState.Map.Where(_ => _.Pos != BlockPos).ToImmutableList();
+						aEditorState.Map = aEditorState.Map.Add(
+							(
+								BlockPos,
+								CreateBlock(
+									V3(),
+									aEditorState.TargetBlock
+										.SliceByMinSize(BlockPos / 3 + Size / 2 - V3(1), V3(3))
+										.Scale3()
+								)
+							)
+						);
+					}
+					break;
+				}
+				default: {
+					break;
+				}
+			}
+		}
+		
+		return ref aEditorState;
+	}
+	
+	public static ref tEditorState
+	Render(
 		ref tEditorState aEditorState,
 		tInt64 aElapsedMilliSeconds
 	) {
@@ -22,7 +90,7 @@ mVoxelEditor_HotReload {
 		
 		var Shadow = CreateShadow(
 			GetShadowSize(
-				V3(5 * 9),
+				V3(27 * 3),
 				RenderEnv.LightDirection
 			),
 			V2()
@@ -36,7 +104,12 @@ mVoxelEditor_HotReload {
 			}
 		}
 		
-		var P2D = aEditorState.MousePosNew;
+		{ // targetBlock
+			//var Block = CreateBlock(V3(), aEditorState.TargetBlock.Scale3());
+			//RenderEnv._DrawTo(Canvas, Shadow, Block, V3());
+		}
+		
+		var P2D = aEditorState.MousePos;
 		var P3D = V3();
 		
 		{ // 3d Marker
@@ -65,7 +138,7 @@ mVoxelEditor_HotReload {
 			}
 			
 			var Map_ = System.Collections.Immutable.ImmutableList.Create<(tV3,tBlock)>();
-			if (P3D.IsInRange(V3(-2 * 9 - 4), V3(2 * 9 + 4))) {
+			if (P3D.IsInRange(V3(-3 * (27 / 2)), V3(3 * (27 / 2)))) {
 				for (var I = -2; I <= 2; I += 1) {
 					Map_ = Map_.Add((V3(9 * I, P3D.Y, P3D.Z), X_));
 					Map_ = Map_.Add((V3(P3D.X, 9 * I, P3D.Z), Y_));
@@ -83,7 +156,7 @@ mVoxelEditor_HotReload {
 			var Normal = GetNormal3D(N);
 			
 			var NewCube = System.Collections.Immutable.ImmutableList.Create<(tV3,tBlock)>();
-			RenderEnv._DrawTo(Canvas, Shadow, OneBlock, P3D + Normal.Sign());
+			//RenderEnv._DrawTo(Canvas, Shadow, OneBlock, P3D + Normal.Sign());
 		}
 		
 		{ // Mouse
@@ -104,7 +177,8 @@ mVoxelEditor_HotReload {
 	public static tEditorDLL
 	Create(
 	) => new tEditorDLL {
-		Loop = Loop,
+		Render = Render,
+		Update = Update,
 	};
 	
 }

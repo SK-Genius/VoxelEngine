@@ -52,7 +52,7 @@ mVoxelRenderer {
 	};
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private static tInt32
+	public static tInt32
 	HashBlock(
 		tColor[,,] aColors
 	) {
@@ -156,12 +156,12 @@ mVoxelRenderer {
 		public   tInt16[,][,] DeepPatterns;
 		
 		public tHotReload<tRendererDLL> HotReloat = new (
-			new DirectoryInfo(".."),
+			new DirectoryInfo("./"),
 			"VoxelRenderer.HotReload.dll"
 		);
 		
 		public tFileWatcher PatternFile = new (
-			new DirectoryInfo("."),
+			new DirectoryInfo("./"),
 			"Patterns4_6x9.txt"
 		);
 		
