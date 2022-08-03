@@ -438,6 +438,7 @@ mMath3D {
 		a.Z.IsInRange(aMin.Z, aMax.Z)
 	);
 	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static t[,,]
 	CreateArray<t>(
 		this tV3 aSize

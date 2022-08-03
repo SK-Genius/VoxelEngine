@@ -10,8 +10,7 @@ mBlockModifier {
 		this tColor[,,] a
 	) {
 		var Size = a.GetSize();
-		var Size_ = Size * 2;
-		var Result = new tColor[Size_.X, Size_.Y, Size_.Z];
+		var Result = (Size * 2).CreateArray<tColor>();
 		
 		for (var Z = 0; Z < Size.Z; Z += 1) {
 			for (var Y = 0; Y < Size.Y; Y += 1) {
@@ -37,8 +36,7 @@ mBlockModifier {
 		this tColor[,,] a
 	) {
 		var Size = a.GetSize();
-		var Size_ = Size * 3;
-		var Result = new tColor[Size_.X, Size_.Y, Size_.Z];
+		var Result = (Size * 3).CreateArray<tColor>();
 		
 		for (var Z = 0; Z < Size.Z; Z += 1) {
 			for (var Y = 0; Y < Size.Y; Y += 1) {
@@ -91,7 +89,7 @@ mBlockModifier {
 		tV3 aMin,
 		tV3 aSize
 	) {
-		var Result = new tColor[aSize.X, aSize.Y, aSize.Z];
+		var Result = aSize.CreateArray<tColor>();
 		for (var Z = 0; Z < aSize.Z; Z += 1) {
 			for (var Y = 0; Y < aSize.Y; Y += 1) {
 				for (var X = 0; X < aSize.X; X += 1) {

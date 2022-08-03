@@ -433,7 +433,7 @@ mVoxelRenderer {
 	) => new tShadow {
 		Size = aSize,
 		Offset = aOffset,
-		Deep = new tInt16[aSize.X, aSize.Y],
+		Deep = aSize.CreateArray<tInt16>(),
 	};
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -444,10 +444,10 @@ mVoxelRenderer {
 	) => new tSprite {
 		Size = aSize,
 		Offset = aOffset,
-		Color = new tColor[aSize.X, aSize.Y],
-		Deep = new tInt16[aSize.X, aSize.Y],
-		Normal = new (tInt8 U, tInt8 V)[aSize.X, aSize.Y],
-		PosBits = new tNat8[aSize.X, aSize.Y],
+		Color = aSize.CreateArray<tColor>(),
+		Deep = aSize.CreateArray<tInt16>(),
+		Normal = aSize.CreateArray<(tInt8 U, tInt8 V)>(),
+		PosBits = aSize.CreateArray<tNat8>(),
 	};
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]

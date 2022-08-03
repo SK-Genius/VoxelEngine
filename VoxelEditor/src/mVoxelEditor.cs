@@ -30,7 +30,7 @@ mVoxelEditor {
 	public static tColor H = RGB(c050p, c050p, c050p);
 	public static tColor _ = default;
 	
-	public static tBlock EmptyBlock = CreateBlock(V3(), new tColor[0, 0, 0]);
+	public static tBlock EmptyBlock = CreateBlock(V3(), V3().CreateArray<tColor>());
 	
 	public static tBlock OneBlock = CreateBlock(
 		V3(),
@@ -480,8 +480,8 @@ mVoxelEditor {
 			}
 		}
 		
-		var TargetSize = V3(27);
-		var TargetBlock = new tColor[TargetSize.X, TargetSize.Y, TargetSize.Z];
+		var TargetSize = V3(9);
+		var TargetBlock = TargetSize.CreateArray<tColor>();
 		for (var Z = (tNat8)0; Z < TargetSize.Z; Z += 1) {
 			for (var Y = (tNat8)0; Y < TargetSize.Y; Y += 1) {
 				for (var X = (tNat8)0; X < TargetSize.X; X += 1) {
@@ -494,7 +494,7 @@ mVoxelEditor {
 			}
 		}
 		
-		Map = TargetBlock.Split(V3(27/2), V3(3))
+		Map = TargetBlock.Split(TargetSize / 2, V3(3))
 		.Select(_ => (_.Pos * 3, CreateBlock(V3(), _.Block.Scale3())))
 		.ToImmutableList();
 		

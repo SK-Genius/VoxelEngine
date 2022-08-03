@@ -27,7 +27,7 @@ mVoxelEditorWin {
 	Main(
 	) {
 		var LastMousePos = V2();
-		var Zoom = 1;
+		var Zoom = 3;
 		
 		var DefaultFont = new Font("Arial", 10);
 		
