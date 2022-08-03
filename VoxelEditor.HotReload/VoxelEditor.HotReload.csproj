@@ -1,17 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	
-	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
-		<OutputType>Library</OutputType> <!--  Exe | Library | Module | WinExe -->
-		<LangVersion>11</LangVersion>
-		<NoWarn>659,661</NoWarn>
-		<Nullable>enable</Nullable>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<EnablePreviewFeatures>true</EnablePreviewFeatures>
-	</PropertyGroup>
-	
 	<ItemGroup>
 		<ProjectReference Include="../VoxelEditor/VoxelEditor.csproj" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<Content Include="./*.txt">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
 	
 </Project>
