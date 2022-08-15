@@ -1,9 +1,9 @@
-using static mStd;
-using static mFileWatcher;
-
 using System.IO;
 using System.Linq;
 using System.Reflection;
+
+using static mStd;
+using static mFileWatcher;
 
 public static class
 mHotReload {

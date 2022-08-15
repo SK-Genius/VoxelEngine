@@ -1,14 +1,16 @@
-﻿using static mHotReload;
-using static mStd;
-using static mMath;
-using static mMath2D;
-using static mMath3D;
-using static mEvents;
-using static mVoxelRenderer;
-
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+
+using static m2DArray;
+using static m3DArray;
+using static mHotReload;
+using static mStd;
+using static mMath;
+using static mV2;
+using static mV3;
+using static mEvents;
+using static mVoxelRenderer;
 
 public static class
 mVoxelEditor {
@@ -480,7 +482,7 @@ mVoxelEditor {
 			}
 		}
 		
-		var TargetSize = V3(9);
+		var TargetSize = V3(3 * 7);
 		var TargetBlock = TargetSize.CreateArray<tColor>();
 		for (var Z = (tNat8)0; Z < TargetSize.Z; Z += 1) {
 			for (var Y = (tNat8)0; Y < TargetSize.Y; Y += 1) {

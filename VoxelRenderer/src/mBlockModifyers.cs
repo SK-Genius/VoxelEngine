@@ -1,10 +1,14 @@
 using System.Collections.Generic;
-using static mMath3D;
+
+using static m2DArray;
+using static m3DArray;
+using static mV3;
 using static mVoxelRenderer;
 
 public static class
 mBlockModifier {
 	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tColor[,,]
 	Scale2(
 		this tColor[,,] a
@@ -31,6 +35,7 @@ mBlockModifier {
 		return Result;
 	}
 	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tColor[,,]
 	Scale3(
 		this tColor[,,] a
@@ -76,6 +81,7 @@ mBlockModifier {
 		return Result;
 	}
 	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tColor[,,]
 	SliceByMinMax(
 		this tColor[,,] a,
@@ -83,6 +89,7 @@ mBlockModifier {
 		tV3 aMax
 	) => a.SliceByMinSize(aMin, aMax - aMin);
 	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tColor[,,]
 	SliceByMinSize(
 		this tColor[,,] a,
@@ -100,12 +107,35 @@ mBlockModifier {
 		return Result;
 	}
 	
+	//[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	//public static tV3
+	//BlockCenter(
+	//	tV3 aPos,
+	//	tV3 aBlockSize
+	//) => BlockBegin(aPos, aBlockSize) + (aBlockSize >> 1);
+	//
+	//[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	//public static tV3
+	//BlockBegin(
+	//	tV3 aPos,
+	//	tV3 aBlockSize
+	//) => BlockIndexBegin(aPos - (aBlockSize >> 1), aBlockSize) + (aBlockSize >>1);
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV3
-	BlockCenter(
+	BlockIndexCenter(
 		tV3 aPos,
 		tV3 aBlockSize
-	) => ((aPos + (aBlockSize / 2) * aPos.Sign()) / aBlockSize) * aBlockSize;
+	) => BlockIndexBegin(aPos, aBlockSize) + (aBlockSize >> 1);
 	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tV3
+	BlockIndexBegin(
+		tV3 aPos,
+		tV3 aBlockSize
+	) => aPos - (aPos % aBlockSize);
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static IEnumerable<(tV3 Pos, tColor[,,] Block)>
 	Split(
 		this tColor[,,] a,

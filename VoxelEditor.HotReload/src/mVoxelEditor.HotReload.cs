@@ -1,13 +1,16 @@
+using System.Collections.Immutable;
+using System.Linq;
+
+using static m2DArray;
+using static m3DArray;
 using static mStd;
 using static mMath;
-using static mMath2D;
-using static mMath3D;
+using static mV2;
+using static mV3;
 using static mVoxelEditor;
 using static mVoxelRenderer;
 using static mEvents;
-
-using System.Collections.Immutable;
-using System.Linq;
+using static mBlockModifier;
 
 public static class
 mVoxelEditor_HotReload {
@@ -32,39 +35,46 @@ mVoxelEditor_HotReload {
 					aEditorState.MousePos = New;
 					aEditorState.Pos3D = aEditorState.RenderEnv.To3D(aEditorState.Canvas, New);
 					
+					var Scale = 3;
 					var Size = aEditorState.TargetBlock.GetSize();
-					var Index3D = aEditorState.Pos3D / 3 + (Size >> 1);
-					if (Index3D.IsInRange(V3(), Size - V3(1))) {
-						var BlockPos = mBlockModifier.BlockCenter(aEditorState.Pos3D, V3(9));
+					var Index3D = (aEditorState.Pos3D + ((Scale * Size) >> 1)) / Scale;
+					
+					if (!Index3D.IsInRange(V3(), Size - V3(1))) {
+						break;
+					}
+					
+					var BlockSize = V3(Scale);
+					var BlockCenterIndex = BlockIndexCenter(Index3D, BlockSize);
+					var BlockCenter3D = (BlockCenterIndex - (Size >> 1)) * Scale;
+					Assert(BlockCenterIndex.IsInRange(V3(), Scale * Size - V3(1)));
+					
+					#if !true
+						var Old_ = aEditorState.Map.First(_ => _.Pos == BlockPos).Block;
+						var New_ = CreateBlock(
+							V3(),
+							aEditorState.TargetBlock
+								.SliceByMinSize(BlockPos / Scale + (Size >> 1) - V3(1), BlockSize)
+								.Scale3()
+						);
 						
-						#if !true
-							var Old_ = aEditorState.Map.First(_ => _.Pos == BlockPos).Block;
-							var New_ = CreateBlock(
+						if (Old_.Id != New_.Id) {
+							1.ToString();
+						}
+					#endif
+					
+					aEditorState.TargetBlock[Index3D.X, Index3D.Y, Index3D.Z] = default;
+					aEditorState.Map = aEditorState.Map.Where(_ => _.Pos != BlockCenter3D).ToImmutableList();
+					aEditorState.Map = aEditorState.Map.Add(
+						(
+							BlockCenter3D,
+							CreateBlock(
 								V3(),
 								aEditorState.TargetBlock
-									.SliceByMinSize(BlockPos / 3 + Size / 2 - V3(1), V3(3))
+									.SliceByMinSize(mBlockModifier.BlockIndexBegin(BlockCenterIndex, BlockSize), BlockSize)
 									.Scale3()
-							);
-							
-							if (Old_.Id != New_.Id) {
-								1.ToString();
-							}
-						#endif
-						
-						aEditorState.TargetBlock[Index3D.X, Index3D.Y, Index3D.Z] = default;
-						aEditorState.Map = aEditorState.Map.Where(_ => _.Pos != BlockPos).ToImmutableList();
-						aEditorState.Map = aEditorState.Map.Add(
-							(
-								BlockPos,
-								CreateBlock(
-									V3(),
-									aEditorState.TargetBlock
-										.SliceByMinSize(BlockPos / 3 + Size / 2 - V3(1), V3(3))
-										.Scale3()
-								)
 							)
-						);
-					}
+						)
+					);
 					break;
 				}
 				default: {
@@ -90,7 +100,7 @@ mVoxelEditor_HotReload {
 		
 		var Shadow = CreateShadow(
 			GetShadowSize(
-				V3(27 * 3),
+				3 * aEditorState.TargetBlock.GetSize(),
 				RenderEnv.LightDirection
 			),
 			V2()

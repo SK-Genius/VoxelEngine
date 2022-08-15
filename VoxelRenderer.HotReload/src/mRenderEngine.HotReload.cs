@@ -1,10 +1,12 @@
 ﻿using System.Linq;
-using System.Runtime.CompilerServices;
 
+using static m2DArray;
+using static m3DArray;
 using static mStd;
+using static mM3x3;
 using static mMath;
-using static mMath2D;
-using static mMath3D;
+using static mV2;
+using static mV3;
 using static mVoxelRenderer;
 
 public static class
@@ -22,7 +24,7 @@ mVoxelRenderer_HotReload {
 			var SpriteSize = GetSpriteSize(BlocSize, aRenderEnv.M);
 			Sprite = CreateSprite(
 				SpriteSize,
-				mMath2D.V2() 
+				V2() 
 			)
 			._Clear()
 			._DrawBlock(aBlock, V3(), aRenderEnv);
@@ -91,7 +93,7 @@ mVoxelRenderer_HotReload {
 			return P;
 		}
 		var Max = P.GetSize();
-		var P_ = new tAxis[Max.X, Max.Y];
+		var P_ = Max.CreateArray<tAxis>();
 		for (var Y = 0; Y < Max.Y; Y += 1) {
 			for (var X = 0; X < Max.X; X += 1) {
 				var Axis = P[X, Y];

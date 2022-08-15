@@ -1,4 +1,7 @@
-﻿global using tBool = System.Boolean;
+﻿global using System.Diagnostics.Contracts;
+global using System.Runtime.CompilerServices;
+
+global using tBool = System.Boolean;
 
 global using tNat8 = System.Byte;
 global using tNat16 = System.UInt16;

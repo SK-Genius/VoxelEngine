@@ -6,8 +6,8 @@ using System.Windows.Forms;
 
 using static mEvents;
 using static mMath;
-using static mMath2D;
-using static mMath3D;
+using static mV2;
+using static mV3;
 using static mVoxelRenderer;
 using static mVoxelEditor;
 
@@ -27,7 +27,7 @@ mVoxelEditorWin {
 	Main(
 	) {
 		var LastMousePos = V2();
-		var Zoom = 3;
+		var Zoom = 1;
 		
 		var DefaultFont = new Font("Arial", 10);
 		
@@ -65,7 +65,7 @@ mVoxelEditorWin {
 			
 			EditorState.MousePos = LastMousePos;
 			
-			mVoxelEditor.Render(
+			Render(
 				ref EditorState,
 				NewTime - LastTimeRender
 			);

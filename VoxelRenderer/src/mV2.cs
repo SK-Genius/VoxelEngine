@@ -1,22 +1,23 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using System.Diagnostics;
+
+using static mMath;
 
 public static class
-mMath2D {
+mV2 {
 	[DebuggerDisplay("({X}, {Y})")]
 	public struct
 	tV2 {
 		public tInt32 X;
 		public tInt32 Y;
 		
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Deconstruct(out tInt32 aX, out tInt32 aY)
 		{
 			aX = this.X;
 			aY = this.Y;
 		}
 		
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV2
 		operator+(
 			tV2 a1,
@@ -26,7 +27,7 @@ mMath2D {
 			a1.Y + a2.Y
 		);
 		
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV2
 		operator-(
 			tV2 a1,
@@ -36,7 +37,7 @@ mMath2D {
 			a1.Y - a2.Y
 		);
 		
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV2
 		operator-(
 			tV2 a
@@ -45,7 +46,7 @@ mMath2D {
 			a.Y
 		);
 		
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV2
 		operator*(
 			tV2 a1,
@@ -55,14 +56,14 @@ mMath2D {
 			a1.Y * a2
 		);
 		
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV2
 		operator*(
 			tInt32 a1,
 			tV2 a2
 		) => a2 * a1;
 		
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV2
 		operator*(
 			tV2 a1,
@@ -72,17 +73,17 @@ mMath2D {
 			a1.Y * a2.Y
 		);
 		
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV2
 		operator/(
 			tV2 a1,
 			tInt32 a2
 		) => V2(
-			a1.X / a2,
-			a1.Y / a2
+			Div(a1.X, a2),
+			Div(a1.Y, a2)
 		);
 		
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV2
 		operator>>(
 			tV2 a1,
@@ -92,26 +93,26 @@ mMath2D {
 			a1.Y >> a2
 		);
 		
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tBool
 		operator==(
 			tV2 a1,
 			tV2 a2
 		) => a1.X == a2.X & a1.Y == a2.Y;
 		
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tBool
 		operator!=(
 			tV2 a1,
 			tV2 a2
 		) => !(a1 == a2);
 		
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override tText
 		ToString() => $"({this.X}, {this.Y})";
 	}
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV2
 	V2(
 		tInt32 aX,
@@ -121,7 +122,7 @@ mMath2D {
 		Y = aY,
 	};
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV2
 	V2(
 		tInt32 a
@@ -130,12 +131,12 @@ mMath2D {
 		Y = a,
 	};
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV2
 	V2(
 	) => V2(0);
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tBool
 	IsInRange(
 		this tV2 aPoint,
@@ -146,7 +147,7 @@ mMath2D {
 		aPoint.Y.IsInRange(aMin.Y, aMax.Y)
 	);
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV2
 	Min(
 		tV2 a1,
@@ -156,7 +157,7 @@ mMath2D {
 		mMath.Min(a1.Y, a2.Y)
 	);
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV2
 	Max(
 		tV2 a1,
@@ -165,4 +166,5 @@ mMath2D {
 		mMath.Max(a1.X, a2.X),
 		mMath.Max(a1.Y, a2.Y)
 	);
+	
 }

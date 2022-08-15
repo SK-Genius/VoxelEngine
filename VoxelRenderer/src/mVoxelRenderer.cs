@@ -1,15 +1,17 @@
-﻿using static mStd;
-using static mMath;
-using static mMath2D;
-using static mMath3D;
-using static mHotReload;
-using static mFileWatcher;
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.IO;
-using System.Runtime.CompilerServices;
+
+using static m2DArray;
+using static m3DArray;
+using static mStd;
+using static mMath;
+using static mM3x3;
+using static mV2;
+using static mV3;
+using static mHotReload;
+using static mFileWatcher;
 
 public static class
 mVoxelRenderer {
@@ -40,7 +42,7 @@ mVoxelRenderer {
 		) => this.Id == ((tBlock)a).Id;
 	}
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tBlock
 	CreateBlock(
 		tV3 aOffset,
@@ -51,7 +53,7 @@ mVoxelRenderer {
 		Colors = aColors,
 	};
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tInt32
 	HashBlock(
 		tColor[,,] aColors
@@ -72,13 +74,13 @@ mVoxelRenderer {
 		return Hash;
 	}
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV3
 	GetSize(
 		this tBlock a
 	) => a.Colors.GetSize();
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static tInt32
 	AddToHash(
 		ref tInt32 aHash,
@@ -174,8 +176,8 @@ mVoxelRenderer {
 		public tAxis[,] NormalPattern;
 		public tInt16[,] DeepPattern;
 		
-		public Dictionary<(mMath3D.tM3x3, tBlock), mVoxelRenderer.tSprite> SpriteBuffer  = new();
-		public Dictionary<(tV3 LightDirection, tInt32 LayerOffset, tBlock Block), mVoxelRenderer.tShadow> ShadowBuffer  = new();
+		public Dictionary<(tM3x3, tBlock), tSprite> SpriteBuffer  = new();
+		public Dictionary<(tV3 LightDirection, tInt32 LayerOffset, tBlock Block), tShadow> ShadowBuffer  = new();
 	}
 	
 	[DebuggerDisplay("{Value}")]
@@ -222,7 +224,7 @@ mVoxelRenderer {
 		public tNat8[,] PosBits;
 	}
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static t[,]
 	ToArray2D<t>(
 		this List<t[]> a
@@ -348,11 +350,23 @@ mVoxelRenderer {
 		return ref aRenderEnv;
 	}
 	
+	public static ref tRenderEnv
+	_ScalePatterns(
+		this ref tRenderEnv aRenderEnv,
+		tInt32 aScale
+	) {
+		var Ms = aRenderEnv.Matrixes.Map(_ => aScale * _);
+		
+		
+		
+		return ref aRenderEnv;
+	}
+	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static ref tRenderEnv
 	_SetLightDirection(
 		this ref tRenderEnv a,
-		mMath3D.tV3 aLightDirection
+		tV3 aLightDirection
 	) {
 		a.LightDirection = GetMainAxis(aLightDirection) switch {
 			(tAxis.X, int Sign) => V3(Sign * 9, aLightDirection.Y, aLightDirection.Z),
@@ -378,13 +392,13 @@ mVoxelRenderer {
 		var (QuarterParts, AngleParts) = a.Matrixes.GetSize();
 		while (a.Dir < 0) { a.Dir += 4 * QuarterParts; }
 		while (a.Dir >= 4 * QuarterParts) { a.Dir -= 4 * QuarterParts; }
-		mMath.Clamp(ref a.Angle, 0, AngleParts - 1);
+		a.Angle.Clamp(0, AngleParts - 1);
 		
 		a.M = a.GetMatrix(a.Dir, a.Angle);
 		a.NormalPattern = a.NormalPatterns[a.Dir % QuarterParts, a.Angle];
 		a.DeepPattern = a.DeepPatterns[a.Dir % QuarterParts, a.Angle];
 		
-		(a.InvM, a.Det) = mMath3D.Inverse(a.M);
+		(a.InvM, a.Det) = a.M.Inverse();
 		return ref a;
 	}
 	
@@ -398,7 +412,7 @@ mVoxelRenderer {
 		Pattern,
 	};
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tColor
 	RGB(
 		tNat8 aR,
@@ -406,7 +420,7 @@ mVoxelRenderer {
 		tNat8 aB
 	) => RGBA(aR, aG, aB, false);
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tColor
 	RGBA(
 		tNat8 aR,
@@ -425,7 +439,7 @@ mVoxelRenderer {
 		)
 	};
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tShadow
 	CreateShadow(
 		tV2 aSize,
@@ -436,7 +450,7 @@ mVoxelRenderer {
 		Deep = aSize.CreateArray<tInt16>(),
 	};
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tSprite
 	CreateSprite(
 		tV2 aSize,
@@ -450,11 +464,11 @@ mVoxelRenderer {
 		PosBits = aSize.CreateArray<tNat8>(),
 	};
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV2
 	GetSpriteSize(
 		tV3 aBlockSize,
-		mMath3D.tM3x3 aM
+		tM3x3 aM
 	) {
 		var D = aBlockSize;
 		var V3s = new [] {
@@ -477,11 +491,11 @@ mVoxelRenderer {
 		return V2(MaxX + 2, MaxY + 2);
 	}
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV2
 	GetShadowSize(
 		tV3 aBlockSize,
-		mMath3D.tV3 aLightDirection
+		tV3 aLightDirection
 	) {
 		var (MainAxis, _) = GetMainAxis(aLightDirection);
 		
@@ -546,7 +560,7 @@ mVoxelRenderer {
 		return aGrid;
 	}
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static (tAxis Axis, tInt32 Sign)
 	GetMainAxis(
 		tV3 aDirection
@@ -565,7 +579,7 @@ mVoxelRenderer {
 		}
 	}
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV3
 	ToRGB(
 		tColor aColor
@@ -574,14 +588,14 @@ mVoxelRenderer {
 			return default;
 		}
 		aColor.Value -= 1;
-		return mMath3D.V3(
+		return V3(
 			(aColor.Value / 5 / 5) % 5,
 			(aColor.Value / 5) % 5,
 			aColor.Value % 5
 		) * 63;
 	}
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tNat32
 	ToRGB32(
 		tNat8 aColor
@@ -597,13 +611,13 @@ mVoxelRenderer {
 		return (tNat32)((A << 24) | (R << 16) | (G << 8) | B);
 	}
 	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV3
 	GetNormal3D(
 		(tInt8 U, tInt8 V) a
-	) => mMath3D.V3(
+	) => V3(
 		a.U,
 		-a.V,
-		-mMath.FastSqrt(mMath.Abs(127*127 - a.U*a.U - a.V*a.V))
+		-FastSqrt(mMath.Abs(127*127 - a.U*a.U - a.V*a.V))
 	);
 }
