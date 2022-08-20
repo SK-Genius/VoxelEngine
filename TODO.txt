@@ -18,6 +18,7 @@ TODO:
 	- make it optional for translucent ???
 
 DONE:
+* Upscale Patterns
 * view from bottom
 * deep offset buffers for voxel
 * non cubic "Blocks"
@@ -29,6 +30,6 @@ DONE:
 * Normal + Shading
 
 NOTS:
-* Qube Colors:
+* Cube Colors:
 	- 7Bits: 5 x 5 x 5 = 125 Colors + Non + ??? + ???
 	- 1Bit: 50% Transparent (draw only every second color)

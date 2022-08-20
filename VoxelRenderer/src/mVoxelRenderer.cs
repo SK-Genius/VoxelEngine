@@ -153,9 +153,10 @@ mVoxelRenderer {
 		public tInt32 Dir;
 		public tInt32 Angle;
 		
-		public  tM3x3[,] Matrixes;
-		public  tAxis[,][,] NormalPatterns;
-		public   tInt16[,][,] DeepPatterns;
+		public tM3x3[,] Matrixes;
+		public tAxis[,][,] NormalPatterns;
+		public tInt16[,][,] DeepPatterns;
+		public tInt32 PatternScale = 1;
 		
 		public tHotReload<tRendererDLL> HotReloat = new (
 			new DirectoryInfo("./"),
@@ -347,17 +348,73 @@ mVoxelRenderer {
 		
 		aRenderEnv.PatternFile.HasUpdated = false;
 		
+		aRenderEnv._ScalePatterns(aRenderEnv.PatternScale);
+		
 		return ref aRenderEnv;
 	}
 	
 	public static ref tRenderEnv
+	_SetScale(
+		this ref tRenderEnv aRenderEnv,
+		tInt32 aPatternScale
+	) {
+		aRenderEnv.PatternScale = aPatternScale;
+		return ref aRenderEnv
+		._LoadPatterns()
+		;
+	}
+	
+	private static ref tRenderEnv
 	_ScalePatterns(
 		this ref tRenderEnv aRenderEnv,
 		tInt32 aScale
 	) {
-		var Ms = aRenderEnv.Matrixes.Map(_ => aScale * _);
+		var Matrixes = aRenderEnv.Matrixes.Map(_ => aScale * _).Map(_ => _);
+		var NormalPatterns = aRenderEnv.NormalPatterns.Map(_ => _);
+		var DeepPatterns = aRenderEnv.DeepPatterns.Map(_ => _);
 		
+		var ScaleHalf = aScale >> 1;
 		
+		var (MaxDir, MaxAngel) = Matrixes.GetSize();
+		for (var Angel = 0; Angel < MaxAngel; Angel += 1) {
+			for (var Dir = 0; Dir < MaxDir; Dir += 1) {
+				var OldDeepPattern = aRenderEnv.DeepPatterns[Dir, Angel];
+				var OldNormalPattern = aRenderEnv.NormalPatterns[Dir, Angel];
+				var OldPatternSize = OldNormalPattern.GetSize();
+				
+				var M = aRenderEnv.Matrixes[Dir, Angel];
+				var NewPatternSize = GetSpriteSize(V3(aScale), M);
+				
+				var NewDeepPattern = NewPatternSize.CreateArray<tInt16>()._Map(_ => tInt16.MaxValue);
+				var NewNormalPattern = NewPatternSize.CreateArray<tAxis>();
+				
+				var OffsetUV = V3((NewPatternSize - OldPatternSize) >> 1, 0);
+				
+				for (var Z = -ScaleHalf; Z <= ScaleHalf; Z += 1) {
+					for (var Y = -ScaleHalf; Y <= ScaleHalf; Y += 1) {
+						for (var X = -ScaleHalf; X <= ScaleHalf; X += 1) {
+							var Offset = V3(X, Y, Z) * M + OffsetUV;
+							for (var V = 0; V < OldPatternSize.Y; V += 1) {
+								for (var U = 0; U < OldPatternSize.X; U += 1) {
+									var OldDeep = OldDeepPattern[U, V];
+									ref var pNewDeep = ref NewDeepPattern[U + Offset.X, V + Offset.Y];
+									if (OldDeep + Offset.Z <= pNewDeep) {
+										pNewDeep = (tInt16)(OldDeep + Offset.Z);
+										NewNormalPattern[U + Offset.X, V + Offset.Y] = OldNormalPattern[U, V];
+									}
+								}
+							}
+						}
+					}
+				}
+				NormalPatterns[Dir, Angel] = NewNormalPattern;
+				DeepPatterns[Dir, Angel] = NewDeepPattern;
+			}
+		}
+		
+		aRenderEnv.Matrixes = Matrixes;
+		aRenderEnv.NormalPatterns = NormalPatterns;
+		aRenderEnv.DeepPatterns = DeepPatterns;
 		
 		return ref aRenderEnv;
 	}

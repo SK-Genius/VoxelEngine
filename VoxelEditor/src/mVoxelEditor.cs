@@ -448,6 +448,7 @@ mVoxelEditor {
 		
 		var RenderEnv = CreateEnv();
 		RenderEnv
+		._SetScale(3)
 		._SetLightDirection(V3(0, 0, 9))
 		._Update()
 		;
