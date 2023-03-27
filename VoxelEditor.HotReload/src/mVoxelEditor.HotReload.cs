@@ -21,6 +21,8 @@ mVoxelEditor_HotReload {
 		tInt64 aElapsedMilliSeconds,
 		ImmutableStack<iEvent> aEvents
 	) {
+		using var Log = mPerfLog.LogPerf();
+		
 		foreach (var Event in aEvents) {
 			switch (Event) {
 				case tMouseKeyDown(var Key): {
@@ -34,52 +36,40 @@ mVoxelEditor_HotReload {
 				case tMouseMove(var Old, var New): {
 					aEditorState.MousePos = New;
 					aEditorState.Pos3D = aEditorState.RenderEnv.To3D(aEditorState.Canvas, New);
-					
-					var Scale = 3;
-					var Size = aEditorState.TargetBlock.GetSize();
-					var Index3D = (aEditorState.Pos3D + ((Scale * Size) >> 1)) / Scale;
-					
-					if (!Index3D.IsInRange(V3(), Size - V3(1))) {
-						break;
-					}
-					
-					var BlockSize = V3(Scale);
-					var BlockCenterIndex = BlockIndexCenter(Index3D, BlockSize);
-					var BlockCenter3D = (BlockCenterIndex - (Size >> 1)) * Scale;
-					Assert(BlockCenterIndex.IsInRange(V3(), Scale * Size - V3(1)));
-					
-					#if !true
-						var Old_ = aEditorState.Map.First(_ => _.Pos == BlockPos).Block;
-						var New_ = CreateBlock(
-							V3(),
-							aEditorState.TargetBlock
-								.SliceByMinSize(BlockPos / Scale + (Size >> 1) - V3(1), BlockSize)
-								.Scale3()
-						);
-						
-						if (Old_.Id != New_.Id) {
-							1.ToString();
-						}
-					#endif
-					
-					aEditorState.TargetBlock[Index3D.X, Index3D.Y, Index3D.Z] = default;
-					aEditorState.Map = aEditorState.Map.Where(_ => _.Pos != BlockCenter3D).ToImmutableList();
-					aEditorState.Map = aEditorState.Map.Add(
-						(
-							BlockCenter3D,
-							CreateBlock(
-								V3(),
-								aEditorState.TargetBlock
-									.SliceByMinSize(mBlockModifier.BlockIndexBegin(BlockCenterIndex, BlockSize), BlockSize)
-									.Scale3()
-							)
-						)
-					);
 					break;
 				}
 				default: {
 					break;
 				}
+			}
+			
+			if (aEditorState.MouseKeys.HasFlag(tMouseKeys.Left)) {
+				var Scale = 3;
+				var Size = aEditorState.TargetBlock.GetSize();
+				var Index3D = (aEditorState.Pos3D + ((Scale * Size) >> 1)) / Scale;
+				
+				if (!Index3D.IsInRange(V3(), Size - V3(1))) {
+					break;
+				}
+				
+				var BlockSize = V3(Scale);
+				var BlockCenterIndex = BlockIndexCenter(Index3D, BlockSize);
+				var BlockCenter3D = (BlockCenterIndex - (Size >> 1)) * Scale;
+				Assert(BlockCenterIndex.IsInRange(V3(), Scale * Size - V3(1)));
+				
+				aEditorState.TargetBlock[Index3D.X, Index3D.Y, Index3D.Z] = default;
+				aEditorState.Map = aEditorState.Map.Where(_ => _.Pos != BlockCenter3D).ToImmutableList();
+				aEditorState.Map = aEditorState.Map.Add(
+					(
+						BlockCenter3D,
+						CreateBlock(
+							V3(),
+							aEditorState.TargetBlock
+								.SliceByMinSize(mBlockModifier.BlockIndexBegin(BlockCenterIndex, BlockSize), BlockSize)
+								.Scale3()
+						)
+					)
+				);
 			}
 		}
 		
@@ -91,6 +81,8 @@ mVoxelEditor_HotReload {
 		ref tEditorState aEditorState,
 		tInt64 aElapsedMilliSeconds
 	) {
+		using var Log = mPerfLog.LogPerf();
+		
 		var RenderEnv = aEditorState.RenderEnv;
 		var Canvas = aEditorState.Canvas;
 		

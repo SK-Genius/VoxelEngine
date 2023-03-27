@@ -7,6 +7,7 @@ using static m2DArray;
 using static m3DArray;
 using static mStd;
 using static mMath;
+using static mSIMD;
 using static mM3x3;
 using static mV2;
 using static mV3;
@@ -177,7 +178,7 @@ mVoxelRenderer {
 		public tAxis[,] NormalPattern;
 		public tInt16[,] DeepPattern;
 		
-		public Dictionary<(tM3x3, tBlock), tSprite> SpriteBuffer  = new();
+		public Dictionary<(tM3x3, tBlock), tSprite> SpriteBuffer = new();
 		public Dictionary<(tV3 LightDirection, tInt32 LayerOffset, tBlock Block), tShadow> ShadowBuffer  = new();
 	}
 	
@@ -256,6 +257,8 @@ mVoxelRenderer {
 	_LoadPatterns(
 		this ref tRenderEnv aRenderEnv
 	) {
+		using var Log = mPerfLog.LogPerf();
+		
 		var AngelParts = 0;
 		var QuoterParts = 0;
 		var Angel = 0;
@@ -369,6 +372,8 @@ mVoxelRenderer {
 		this ref tRenderEnv aRenderEnv,
 		tInt32 aScale
 	) {
+		using var Log = mPerfLog.LogPerf();
+		
 		var Matrixes = aRenderEnv.Matrixes.Map(_ => aScale * _).Map(_ => _);
 		var NormalPatterns = aRenderEnv.NormalPatterns.Map(_ => _);
 		var DeepPatterns = aRenderEnv.DeepPatterns.Map(_ => _);

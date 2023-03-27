@@ -6,11 +6,13 @@
 
 TODO:
 * Editor
+	- Undo/Redo
 	- add/remove Voxel
 	- ColorSelector
 	- ViewingModes
 	- EditModes
 	- copy/paste
+	- animation
 * Offset for Sprites and Shadow
 * introduce fix raster (maybe 9x9x9) to get proper shadow
 	- on LightDirection the longest/main axis value has to be this raster size (9)

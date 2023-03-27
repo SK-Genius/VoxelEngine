@@ -1,0 +1,59 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "run",
+			"type": "process",
+			"options": {
+				"cwd": "${workspaceFolder}/VoxelEditor.Windows/"
+			},
+			"command": "dotnet",
+			"args": [
+				"run",
+				"-c:Debug"
+			],
+			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "build",
+			"type": "process",
+			"options": {
+				"cwd": "${workspaceFolder}/VoxelEditor.Windows/"
+			},
+			"command": "dotnet",
+			"args": [
+				"build",
+				"-c:Debug"
+			],
+			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "watchHotEditor",
+			"type": "process",
+			"options": {
+				"cwd": "${workspaceFolder}/VoxelEditor.HotReload/"
+			},
+			"command": "dotnet",
+			"args": [
+				"watch",
+				"build",
+				"-c:Debug"
+			],
+			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "watchHotReload",
+			"type": "process",
+			"options": {
+				"cwd": "${workspaceFolder}/VoxelRenderer.HotReload/"
+			},
+			"command": "dotnet",
+			"args": [
+				"watch",
+				"build",
+				"-c:Debug"
+			],
+			"problemMatcher": "$msCompile"
+		}
+	]
+}

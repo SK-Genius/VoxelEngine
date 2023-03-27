@@ -59,6 +59,8 @@ mVoxelEditorWin {
 		);
 		
 		Window.Paint += (_, a) => {
+			using var PerfLog = mPerfLog.LogPerf("Window.Paint");
+			
 			ref var pRenderEnv = ref EditorState.RenderEnv;
 			
 			var NewTime = SW.ElapsedMilliseconds;
@@ -197,7 +199,11 @@ mVoxelEditorWin {
 					break;
 				}
 				case Keys.Escape: {
-					System.Environment.Exit(0);
+					System.IO.File.WriteAllText(
+						@"c:\Temp\VoxelGamePerf.log",
+						mPerfLog.Print()
+					);
+					Environment.Exit(0);
 					break;	
 				}
 				case Keys.L:

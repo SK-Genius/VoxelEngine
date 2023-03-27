@@ -483,7 +483,7 @@ mVoxelEditor {
 			}
 		}
 		
-		var TargetSize = V3(3 * 7);
+		var TargetSize = V3(3 * 5);
 		var TargetBlock = TargetSize.CreateArray<tColor>();
 		for (var Z = (tNat8)0; Z < TargetSize.Z; Z += 1) {
 			for (var Y = (tNat8)0; Y < TargetSize.Y; Y += 1) {
