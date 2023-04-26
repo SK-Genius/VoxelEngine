@@ -8,7 +8,8 @@ using static mFileWatcher;
 public static class
 mHotReload {
 	
-	class tDLL_Context : System.Runtime.Loader.AssemblyLoadContext {
+	class
+	tDLL_Context : System.Runtime.Loader.AssemblyLoadContext {
 		public tDLL_Context(
 		) : base(isCollectible: true) {
 		}
@@ -20,17 +21,16 @@ mHotReload {
 	
 	public class
 	tHotReload<t> {
-		public tFileWatcher DLL_File;
+		public tFileWatcher DLL_FileWatcher;
 		public t DLL;
 		public System.Runtime.Loader.AssemblyLoadContext DLL_Context;
 		
-		public tBool HasNewDLL => this.DLL_File.HasUpdated;
+		public tBool HasNewDLL => this.DLL_FileWatcher.HasUpdated;
 		
 		public tHotReload(
-			DirectoryInfo aFolder,
-			string aFileName
+			FileInfo aFile
 		) {
-			this.DLL_File = new tFileWatcher(aFolder, aFileName);
+			this.DLL_FileWatcher = new tFileWatcher(aFile);
 			this._LoadDLL();
 		}
 	}
@@ -45,7 +45,7 @@ mHotReload {
 		a.DLL = a.DLL_Context.LoadFromStream(
 			new System.IO.MemoryStream(
 				System.IO.File.ReadAllBytes(
-					a.DLL_File.File.FullName
+					a.DLL_FileWatcher.File.FullName
 				)
 			)
 		).GetTypes(
@@ -57,7 +57,7 @@ mHotReload {
 			tFunc<t>
 		>()();
 		
-		a.DLL_File.HasUpdated = false;
+		a.DLL_FileWatcher.HasUpdated = false;
 		return a;
 	}
 }

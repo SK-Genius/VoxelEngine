@@ -29,6 +29,7 @@ mPerfLog {
 				Ticks = Tick,
 			};
 			NextIndex += 1;
+			NextIndex &= cBufferMask;
 		}
 	}
 	
@@ -45,7 +46,10 @@ mPerfLog {
 		public tNat64 Ticks;
 	}
 	
-	private static tLogLine[] Logs = new tLogLine[1<<20];
+	private const tInt32 cBufferAdressBits = 16;
+	private const tInt32 cBufferSize = 1 << cBufferAdressBits;
+	private const tInt32 cBufferMask = cBufferSize - 1;
+	private static tLogLine[] Logs = new tLogLine[cBufferSize];
 	
 	public static tPerfLog
 	LogPerf(
@@ -58,6 +62,7 @@ mPerfLog {
 			Ticks = Tick
 		};
 		NextIndex += 1;
+		NextIndex &= cBufferMask;
 		return new tPerfLog {
 			Region = aRegion,
 		};

@@ -160,15 +160,14 @@ mVoxelEditorWin {
 		
 		Window.Resize += (_, a) => {
 			var Size = V2(Window.Size.Width, Window.Size.Height) / EditorState.Zoom;
-			EditorState.Canvas = CreateSprite(
-				Size,
-				V2()
-			);
-			
+			EditorState.Canvas = CreateSprite(Size);
 			Image.Dispose();
 			Image = new Bitmap(Size.X, Size.Y, cImageFormat);
 			Window.Invalidate();
 		};
+		
+		var LightHeight = 1f;
+		var LightDir = 0f;
 		
 		Window.KeyDown += (_, a) => {
 			var NeedsUpdate = true;
@@ -208,34 +207,28 @@ mVoxelEditorWin {
 				}
 				case Keys.L:
 				case Keys.Right: {
-					var LightDirection = EditorState.RenderEnv.LightDirection;
-					EditorState.RenderEnv._SetLightDirection(
-						LightDirection + (V3(LightDirection.Z, 0, -LightDirection.X) >> 3)
-					);
+					LightDir += 1f / 37;
+					if (LightDir >= 1) {
+						LightDir -= 1;
+					}
 					break;
 				}
 				case Keys.J:
 				case Keys.Left: {
-					var LightDirection = EditorState.RenderEnv.LightDirection;
-					EditorState.RenderEnv._SetLightDirection(
-						LightDirection - (V3(LightDirection.Z, 0, -LightDirection.X) >> 3)
-					);
+					LightDir -= 1f / 37;
+					if (LightDir < 0) {
+						LightDir += 1;
+					}
 					break;
 				}
 				case Keys.I:
 				case Keys.Up: {
-					var LightDirection = EditorState.RenderEnv.LightDirection;
-					EditorState.RenderEnv._SetLightDirection(
-						LightDirection + (V3(0, LightDirection.Z, -LightDirection.Y) >> 3)
-					);
+					LightHeight = (LightHeight + 1f / 18).Clamp(-1, 1);
 					break;
 				}
 				case Keys.K:
 				case Keys.Down: {
-					var LightDirection = EditorState.RenderEnv.LightDirection;
-					EditorState.RenderEnv._SetLightDirection(
-						LightDirection - (V3(0, LightDirection.Z, -LightDirection.Y) >> 3)
-					);
+					LightHeight = (LightHeight - 1f / 18).Clamp(-1, 1);
 					break;
 				}
 				case Keys.D: {
@@ -260,6 +253,17 @@ mVoxelEditorWin {
 				}
 			}
 			if (NeedsUpdate) {
+				var SinZ = mMath.Sin(LightHeight * mMath.cPi);
+				var CosZ = mMath.Cos(LightHeight * mMath.cPi);
+				var VDir = mV3.V3(
+					(tInt32)(100 * mMath.Sin(2 * mMath.cPi * LightDir) * CosZ),
+					(tInt32)(100 * mMath.Cos(2 * mMath.cPi * LightDir) * CosZ),
+					(tInt32)(100 * SinZ)
+				);
+				var Max = VDir.Abs().Max();
+				EditorState.RenderEnv._SetLightDirection(
+					VDir * 9 / Max
+				);
 				EditorState.RenderEnv._Update();
 				Window.Invalidate();
 			}

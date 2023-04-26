@@ -140,13 +140,22 @@ mMath {
 	) => Math.Max(a1, a2);
 	
 	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static void
+	public static tInt32
 	Clamp(
-		this ref tInt32 a,
+		this tInt32 a,
 		tInt32 aMin,
 		tInt32 aMax
+	) => Math.Clamp(a, aMin, aMax);
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tReal32
+	Clamp(
+		this tReal32 a,
+		tReal32 aMin,
+		tReal32 aMax
 	) {
 		a = Math.Clamp(a, aMin, aMax);
+		return a;
 	}
 	
 	public static tInt32
@@ -168,4 +177,24 @@ mMath {
 		tInt32 aMin,
 		tInt32 aMax
 	) => aMin <= a & a <= aMax;
+	
+	public const tReal32 cPi = MathF.PI;
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tReal32
+	Abs(
+		this tReal32 a
+	) => MathF.Abs(a);
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tReal32
+	Sin(
+		this tReal32 a
+	) => MathF.Sin(a);
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tReal32
+	Cos(
+		this tReal32 a
+	) => MathF.Cos(a);
 }

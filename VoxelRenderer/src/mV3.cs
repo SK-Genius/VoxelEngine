@@ -123,6 +123,17 @@ mV3 {
 		public static tV3
 		operator%(
 			tV3 a1,
+			tInt32 a2
+		) => V3(
+			Mod(a1.X, a2),
+			Mod(a1.Y, a2),
+			Mod(a1.Z, a2)
+		);      
+		
+		[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static tV3
+		operator%(
+			tV3 a1,
 			tV3 a2
 		) => V3(
 			Mod(a1.X, a2.X),
@@ -257,6 +268,24 @@ mV3 {
 	ZY(
 		this tV3 aV3
 	) => V2(aV3.Z, aV3.Y);
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tInt32
+	Min(
+		this tV3 a
+	) => mMath.Min(mMath.Min(a.X, a.Y), a.Z);
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tInt32
+	Max(
+		this tV3 a
+	) => mMath.Max(mMath.Max(a.X, a.Y), a.Z);
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tV3
+	Abs(
+		this tV3 a
+	) => V3(mMath.IAbs(a.X), mMath.IAbs(a.Y), mMath.IAbs(a.Z));
 	
 	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tInt32

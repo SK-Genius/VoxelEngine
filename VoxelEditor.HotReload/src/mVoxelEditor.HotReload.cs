@@ -46,14 +46,14 @@ mVoxelEditor_HotReload {
 			if (aEditorState.MouseKeys.HasFlag(tMouseKeys.Left)) {
 				var Scale = 3;
 				var Size = aEditorState.TargetBlock.GetSize();
-				var Index3D = (aEditorState.Pos3D + ((Scale * Size) >> 1)) / Scale;
+				var Index3D = (aEditorState.Pos3D + ((Size * Scale) >> 1)) / Scale;
 				
 				if (!Index3D.IsInRange(V3(), Size - V3(1))) {
 					break;
 				}
 				
-				var BlockSize = V3(Scale);
-				var BlockCenterIndex = BlockIndexCenter(Index3D, BlockSize);
+				var BlockSize = V3(9);
+				var BlockCenterIndex = BlockIndexCenter(Index3D, BlockSize / Scale);
 				var BlockCenter3D = (BlockCenterIndex - (Size >> 1)) * Scale;
 				Assert(BlockCenterIndex.IsInRange(V3(), Scale * Size - V3(1)));
 				
@@ -65,7 +65,7 @@ mVoxelEditor_HotReload {
 						CreateBlock(
 							V3(),
 							aEditorState.TargetBlock
-								.SliceByMinSize(mBlockModifier.BlockIndexBegin(BlockCenterIndex, BlockSize), BlockSize)
+								.SliceByMinSize(mBlockModifier.BlockIndexBegin(Index3D, BlockSize / Scale), BlockSize / Scale)
 								.Scale3()
 						)
 					)

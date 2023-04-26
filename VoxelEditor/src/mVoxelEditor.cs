@@ -117,8 +117,7 @@ mVoxelEditor {
 		public tMouseKeys MouseKeys;
 		
 		public tHotReload<tEditorDLL> HotReload = new (
-			new DirectoryInfo("./"),
-			"VoxelEditor.HotReload.dll"
+			new FileInfo("./VoxelEditor.HotReload.dll")
 		);
 		
 		public tEditorState() {
@@ -446,44 +445,17 @@ mVoxelEditor {
 			}
 		);
 		
+		var BlockSize = 9;
+		var Scale = 3;
+		
 		var RenderEnv = CreateEnv();
 		RenderEnv
-		._SetScale(3)
-		._SetLightDirection(V3(0, 0, 9))
+		._SetScale(Scale)
+		._SetLightDirection(V3(0, 0, BlockSize))
 		._Update()
 		;
 		
-		var StdBlockSize = 9;
-		
-		var Map = ImmutableList
-		.Create<(tV3, tBlock)>()
-		.Add((StdBlockSize * V3(-2, 2, 0), Dice))
-		.Add((StdBlockSize * V3(-1, 2, 0), Dice))
-		.Add((StdBlockSize * V3(0, 2, 0), Dice))
-		.Add((StdBlockSize * V3(1, 2, 0), Dice))
-		.Add((StdBlockSize * V3(2, 2, 0), Dice))
-		.Add((StdBlockSize * V3(2, -1, 0), Dice))
-		.Add((StdBlockSize * V3(2, 0, 0), Dice))
-		.Add((StdBlockSize * V3(2, 1, 0), Dice))
-		.Add((StdBlockSize * V3(-2, -1, 0), Dice))
-		.Add((StdBlockSize * V3(-2, 0, 0), Dice))
-		.Add((StdBlockSize * V3(-2, 1, 0), Dice))
-		.Add((StdBlockSize * V3(-2, -2, 0), Dice))
-		.Add((StdBlockSize * V3(-1, -2, 0), Dice))
-		.Add((StdBlockSize * V3(0, -2, 0), Dice))
-		.Add((StdBlockSize * V3(1, -2, 0), Dice))
-		.Add((StdBlockSize * V3(2, -2, 0), Dice))
-		.Add((StdBlockSize * V3(0, 0, 0), Dice))
-		.Add((StdBlockSize * V3(0, 0, 1), Dice))
-		;
-		
-		for (var Y_ = -2; Y_ <= 2; Y_ += 1) {
-			for (var X_ = -2; X_ <= 2; X_ += 1) {
-				Map = Map.Add((StdBlockSize * V3(X_, Y_, 2), Plane));
-			}
-		}
-		
-		var TargetSize = V3(3 * 5);
+		var TargetSize = V3(BlockSize);
 		var TargetBlock = TargetSize.CreateArray<tColor>();
 		for (var Z = (tNat8)0; Z < TargetSize.Z; Z += 1) {
 			for (var Y = (tNat8)0; Y < TargetSize.Y; Y += 1) {
@@ -497,16 +469,16 @@ mVoxelEditor {
 			}
 		}
 		
-		Map = TargetBlock.Split(TargetSize / 2, V3(3))
-		.Select(_ => (_.Pos * 3, CreateBlock(V3(), _.Block.Scale3())))
-		.ToImmutableList();
+		var Map = TargetBlock.Split(V3(), V3(BlockSize / Scale))
+		.Select(_ => ((_.Pos - V3(BlockSize >> 1)) * Scale, CreateBlock(V3(), _.Block.Scale3())))
+		.ToImmutableList()
+		;
 		
 		return new tEditorState {
 			RenderEnv = RenderEnv,
 			Zoom = aZoom,
 			Canvas = CreateSprite(
-				V2(aCanvasSize.X, aCanvasSize.Y) / aZoom,
-				V2()
+				V2(aCanvasSize.X, aCanvasSize.Y) / aZoom
 			),
 			TargetBlock = TargetBlock,
 			Map = Map,

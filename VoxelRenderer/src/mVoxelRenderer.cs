@@ -19,10 +19,9 @@ mVoxelRenderer {
 	
 	public class
 	tRendererDLL {
-		public tFunc<tRenderEnv, tSprite, tV2,  tV3> To3D;
-		public tMeth<tRenderEnv, tSprite, tShadow, System.IntPtr, tV2, tDebugRenderMode> _RenderToBuffer;
+		public tFunc<tCamera, tSprite, tV2,  tV3> To3D;
+		public tMeth<tCamera, tV3, tSprite, tShadow, System.IntPtr, tV2, tDebugRenderMode> _RenderToBuffer;
 		public tMeth<tRenderEnv, tSprite, tShadow, tBlock, tV3> _DrawTo;
-		public tFunc<tRenderEnv, tInt32, tInt32, tM3x3> GetMatrix;
 	}
 	
 	public struct
@@ -96,20 +95,12 @@ mVoxelRenderer {
 	}
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private static tM3x3
-	GetMatrix(
-		this ref tRenderEnv aRenderEnv,
-		tInt32 aDir,
-		tInt32 aAngle
-	) => aRenderEnv.HotReloat.DLL.GetMatrix(aRenderEnv, aDir, aAngle);
-	
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV3
 	To3D(
 		this ref tRenderEnv aRenderEnv,
 		tSprite aSprite,
 		tV2 aV2
-	) => aRenderEnv.HotReloat.DLL.To3D(aRenderEnv, aSprite, aV2);
+	) => aRenderEnv.HotReloat.DLL.To3D(aRenderEnv.Camera, aSprite, aV2);
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static unsafe ref tRenderEnv
@@ -120,7 +111,10 @@ mVoxelRenderer {
 		System.IntPtr aBuffer,
 		tV2 aBufferSize,
 		tDebugRenderMode aDebugRenderMode
-	) => ref aRenderEnv.HotReloat.DLL._RenderToBuffer(ref aRenderEnv, aSprite, aShadow, aBuffer, aBufferSize, aDebugRenderMode);
+	) {
+		aRenderEnv.HotReloat.DLL._RenderToBuffer(ref aRenderEnv.Camera, aRenderEnv.LightDirection, aSprite, aShadow, aBuffer, aBufferSize, aDebugRenderMode);
+		return ref aRenderEnv;
+	}
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static unsafe ref tRenderEnv
@@ -148,9 +142,28 @@ mVoxelRenderer {
 	};
 	
 	public struct
+	tCamera {
+		//public tInt32 Dir;
+		//public tInt32 Angle;
+		
+		//public tInt32 MaxDir;
+		//public tInt32 MaxAngle;
+		
+		public tM3x3 M;
+		public tM3x3 InvM;
+		public tInt32 Det;
+		
+		public tAxis[,] NormalPattern;
+		public tInt16[,] DeepPattern;
+	}
+	
+	public struct
 	tRenderEnv {
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public tRenderEnv() {}
+		
+		public tCamera Camera;
+		
 		public tInt32 Dir;
 		public tInt32 Angle;
 		
@@ -160,23 +173,14 @@ mVoxelRenderer {
 		public tInt32 PatternScale = 1;
 		
 		public tHotReload<tRendererDLL> HotReloat = new (
-			new DirectoryInfo("./"),
-			"VoxelRenderer.HotReload.dll"
+			new FileInfo("./VoxelRenderer.HotReload.dll")
 		);
 		
-		public tFileWatcher PatternFile = new (
-			new DirectoryInfo("./"),
-			"Patterns4_6x9.txt"
+		public tFileWatcher PatternFileWatcher = new (
+			new FileInfo("./Patterns4_6x9.txt")
 		);
 		
 		public tV3 LightDirection;
-		
-		public tM3x3 M;
-		public tM3x3 InvM;
-		public tInt32 Det;
-		
-		public tAxis[,] NormalPattern;
-		public tInt16[,] DeepPattern;
 		
 		public Dictionary<(tM3x3, tBlock), tSprite> SpriteBuffer = new();
 		public Dictionary<(tV3 LightDirection, tInt32 LayerOffset, tBlock Block), tShadow> ShadowBuffer  = new();
@@ -219,7 +223,6 @@ mVoxelRenderer {
 	public struct
 	tSprite {
 		public tV2 Size;
-		public tV2 Offset;
 		public tColor[,] Color;
 		public (tInt8 U, tInt8 V)[,] Normal;
 		public tInt16[,] Deep;
@@ -270,7 +273,7 @@ mVoxelRenderer {
 		var DeepPattern = new List<tInt16[]>();
 		
 		var IsFirstLine = true;
-		foreach (var Line in File.ReadAllLines(aRenderEnv.PatternFile.File.FullName)) {
+		foreach (var Line in File.ReadAllLines(aRenderEnv.PatternFileWatcher.File.FullName)) {
 			if (IsFirstLine) {
 				IsFirstLine = false;
 				
@@ -349,7 +352,7 @@ mVoxelRenderer {
 			}
 		}		
 		
-		aRenderEnv.PatternFile.HasUpdated = false;
+		aRenderEnv.PatternFileWatcher.HasUpdated = false;
 		
 		aRenderEnv._ScalePatterns(aRenderEnv.PatternScale);
 		
@@ -362,9 +365,7 @@ mVoxelRenderer {
 		tInt32 aPatternScale
 	) {
 		aRenderEnv.PatternScale = aPatternScale;
-		return ref aRenderEnv
-		._LoadPatterns()
-		;
+		return ref aRenderEnv._LoadPatterns();
 	}
 	
 	private static ref tRenderEnv
@@ -441,6 +442,24 @@ mVoxelRenderer {
 	}
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private static ref tCamera
+	Update(
+		this ref tCamera aCamera,
+		tM3x3 M,
+		tAxis[,] aNormalPattern,
+		tInt16[,] aDeepPattern
+	) {
+		aCamera.M = M;
+		
+		(aCamera.InvM, aCamera.Det) = aCamera.M.Inverse();
+		
+		aCamera.NormalPattern = aNormalPattern;
+		aCamera.DeepPattern = aDeepPattern;
+		
+		return ref aCamera;
+	}
+	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static ref tRenderEnv
 	_Update(
 		this ref tRenderEnv a
@@ -448,19 +467,32 @@ mVoxelRenderer {
 		if (a.HotReloat.HasNewDLL) {
 			a.HotReloat._LoadDLL();
 		}
-		if (a.PatternFile.HasUpdated) {
+		if (a.PatternFileWatcher.HasUpdated) {
 			a._LoadPatterns();
 		}
+		
 		var (QuarterParts, AngleParts) = a.Matrixes.GetSize();
-		while (a.Dir < 0) { a.Dir += 4 * QuarterParts; }
-		while (a.Dir >= 4 * QuarterParts) { a.Dir -= 4 * QuarterParts; }
-		a.Angle.Clamp(0, AngleParts - 1);
 		
-		a.M = a.GetMatrix(a.Dir, a.Angle);
-		a.NormalPattern = a.NormalPatterns[a.Dir % QuarterParts, a.Angle];
-		a.DeepPattern = a.DeepPatterns[a.Dir % QuarterParts, a.Angle];
+		var MaxDir = 4 * QuarterParts;
+		var MaxAngle = AngleParts;
 		
-		(a.InvM, a.Det) = a.M.Inverse();
+		while (a.Dir < 0) { a.Dir += MaxDir; }
+		a.Dir %= MaxDir;
+		
+		a.Angle = a.Angle.Clamp(0, MaxAngle - 1);
+		
+		var M = a.Matrixes[a.Dir % QuarterParts, a.Angle];
+		
+		for (var MDir = a.Dir; MDir >= QuarterParts; MDir -= QuarterParts) {
+			M *= cRotRight;
+		}
+		
+		a.Camera.Update(
+			M,
+			a.NormalPatterns[a.Dir % QuarterParts, a.Angle],
+			a.DeepPatterns[a.Dir % QuarterParts, a.Angle]
+		);
+		
 		return ref a;
 	}
 	
@@ -515,11 +547,9 @@ mVoxelRenderer {
 	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tSprite
 	CreateSprite(
-		tV2 aSize,
-		tV2 aOffset
+		tV2 aSize
 	) => new tSprite {
 		Size = aSize,
-		Offset = aOffset,
 		Color = aSize.CreateArray<tColor>(),
 		Deep = aSize.CreateArray<tInt16>(),
 		Normal = aSize.CreateArray<(tInt8 U, tInt8 V)>(),
@@ -561,30 +591,13 @@ mVoxelRenderer {
 	) {
 		var (MainAxis, _) = GetMainAxis(aLightDirection);
 		
-		var L = V3(
-			aLightDirection.X.IAbs(),
-			aLightDirection.Y.IAbs(),
-			aLightDirection.Z.IAbs()
-		);
+		var L = aLightDirection.Abs();
 		
-		var UV = default(tV2);
-		
-		switch (MainAxis) {
-			case tAxis.X: {
-				UV = aBlockSize.ZY() + L.ZY() * aBlockSize.X / L.X;
-				break;
-			}
-			case tAxis.Y: {
-				UV = aBlockSize.XZ() + L.XZ() * aBlockSize.Y / L.Y;
-				break;
-			}
-			case tAxis.Z: {
-				UV = aBlockSize.XY() + L.XY() * aBlockSize.Z / L.Z; 
-				break;
-			}
-		}
-		
-		return UV + V2(2);
+		return MainAxis switch {
+			tAxis.X => aBlockSize.ZY() + L.ZY() * aBlockSize.X / L.X,
+			tAxis.Y => aBlockSize.XZ() + L.XZ() * aBlockSize.Y / L.Y,
+			tAxis.Z => aBlockSize.XY() + L.XY() * aBlockSize.Z / L.Z,
+		} + V2(2);
 	}
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -2,7 +2,11 @@ using System.Numerics;
 
 public static class
 mSIMD {
-
+	
+	public static tInt32
+	VCount<t>(
+	) where t : struct => Vector<t>.Count;
+	
 	public struct tV<t> where t : struct {
 		internal Vector<t> Value;
 		
@@ -13,7 +17,10 @@ mSIMD {
 			this.Value = a;
 		}
 		
-		public static implicit operator tV<t>(Vector<t> a) => new tV<t>(a);
+		public static implicit
+		operator tV<t>(
+			Vector<t> a
+		) => new tV<t>(a);
 		
 		[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tV<t>
@@ -117,6 +124,24 @@ mSIMD {
 	V<t>(
 		t a
 	) where t : struct => new Vector<t>(a);
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tV<t>
+	V<t>(
+		System.Span<t> a
+	) where t : struct => new Vector<t>(a);
+	
+	public static tV<t>
+	Into<t>(
+		this tV<t> aFrom,
+		System.Span<t> aTo
+	)  where t : struct {
+		var Count = mSIMD.VCount<t>();
+		for (var I = 0; I < Count; I += 1) {
+			aTo[I] = aFrom.Value[I];
+		}
+		return aFrom;
+	}
 	
 	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV<t>
