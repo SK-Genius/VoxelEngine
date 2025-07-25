@@ -2,8 +2,8 @@
 	
 	<PropertyGroup>
 		<OutputType>Exe</OutputType> <!--  Exe | Library | Module | WinExe -->
-		<TargetFramework>net7.0-windows</TargetFramework>
 		<UseWindowsForms>true</UseWindowsForms>
+		<TargetFramework>$(TargetFramework)-windows</TargetFramework>
 	</PropertyGroup>
 	
 	<ItemGroup>

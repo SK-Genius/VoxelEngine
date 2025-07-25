@@ -34,12 +34,23 @@ mVoxelEditor {
 	
 	public static tBlock EmptyBlock = CreateBlock(V3(), V3().CreateArray<tColor>());
 	
-	public static tBlock OneBlock = CreateBlock(
+	public static tBlock OneRedBlock = CreateBlock(
 		V3(),
 		new tColor[1, 1, 1] {
 			{
 				{
 					R
+				}
+			}
+		}
+	);
+	
+	public static tBlock OneTransparentBlock = CreateBlock(
+		V3(),
+		new tColor[1, 1, 1] {
+			{
+				{
+					T
 				}
 			}
 		}
@@ -104,8 +115,15 @@ mVoxelEditor {
 		}
 	);
 	
+	public enum tAxis {
+		None,
+		X,
+		Y,
+		Z
+	}
+	
 	public struct tEditorState {
-		public tInt32 Zoom;
+		public tInt32 Zoom = 1;
 		public tDebugRenderMode DebugRenderMode;
 		public tRenderEnv RenderEnv;
 		public tSprite Canvas;
@@ -114,7 +132,11 @@ mVoxelEditor {
 		public tShadow Shadow;
 		public tV3 Pos3D;
 		public tV2 MousePos;
-		public tMouseKeys MouseKeys;
+		public tKeys Keys;
+		public tKeys KeysUpdated;
+		public tColor SelectedColor = R;
+		public tAxis SelectedAxis;
+		public tV3 StartPos3D;
 		
 		public tHotReload<tEditorDLL> HotReload = new (
 			new FileInfo("./VoxelEditor.HotReload.dll")
@@ -446,11 +468,11 @@ mVoxelEditor {
 		);
 		
 		var BlockSize = 9;
-		var Scale = 3;
+		var Upscale = 3;
 		
 		var RenderEnv = CreateEnv();
 		RenderEnv
-		._SetScale(Scale)
+		._SetScale(Upscale)
 		._SetLightDirection(V3(0, 0, BlockSize))
 		._Update()
 		;
@@ -469,8 +491,8 @@ mVoxelEditor {
 			}
 		}
 		
-		var Map = TargetBlock.Split(V3(), V3(BlockSize / Scale))
-		.Select(_ => ((_.Pos - V3(BlockSize >> 1)) * Scale, CreateBlock(V3(), _.Block.Scale3())))
+		var Map = TargetBlock.Split(V3(), V3(BlockSize / Upscale))
+		.Select(_ => ((_.Pos - V3(BlockSize >> 1)) * Upscale, CreateBlock(V3(), _.Block.Scale3())))
 		.ToImmutableList()
 		;
 		
@@ -492,14 +514,19 @@ mVoxelEditor {
 		tInt64 aElapsedMilliSeconds,
 		iEvent aEvent
 	) {
-		if (aEditorState.HotReload.HasNewDLL) {
-			aEditorState.HotReload._LoadDLL();
+		try {
+			if (aEditorState.HotReload.HasNewDLL) {
+				aEditorState.HotReload._LoadDLL();
+			}
+			return ref aEditorState.HotReload.DLL.Update(
+				ref aEditorState,
+				aElapsedMilliSeconds,
+				ImmutableStack.Create(aEvent)
+			);
+		} catch (System.Exception e) {
+			System.Console.WriteLine(e);
+			return ref aEditorState;
 		}
-		return ref aEditorState.HotReload.DLL.Update(
-			ref aEditorState,
-			aElapsedMilliSeconds,
-			ImmutableStack.Create(aEvent)
-		);
 	}
 	
 	public static ref tEditorState
@@ -507,13 +534,18 @@ mVoxelEditor {
 		ref tEditorState aEditorState,
 		tInt64 aElapsedMilliSeconds
 	) {
-		if (aEditorState.HotReload.HasNewDLL) {
-			aEditorState.HotReload._LoadDLL();
+		try {
+			if (aEditorState.HotReload.HasNewDLL) {
+				aEditorState.HotReload._LoadDLL();
+			}
+			return ref aEditorState.HotReload.DLL.Render(
+				ref aEditorState,
+				aElapsedMilliSeconds
+			);
+		} catch (System.Exception e) {
+			System.Console.WriteLine(e);
+			return ref aEditorState;
 		}
-		return ref aEditorState.HotReload.DLL.Render(
-			ref aEditorState,
-			aElapsedMilliSeconds
-		);
 	}
 	
 	public class tEditorDLL {

@@ -5,15 +5,23 @@ mFileWatcher {
 	
 	public class
 	tFileWatcher {
-		public FileInfo File;
+		public FileInfo File { get; private set; }
 		public tBool HasUpdated;
-		public FileSystemWatcher DLL_Watcher;
+		private FileSystemWatcher DLL_Watcher;
 		
 		public tFileWatcher(
 			FileInfo aFile
 		) {
+			this.SetFile(aFile);
+		}
+		
+		public void
+		SetFile(
+			FileInfo aFile
+		) {
 			this.File = aFile;
-			
+			this.HasUpdated = true;
+			this.DLL_Watcher?.Dispose();
 			this.DLL_Watcher = new FileSystemWatcher(
 				this.File.Directory.FullName
 			) {

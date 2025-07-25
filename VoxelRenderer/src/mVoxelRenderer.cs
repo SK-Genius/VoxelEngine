@@ -19,7 +19,7 @@ mVoxelRenderer {
 	
 	public class
 	tRendererDLL {
-		public tFunc<tCamera, tSprite, tV2,  tV3> To3D;
+		public tFunc<tCamera, tSprite, tV2, tV3> To3D;
 		public tMeth<tCamera, tV3, tSprite, tShadow, System.IntPtr, tV2, tDebugRenderMode> _RenderToBuffer;
 		public tMeth<tRenderEnv, tSprite, tShadow, tBlock, tV3> _DrawTo;
 	}
@@ -100,7 +100,7 @@ mVoxelRenderer {
 		this ref tRenderEnv aRenderEnv,
 		tSprite aSprite,
 		tV2 aV2
-	) => aRenderEnv.HotReloat.DLL.To3D(aRenderEnv.Camera, aSprite, aV2);
+	) => aRenderEnv.HotReload.DLL.To3D(aRenderEnv.Camera, aSprite, aV2);
 	
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static unsafe ref tRenderEnv
@@ -112,7 +112,7 @@ mVoxelRenderer {
 		tV2 aBufferSize,
 		tDebugRenderMode aDebugRenderMode
 	) {
-		aRenderEnv.HotReloat.DLL._RenderToBuffer(ref aRenderEnv.Camera, aRenderEnv.LightDirection, aSprite, aShadow, aBuffer, aBufferSize, aDebugRenderMode);
+		aRenderEnv.HotReload.DLL._RenderToBuffer(ref aRenderEnv.Camera, aRenderEnv.LightDirection, aSprite, aShadow, aBuffer, aBufferSize, aDebugRenderMode);
 		return ref aRenderEnv;
 	}
 	
@@ -124,7 +124,7 @@ mVoxelRenderer {
 		tShadow aShadow,
 		tBlock aBlock,
 		tV3 aOffset
-	) => ref aRenderEnv.HotReloat.DLL._DrawTo(
+	) => ref aRenderEnv.HotReload.DLL._DrawTo(
 		ref aRenderEnv,
 		aCanvas,
 		aShadow,
@@ -160,7 +160,7 @@ mVoxelRenderer {
 	public struct
 	tRenderEnv {
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public tRenderEnv() {}
+		public tRenderEnv() { }
 		
 		public tCamera Camera;
 		
@@ -172,18 +172,18 @@ mVoxelRenderer {
 		public tInt16[,][,] DeepPatterns;
 		public tInt32 PatternScale = 1;
 		
-		public tHotReload<tRendererDLL> HotReloat = new (
+		public tHotReload<tRendererDLL> HotReload = new(
 			new FileInfo("./VoxelRenderer.HotReload.dll")
 		);
 		
-		public tFileWatcher PatternFileWatcher = new (
+		public tFileWatcher PatternFileWatcher = new(
 			new FileInfo("./Patterns4_6x9.txt")
 		);
 		
 		public tV3 LightDirection;
 		
 		public Dictionary<(tM3x3, tBlock), tSprite> SpriteBuffer = new();
-		public Dictionary<(tV3 LightDirection, tInt32 LayerOffset, tBlock Block), tShadow> ShadowBuffer  = new();
+		public Dictionary<(tV3 LightDirection, tInt32 LayerOffset, tBlock Block), tShadow> ShadowBuffer = new();
 	}
 	
 	[DebuggerDisplay("{Value}")]
@@ -193,24 +193,24 @@ mVoxelRenderer {
 		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tBool
-		operator==(
+		operator ==(
 			tColor a1,
 			tColor a2
 		) => a1.Value == a2.Value;
 		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tBool
-		operator!=(
+		operator !=(
 			tColor a1,
 			tColor a2
 		) => a1.Value != a2.Value;
 		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static tColor
-		operator&(
+		operator &(
 			tColor aColor,
 			tNat8 aMask
-		) => new tColor{ Value = (tNat8)(aColor.Value & aMask) };
+		) => new tColor { Value = (tNat8)(aColor.Value & aMask) };
 	}
 	
 	public struct
@@ -350,7 +350,7 @@ mVoxelRenderer {
 				NormalPattern.Add(Row.Select(_ => _.Axis).ToArray());
 				DeepPattern.Add(Row.Select(_ => _.Deep).ToArray());
 			}
-		}		
+		}
 		
 		aRenderEnv.PatternFileWatcher.HasUpdated = false;
 		
@@ -464,8 +464,8 @@ mVoxelRenderer {
 	_Update(
 		this ref tRenderEnv a
 	) {
-		if (a.HotReloat.HasNewDLL) {
-			a.HotReloat._LoadDLL();
+		if (a.HotReload.HasNewDLL) {
+			a.HotReload._LoadDLL();
 		}
 		if (a.PatternFileWatcher.HasUpdated) {
 			a._LoadPatterns();
@@ -522,7 +522,7 @@ mVoxelRenderer {
 		tNat8 aB,
 		tBool aIsTransparent
 	) => new tColor {
-		Value =  (tNat8)(
+		Value = (tNat8)(
 			(
 				aIsTransparent
 				? 0b_1000_0000
@@ -563,7 +563,7 @@ mVoxelRenderer {
 		tM3x3 aM
 	) {
 		var D = aBlockSize;
-		var V3s = new [] {
+		var V3s = new[] {
 			V3(+D.X, +D.Y, +D.Z),
 			V3(+D.X, +D.Y, -D.Z),
 			V3(+D.X, -D.Y, +D.Z),
@@ -693,6 +693,74 @@ mVoxelRenderer {
 	) => V3(
 		a.U,
 		-a.V,
-		-FastSqrt(mMath.Abs(127*127 - a.U*a.U - a.V*a.V))
+		-FastSqrt(mMath.Abs(127 * 127 - a.U * a.U - a.V * a.V))
+	);
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tBool
+	TryGet3DOnZ(
+		this tRenderEnv aEnv,
+		tSprite aCanvas,
+		tV2 aMousePos,
+		tInt32 aZ,
+		out tV3 a3D
+	) {
+		var (Origin, Dir) = aEnv.GetRayFromScreen(aCanvas, aMousePos);
+		if (Dir.Z == 0) {
+			a3D = default;
+			return false;
+		} else {
+			a3D = Origin + Dir * (aZ - Origin.Z) / Dir.Z;
+			return true;
+		}
+	}
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tBool
+	TryGet3DOnX(
+		this tRenderEnv aEnv,
+		tSprite aCanvas,
+		tV2 aMousePos,
+		tInt32 aX,
+		out tV3 a3D
+	) {
+		var (Origin, Dir) = aEnv.GetRayFromScreen(aCanvas, aMousePos);
+		if (Dir.X == 0) {
+			a3D = default;
+			return false;
+		} else {
+			a3D = Origin + Dir * (aX - Origin.X) / Dir.X;
+			return true;
+		}
+	}
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tBool
+	TryGet3DOnY(
+		this tRenderEnv aEnv,
+		tSprite aCanvas,
+		tV2 aMousePos,
+		tInt32 aY,
+		out tV3 a3D
+	) {
+		var (Origin, Dir) = aEnv.GetRayFromScreen(aCanvas, aMousePos);
+		if (Dir.Y == 0) {
+			a3D = default;
+			return false;
+		} else {
+			a3D = Origin + Dir * (aY - Origin.Y) / Dir.Y;
+			return true;
+		}
+	}
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static (tV3 Origin, tV3 Dir)
+	GetRayFromScreen(
+		this tRenderEnv aEnv,
+		tSprite aCanvas,
+		tV2 aMousePos   
+	) => (
+		Origin: V3(aMousePos - (aCanvas.Size >> 1), 0) * aEnv.Camera.InvM / aEnv.Camera.Det,
+		Dir: V3(0, 0, 1) * aEnv.Camera.InvM
 	);
 }

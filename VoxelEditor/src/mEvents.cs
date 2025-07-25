@@ -15,21 +15,32 @@ mEvents {
 	
 	[Flags]
 	public enum
-	tMouseKeys {
-		Left = 1 << 0,
-		Middle = 1 << 1,
-		Right = 1 << 2,
+	tKeys {
+		None = 0,
+		
+		MouseLeft = 1 << 0,
+		MouseMiddle = 1 << 1,
+		MouseRight = 1 << 2,
+		
+		Shift = 1 << 3,
+		Control = 1 << 4,
+		Alt = 1 << 5,
+		
+		Up = 1 << 6,
+		Down = 1 << 7,
+		Left = 1 << 8,
+		Right = 1 << 9,
 	}
 	
 	public record
-	tMouseKeyDown(
-		tMouseKeys Key
+	tKeyDown(
+		tKeys Key
 	) : iEvent {
 	}
 	
 	public record
-	tMouseKeyUp(
-		tMouseKeys Key
+	tKeyUp(
+		tKeys Key
 	) : iEvent {
 	}
 	

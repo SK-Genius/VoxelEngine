@@ -1,41 +1,50 @@
 ﻿BUGS:
-* still some issues with shadow
-* can't reconstruct the sign of the ZAxis part of the normal right now
-* transparent sprites dose not align with uneven sprite offset
-	- [-maybe create two versions ???-]
-	- make transparency not part buffered sprite, instead make it a shader/material
+	* can't reconstruct the sign of the ZAxis part of the normal right now
+	* transparent sprites dose not align with uneven sprite offset
+		- [-maybe create two versions ???-]
+		- make transparency not part of buffered sprite, instead make it a shader/material
+	* shadow edges show artifacts on the edges some times. maybe an off-by-one bug
+	* changing windows size can end in crash (canvas size?)
+
+BUGS IN EDITOR:
+	* the 3D position of the mouse pointer includes the preview objects unintentional
+		- [-do i have to draw the scene ones for the mouse and ones for the screen? or-]
+		- draw in different canvas (base on interact with the mouse or not) and compose it later
 
 TODO:
-* Editor
-	- Undo/Redo
-	- add/remove Voxel
-	- ColorSelector
-	- ViewingModes
-	- EditModes
-	- copy/paste
-	- animation
-* give sprites an material how select witch shaders should be used for rendering to screen
-* [-Offset for Sprites and Shadow-]
-* introduce fix raster (maybe 9x9x9) to get proper shadow
-	- the LightDirection main (longest) axis value has to be this raster size (9)
-* shortcut Shadow calculation while using NormalLayer
-	- make it optional for translucent ???
-		- part of the material
+	* give sprites an material how select witch shaders should be used for rendering to screen
+	* shortcut Shadow calculation while using NormalLayer
+		- make it optional for translucent ???
+			- part of the material
+	* create render a pipeline
+	* SIMD support
+	* Editor
+		- Undo/Redo
+		- add/remove Voxel
+		- ColorSelector
+		- ViewingModes
+		- EditModes
+		- copy/paste
+		- animation
+	* maybe improve shadow by higher resolution
 
 DONE:
-* Upscale Patterns
-* view from bottom
-* deep offset buffers for voxel
-* non cubic "Blocks"
-* HotReload for AppLogic
-* HotReload for EngineCode
-* Shadow Layer
-* Layer
-* Mouse position improvements
-* Normal + Shading
+	* introduce fix raster (maybe 9x9x9) to get proper shadow
+		- the LightDirection main (longest) axis value has to be this raster size (9)
+	* Upscale Patterns
+	* view from bottom
+	* deep offset buffers for voxel
+	* non cubic "Blocks"
+	* HotReload for AppLogic
+	* HotReload for EngineCode
+	* Shadow Layer
+	* Layer
+	* Mouse position improvements
+	* Normal + Shading
 
 NOTES:
-* Cube Colors:
-	- 7Bits: 5 x 5 x 5 = 125 Colors + Non + PrimaryColor??? + SecondaryColor???  (Two Team or Effects Colors???)
-	- 1Bit: 50% Transparent (draw only every second pixel)
-		- or primary or secondary materials ???
+	* Cube Colors:
+		- 7Bits: 5 x 5 x 5 = 125 Colors + Non + PrimaryColor??? + SecondaryColor???  (Two Team or Effects Colors???)
+		- 1Bit: 50% Transparent (draw only every second pixel)
+			- or primary or secondary materials ???
+		- or 1Bit: for cluster (subtree is all the same material)

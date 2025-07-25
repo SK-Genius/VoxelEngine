@@ -30,6 +30,6 @@ global using tVInt16 = mSIMD.tV<System.Int16>;
 global using tVInt32 = mSIMD.tV<System.Int32>;
 global using tVInt64 = mSIMD.tV<System.Int64>;
 
-global using tVRealt16 = mSIMD.tV<System.Half>;
-global using tVRealt32 = mSIMD.tV<System.Single>;
-global using tVRealt64 = mSIMD.tV<System.Double>;
+global using tVReal16 = mSIMD.tV<System.Half>;
+global using tVReal32 = mSIMD.tV<System.Single>;
+global using tVReal64 = mSIMD.tV<System.Double>;

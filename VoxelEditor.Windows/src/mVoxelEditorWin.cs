@@ -27,7 +27,6 @@ mVoxelEditorWin {
 	Main(
 	) {
 		var LastMousePos = V2();
-		var Zoom = 1;
 		
 		var DefaultFont = new Font("Arial", 10);
 		
@@ -49,12 +48,12 @@ mVoxelEditorWin {
 		
 		var EditorState = mVoxelEditor.Create(
 			V2(Window.Width, Window.Height),
-			Zoom
+			1
 		);
 		
 		var Image = new Bitmap(
-			Window.Width / Zoom,
-			Window.Height / Zoom,
+			Window.Width / EditorState.Zoom,
+			Window.Height / EditorState.Zoom,
 			cImageFormat
 		);
 		
@@ -90,6 +89,7 @@ mVoxelEditorWin {
 			
 			pRenderEnv._RenderTo(
 				ref Image,
+				EditorState.Zoom,
 				EditorState.Canvas,
 				EditorState.Shadow,
 				EditorState.DebugRenderMode
@@ -98,7 +98,13 @@ mVoxelEditorWin {
 			a.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
 			//a.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Low;
 			a.Graphics.Clear(System.Drawing.Color.White);
-			a.Graphics.DrawImage(Image, 0, 0, EditorState.Zoom*Image.Width, EditorState.Zoom*Image.Height);
+			
+			var drawWidth = EditorState.Zoom * Image.Width;
+			var drawHeight = EditorState.Zoom * Image.Height;
+			var offsetX = (Window.ClientSize.Width - drawWidth) / 2;
+			var offsetY = (Window.ClientSize.Height - drawHeight) / 2;
+			a.Graphics.DrawImage(Image, offsetX, offsetY, drawWidth, drawHeight);
+			
 			a.Graphics.DrawString($"{NewTime - LastTimeRender} ms", DefaultFont, Brushes.Black, 100, 0);
 			
 			
@@ -116,23 +122,26 @@ mVoxelEditorWin {
 			var NewTime = SW.ElapsedMilliseconds;
 			EditorState.Update(
 				NewTime - LastTimeUpdate,
-				new tMouseKeyDown(
-					(a.Button.HasFlag(MouseButtons.Left) ? tMouseKeys.Left : default) |
-					(a.Button.HasFlag(MouseButtons.Middle) ? tMouseKeys.Middle : default) |
-					(a.Button.HasFlag(MouseButtons.Right) ? tMouseKeys.Right : default)
+				new tKeyDown(
+					(a.Button.HasFlag(MouseButtons.Left) ? tKeys.MouseLeft : default) |
+					(a.Button.HasFlag(MouseButtons.Middle) ? tKeys.MouseMiddle : default) |
+					(a.Button.HasFlag(MouseButtons.Right) ? tKeys.MouseRight : default)
 				)
 			);
 			LastTimeUpdate = NewTime;
+			
+			EditorState.RenderEnv._Update();
+			Window.Invalidate();
 		};
 		
 		Window.MouseUp += (_, a) => {
 			var NewTime = SW.ElapsedMilliseconds;
 			EditorState.Update(
 				NewTime - LastTimeUpdate,
-				new tMouseKeyUp(
-					(a.Button.HasFlag(MouseButtons.Left) ? tMouseKeys.Left : default) |
-					(a.Button.HasFlag(MouseButtons.Middle) ? tMouseKeys.Middle : default) |
-					(a.Button.HasFlag(MouseButtons.Right) ? tMouseKeys.Right : default)
+				new tKeyUp(
+					(a.Button.HasFlag(MouseButtons.Left) ? tKeys.MouseLeft : default) |
+					(a.Button.HasFlag(MouseButtons.Middle) ? tKeys.MouseMiddle : default) |
+					(a.Button.HasFlag(MouseButtons.Right) ? tKeys.MouseRight : default)
 				)
 			);
 			LastTimeUpdate = NewTime;
@@ -142,8 +151,12 @@ mVoxelEditorWin {
 		};
 		
 		Window.MouseMove += (_, a) => {
+			var drawWidth = EditorState.Zoom * Image.Width;
+			var drawHeight = EditorState.Zoom * Image.Height;
+			var offsetX = (Window.ClientSize.Width - drawWidth) / 2;
+			var offsetY = (Window.ClientSize.Height - drawHeight) / 2;
 			var NewTime = SW.ElapsedMilliseconds;
-			var NewPos = V2(a.X, a.Y) / Zoom;
+			var NewPos = V2(a.X - offsetX, a.Y - offsetY) / EditorState.Zoom;
 			EditorState.Update(
 				NewTime - LastTimeUpdate,
 				new tMouseMove(
@@ -152,6 +165,89 @@ mVoxelEditorWin {
 				)
 			);
 			LastMousePos = NewPos;
+			LastTimeUpdate = NewTime;
+			
+			EditorState.RenderEnv._Update();
+			Window.Invalidate();
+		};
+		
+		Window.MouseWheel += (_, a) => {
+			var drawWidth = EditorState.Zoom * Image.Width;
+			var drawHeight = EditorState.Zoom * Image.Height;
+			var offsetX = (Window.ClientSize.Width - drawWidth) / 2;
+			var offsetY = (Window.ClientSize.Height - drawHeight) / 2;
+			var NewTime = SW.ElapsedMilliseconds;
+			EditorState.Update(
+				NewTime - LastTimeUpdate,
+				new tMouseScroll(
+					a.Delta.Sign()
+				)
+			);
+			
+			var NewPos = V2(a.X - offsetX, a.Y - offsetY) / EditorState.Zoom;
+			EditorState.Update(
+				NewTime - LastTimeUpdate,
+				new tMouseMove(
+					LastMousePos,
+					NewPos
+				)
+			);
+			LastMousePos = NewPos;
+			
+			LastTimeUpdate = NewTime;
+			
+			EditorState.RenderEnv._Update();
+			Window.Invalidate();
+		};
+		
+		Window.KeyDown += (_ , a) => {
+			var Key = (
+				a.KeyCode == Keys.Shift ? tKeys.Shift :
+				a.KeyCode == Keys.ControlKey ? tKeys.Control :
+				a.KeyCode == Keys.Alt ? tKeys.Alt :
+				a.KeyCode == Keys.Up ? tKeys.Up :
+				a.KeyCode == Keys.Down ? tKeys.Down :
+				a.KeyCode == Keys.Left ? tKeys.Left :
+				a.KeyCode == Keys.Right ? tKeys.Right :
+				tKeys.None
+			);
+			
+			if (Key is tKeys.None) {
+				return;
+			}
+			
+			var NewTime = SW.ElapsedMilliseconds;
+			EditorState.Update(
+				NewTime - LastTimeUpdate,
+				new tKeyDown(Key)
+			);
+			LastTimeUpdate = NewTime;
+			
+			EditorState.RenderEnv._Update();
+			Window.Invalidate();
+		};
+		
+		Window.KeyUp += (_ , a) => {
+			var Key = (
+				a.KeyCode == Keys.Shift ? tKeys.Shift :
+				a.KeyCode == Keys.ControlKey ? tKeys.Control :
+				a.KeyCode == Keys.Alt ? tKeys.Alt :
+				a.KeyCode == Keys.Up ? tKeys.Up :
+				a.KeyCode == Keys.Down ? tKeys.Down :
+				a.KeyCode == Keys.Left ? tKeys.Left :
+				a.KeyCode == Keys.Right ? tKeys.Right :
+				tKeys.None
+			);
+			
+			if (Key is tKeys.None) {
+				return;
+			}
+			
+			var NewTime = SW.ElapsedMilliseconds;
+			EditorState.Update(
+				NewTime - LastTimeUpdate,
+				new tKeyUp(Key)
+			);
 			LastTimeUpdate = NewTime;
 			
 			EditorState.RenderEnv._Update();
@@ -170,6 +266,7 @@ mVoxelEditorWin {
 		var LightDir = 0f;
 		
 		Window.KeyDown += (_, a) => {
+			// Move to HotReload code
 			var NeedsUpdate = true;
 			
 			switch (a.KeyCode) {
@@ -277,6 +374,7 @@ mVoxelEditorWin {
 	_RenderTo(
 		this tRenderEnv aRenderEnv,
 		ref Bitmap aImage,
+		tInt32 aScale, 
 		tSprite aSprite,
 		tShadow aShadow,
 		tDebugRenderMode aDebugRenderMode
