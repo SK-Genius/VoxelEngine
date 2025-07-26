@@ -696,16 +696,26 @@ mVoxelRenderer {
 		-FastSqrt(mMath.Abs(127 * 127 - a.U * a.U - a.V * a.V))
 	);
 	
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static (tV3 Origin, tV3 Dir)
+	GetRayFromScreen(
+		this tCamera aCamera,
+		tV2 aMousePos   
+	) => (
+		Origin: V3(aMousePos, 0) * aCamera.InvM / aCamera.Det,
+		Dir: V3(0, 0, 1) * aCamera.InvM
+	);
+	
 	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tBool
 	TryGet3DOnZ(
-		this tRenderEnv aEnv,
-		tSprite aCanvas,
+		this tCamera aCamera,
 		tV2 aMousePos,
 		tInt32 aZ,
 		out tV3 a3D
 	) {
-		var (Origin, Dir) = aEnv.GetRayFromScreen(aCanvas, aMousePos);
+		var (Origin, Dir) = aCamera.GetRayFromScreen(aMousePos);
 		if (Dir.Z == 0) {
 			a3D = default;
 			return false;
@@ -718,13 +728,12 @@ mVoxelRenderer {
 	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tBool
 	TryGet3DOnX(
-		this tRenderEnv aEnv,
-		tSprite aCanvas,
+		this tCamera aCamera,
 		tV2 aMousePos,
 		tInt32 aX,
 		out tV3 a3D
 	) {
-		var (Origin, Dir) = aEnv.GetRayFromScreen(aCanvas, aMousePos);
+		var (Origin, Dir) = aCamera.GetRayFromScreen(aMousePos);
 		if (Dir.X == 0) {
 			a3D = default;
 			return false;
@@ -737,13 +746,12 @@ mVoxelRenderer {
 	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tBool
 	TryGet3DOnY(
-		this tRenderEnv aEnv,
-		tSprite aCanvas,
+		this tCamera aCamera,
 		tV2 aMousePos,
 		tInt32 aY,
 		out tV3 a3D
 	) {
-		var (Origin, Dir) = aEnv.GetRayFromScreen(aCanvas, aMousePos);
+		var (Origin, Dir) = aCamera.GetRayFromScreen(aMousePos);
 		if (Dir.Y == 0) {
 			a3D = default;
 			return false;
@@ -753,14 +761,43 @@ mVoxelRenderer {
 		}
 	}
 	
-	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public static (tV3 Origin, tV3 Dir)
-	GetRayFromScreen(
-		this tRenderEnv aEnv,
-		tSprite aCanvas,
-		tV2 aMousePos   
-	) => (
-		Origin: V3(aMousePos - (aCanvas.Size >> 1), 0) * aEnv.Camera.InvM / aEnv.Camera.Det,
-		Dir: V3(0, 0, 1) * aEnv.Camera.InvM
-	);
+	
+	[Pure]
+	public static tBool
+	TryGet3DPos(
+		this tCamera aCamera,
+		tAxis aAxis,
+		tV2 aMousePos,
+		tV3 aStartPos3D,
+		out tV3 aEndPos3D
+	) {
+		var Mouse2D = aMousePos;
+		var Start3D = aStartPos3D;
+		aEndPos3D = Start3D;
+		switch (aAxis) {
+			case tAxis.X: {
+				if (aCamera.TryGet3DOnX(Mouse2D, Start3D.X, out var Hit)) {
+					aEndPos3D = Hit;
+					return true;
+				}
+				break;
+			}
+			case tAxis.Y: {
+				if (aCamera.TryGet3DOnY(Mouse2D, Start3D.Y, out var Hit)) {
+					aEndPos3D = Hit;
+					return true;
+				}
+				break;
+			}
+			case tAxis.Z: {
+				if (aCamera.TryGet3DOnZ(Mouse2D, Start3D.Z, out var Hit)) {
+					aEndPos3D = Hit;
+					return true;
+				}
+				break;
+			}
+		}
+		
+		return false;
+	}
 }

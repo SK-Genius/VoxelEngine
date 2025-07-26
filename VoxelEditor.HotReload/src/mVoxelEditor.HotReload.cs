@@ -35,6 +35,9 @@ mVoxelEditor_HotReload {
 	) {
 		using var Log = mPerfLog.LogPerf();
 		
+		var Size = aEditorState.TargetBlock.GetSize();
+		var SizeHalf = Size >> 1;
+		
 		foreach (var Event in aEvents) {
 			aEditorState.KeysUpdated = default;
 			
@@ -79,159 +82,132 @@ mVoxelEditor_HotReload {
 				}
 			}
 			
-			if (aEditorState.Keys.HasFlag(tKeys.MouseLeft) && aEditorState.KeysUpdated.HasFlag(tKeys.MouseLeft)) {
-				var Size = aEditorState.TargetBlock.GetSize();
-				var Index3D = aEditorState.Pos3D + (Size >> 1);
-				var P2D = aEditorState.MousePos;
-				var N = aEditorState.Canvas.Normal[P2D.X, P2D.Y];
-				switch (N) {
-					case (0, 0): {
-						if (aEditorState.RenderEnv.Angle > 0) {
-							Index3D -= V3(0, 0, 1);
-						} else {
-							Index3D += V3(0, 0, 1);
-						}
-						break;
-					}
-					case (var X, 0): {
-						Index3D += V3(X.Sign(), 0, 0);
-						break;
-					}
-					case (0, var Y): {
-						Index3D -= V3(0, Y.Sign(), 0);
-						break;
-					}
-				}
-				
-				if (!Index3D.IsInRange(V3(), Size - V3(1))) {
-					break;
-				}
-				var BlockSize = V3(9);
-				var BlockCenterIndex = BlockIndexCenter(Index3D, BlockSize);
-				
-				Assert(BlockCenterIndex.IsInRange(V3(), aEditorState.RenderEnv.PatternScale * Size - V3(1)));
-				
-				var BlockCenter3D = BlockCenterIndex - (Size >> 1);
-				
-				aEditorState.TargetBlock[Index3D.X, Index3D.Y, Index3D.Z] = aEditorState.SelectedColor;
-				aEditorState.Map = aEditorState.Map.Where(_ => _.Pos != BlockCenter3D).ToImmutableList();
-				aEditorState.Map = aEditorState.Map.Add(
-					(
-						BlockCenter3D,
-						CreateBlock(
-							V3(),
-							aEditorState.TargetBlock
-								.SliceByMinSize(mBlockModifier.BlockIndexBegin(Index3D, BlockSize), BlockSize)
-						)
-					)
-				);
-			}
-			
-			// Rechteck-Lösch-Logik mit aufziehbarem Rechteck (Control nur beim Loslassen relevant)
-			if (aEditorState.Keys.HasFlag(tKeys.MouseRight) && aEditorState.KeysUpdated.HasFlag(tKeys.MouseRight)) {
-				// Startpunkt und Achse merken (unabhängig von Control)
-				aEditorState.StartPos3D = aEditorState.Pos3D;
-				var N = aEditorState.Canvas.Normal[aEditorState.MousePos.X, aEditorState.MousePos.Y];
-				switch (N) {
-					case (0, 0): aEditorState.SelectedAxis = mVoxelEditor.tAxis.Z; break;
-					case (var X, 0): aEditorState.SelectedAxis = mVoxelEditor.tAxis.X; break;
-					case (0, var Y): aEditorState.SelectedAxis = mVoxelEditor.tAxis.Y; break;
-					default: aEditorState.SelectedAxis = mVoxelEditor.tAxis.None; break;
-				}
-			}
-			
-			if (aEditorState.KeysUpdated.HasFlag(tKeys.MouseRight) && !aEditorState.Keys.HasFlag(tKeys.MouseRight)) {
-				if (aEditorState.Keys.HasFlag(tKeys.Control) && aEditorState.SelectedAxis != mVoxelEditor.tAxis.None) {
-					var Size = aEditorState.TargetBlock.GetSize();
-					var SizeHalf = Size >> 1;
-					var Start3D = aEditorState.StartPos3D;
-					var Mouse2D = aEditorState.MousePos;
-					var End3D = Start3D;
-					
-					if (aEditorState.SelectedAxis == mVoxelEditor.tAxis.Z) {
-						if (aEditorState.RenderEnv.TryGet3DOnZ(aEditorState.Canvas, Mouse2D, Start3D.Z, out var hit)) {
-							End3D = hit;
-						}
-					} else if (aEditorState.SelectedAxis == mVoxelEditor.tAxis.X) {
-						if (aEditorState.RenderEnv.TryGet3DOnX(aEditorState.Canvas, Mouse2D, Start3D.X, out var hit)) {
-							End3D = hit;
-						}
-					} else if (aEditorState.SelectedAxis == mVoxelEditor.tAxis.Y) {
-						if (aEditorState.RenderEnv.TryGet3DOnY(aEditorState.Canvas, Mouse2D, Start3D.Y, out var hit)) {
-							End3D = hit;
-						}
-					}
-					
-					var MinX = mMath.Min(Start3D.X, End3D.X) + SizeHalf.X;
-					var MaxX = mMath.Max(Start3D.X, End3D.X) + SizeHalf.X;
-					var MinY = mMath.Min(Start3D.Y, End3D.Y) + SizeHalf.Y;
-					var MaxY = mMath.Max(Start3D.Y, End3D.Y) + SizeHalf.Y;
-					var MinZ = mMath.Min(Start3D.Z, End3D.Z) + SizeHalf.Z;
-					var MaxZ = mMath.Max(Start3D.Z, End3D.Z) + SizeHalf.Z;
-					// Rechteck auf der gewählten Ebene löschen
-					if (aEditorState.SelectedAxis is mVoxelEditor.tAxis.X) {
-						for (var Y = MinY; Y <= MaxY; Y += 1) {
-							for (var Z = MinZ; Z <= MaxZ; Z += 1) {
-								var pos = V3(Start3D.X + SizeHalf.X, Y, Z);
-								if (pos.IsInRange(V3(), Size - V3(1))) {
-									aEditorState.TargetBlock[pos.X, pos.Y, pos.Z] = default;
-								}
+			if (aEditorState.KeysUpdated.HasFlag(tKeys.MouseLeft)) {
+				if (aEditorState.Keys.HasFlag(tKeys.MouseLeft)) {
+					var Index3D = aEditorState.Pos3D + SizeHalf;
+					aEditorState.StartPos3D = aEditorState.Pos3D;
+					var P2D = aEditorState.MousePos;
+					var N = aEditorState.Canvas.Normal[P2D.X, P2D.Y];
+					switch (N) {
+						case (0, 0): {
+							aEditorState.SelectedAxis = tAxis.Z;
+							if (aEditorState.RenderEnv.Angle > 0) {
+								aEditorState.StartPos3D -= V3(0, 0, 1);
+							} else {
+								aEditorState.StartPos3D += V3(0, 0, 1);
 							}
+							break;
 						}
-					} else if (aEditorState.SelectedAxis is mVoxelEditor.tAxis.Y) {
-						for (var X = MinX; X <= MaxX; X += 1) {
-							for (var Z = MinZ; Z <= MaxZ; Z += 1) {
-								var pos = V3(X, Start3D.Y + SizeHalf.Y, Z);
-								if (pos.IsInRange(V3(), Size - V3(1))) {
-									aEditorState.TargetBlock[pos.X, pos.Y, pos.Z] = default;
-								}
-							}
+						case (var X, 0): {
+							aEditorState.SelectedAxis = tAxis.X;
+							aEditorState.StartPos3D += V3(X.Sign(), 0, 0);
+							break;
 						}
-					} else if (aEditorState.SelectedAxis is mVoxelEditor.tAxis.Z) {
-						for (var X = MinX; X <= MaxX; X += 1) {
-							for (var Y = MinY; Y <= MaxY; Y += 1) {
-								var pos = V3(X, Y, Start3D.Z + SizeHalf.Z);
-								if (pos.IsInRange(V3(), Size - V3(1))) {
-									aEditorState.TargetBlock[pos.X, pos.Y, pos.Z] = default;
-								}
-							}
+						case (0, var Y): {
+							aEditorState.SelectedAxis = tAxis.Y;
+							aEditorState.StartPos3D -= V3(0, Y.Sign(), 0);
+							break;
 						}
 					}
 				} else {
-					var Size = aEditorState.TargetBlock.GetSize();
-					var Index3D = aEditorState.Pos3D + (Size >> 1);
+					var Mouse2D = aEditorState.MousePos - (aEditorState.Canvas.Size >> 1);
+					var Start3D = aEditorState.StartPos3D;
+					var End3D = aEditorState.RenderEnv.Camera.TryGet3DPos(aEditorState.SelectedAxis, Mouse2D, Start3D, out var Result)
+					? Result
+					: Start3D;
 					
-					System.Console.WriteLine();
-					System.Console.WriteLine(aEditorState.Pos3D);
-					System.Console.WriteLine(Index3D);
-					System.Console.WriteLine(Size);
-					
-					if (!Index3D.IsInRange(V3(), Size - V3(1))) {
-						break;
+					if (aEditorState.Keys.HasFlag(tKeys.Shift)) {
+						var D = End3D - Start3D;
+						var D_ = aEditorState.SelectedAxis switch {
+							tAxis.X => D.Sign() * V3(D.Abs().YZ().Min()),
+							tAxis.Y => D.Sign() * V3(D.Abs().XZ().Min()),
+							tAxis.Z => D.Sign() * V3(D.Abs().XY().Min()),
+						};
+						
+						End3D = Start3D + D_;
+					}
+					if (aEditorState.Keys.HasFlag(tKeys.Control)) {
+						Start3D -= End3D - Start3D;
 					}
 					
-					var BlockSize = V3(9);
-					var BlockCenterIndex = BlockIndexCenter(Index3D, BlockSize);
-					Assert(BlockCenterIndex.IsInRange(V3(), aEditorState.RenderEnv.PatternScale * Size - V3(1)));
+					var Min = mV3.Min(Start3D, End3D) + SizeHalf;
+					var Max = mV3.Max(Start3D, End3D) + SizeHalf;
 					
-					var BlockCenter3D = BlockCenterIndex - (Size >> 1);
-					System.Console.WriteLine(BlockCenter3D);
+					var C = (Max + Min) >> 1;
+					var R = mV3.Max( (Max - Min) >> 1, V3(1));
 					
-					aEditorState.TargetBlock[Index3D.X, Index3D.Y, Index3D.Z] = default;
-					aEditorState.Map = aEditorState.Map.Where(_ => _.Pos != BlockCenter3D).ToImmutableList();
-					aEditorState.Map = aEditorState.Map.Add(
-						(
-							BlockCenter3D,
-							CreateBlock(
-								V3(),
-								aEditorState.TargetBlock
-									.SliceByMinSize(mBlockModifier.BlockIndexBegin(Index3D, BlockSize), BlockSize)
-							)
-						)
-					);
+					for (var X = Min.X; X <= Max.X; X += 1) {
+						for (var Y = Min.Y; Y <= Max.Y; Y += 1) {
+							for (var Z = Min.Z; Z <= Max.Z; Z += 1) {
+								var Pos = V3(X, Y, Z);
+								if (Pos.IsInRange(V3(), Size - V3(1))) {
+									if (!aEditorState.Keys.HasFlag(tKeys.Alt) || (100 * (Pos - C).Abs() / R).Length2() <= 100 * 100) {
+										aEditorState.TargetBlock[Pos.X, Pos.Y, Pos.Z] = aEditorState.SelectedColor;
+									}
+								}
+							}
+						}
+					}
+					
+					// Reset
+					aEditorState.SelectedAxis = tAxis._;
 				}
-				// Reset
-				aEditorState.SelectedAxis = mVoxelEditor.tAxis.None;
+			}
+			
+			// Rechteck-Lösch-Logik mit aufziehbarem Rechteck (Control nur beim Loslassen relevant)
+			if (aEditorState.KeysUpdated.HasFlag(tKeys.MouseRight)) {
+				if (aEditorState.Keys.HasFlag(tKeys.MouseRight)) {
+					aEditorState.StartPos3D = aEditorState.Pos3D;
+					var N = aEditorState.Canvas.Normal[aEditorState.MousePos.X, aEditorState.MousePos.Y];
+					aEditorState.SelectedAxis = N switch {
+						(0, 0) => tAxis.Z,
+						(var X, 0) => tAxis.X,
+						(0, var Y) => tAxis.Y,
+						_ => tAxis._,
+					};
+				} else {
+					var Mouse2D = aEditorState.MousePos - (aEditorState.Canvas.Size >> 1);
+					var Start3D = aEditorState.StartPos3D;
+					var End3D = aEditorState.RenderEnv.Camera.TryGet3DPos(aEditorState.SelectedAxis, Mouse2D, Start3D, out var Result)
+					? Result
+					: Start3D;
+					
+					if (aEditorState.Keys.HasFlag(tKeys.Shift)) {
+						var D = End3D - Start3D;
+						var D_ = aEditorState.SelectedAxis switch {
+							tAxis.X => D.Sign() * V3(D.Abs().YZ().Min()),
+							tAxis.Y => D.Sign() * V3(D.Abs().XZ().Min()),
+							tAxis.Z => D.Sign() * V3(D.Abs().XY().Min()),
+						};
+						
+						End3D = Start3D + D_;
+					}
+					if (aEditorState.Keys.HasFlag(tKeys.Control)) {
+						Start3D -= End3D - Start3D;
+					}
+					
+					var Min = mV3.Min(Start3D, End3D) + SizeHalf;
+					var Max = mV3.Max(Start3D, End3D) + SizeHalf;
+					
+					var C = (Max + Min) >> 1;
+					var R = mV3.Max( (Max - Min) >> 1, V3(1));
+					
+					for (var X = Min.X; X <= Max.X; X += 1) {
+						for (var Y = Min.Y; Y <= Max.Y; Y += 1) {
+							for (var Z = Min.Z; Z <= Max.Z; Z += 1) {
+								var Pos = V3(X, Y, Z);
+								if (Pos.IsInRange(V3(), Size - V3(1))) {
+									if (!aEditorState.Keys.HasFlag(tKeys.Alt) || (100 * (Pos - C).Abs() / R).Length2() <= 100 * 100) {
+										aEditorState.TargetBlock[Pos.X, Pos.Y, Pos.Z] = default;
+									}
+								}
+							}
+						}
+					}
+					
+					// Reset
+					aEditorState.SelectedAxis = tAxis._;
+				}
 			}
 		}
 		
@@ -283,62 +259,48 @@ mVoxelEditor_HotReload {
 		var P2D = aEditorState.MousePos;
 		var P3D = V3();
 		
-		if (aEditorState.Keys.HasFlag(tKeys.MouseRight) && aEditorState.Keys.HasFlag(tKeys.Control)) {
+		var Size = aEditorState.TargetBlock.GetSize();
+		var SizeHalf = Size >> 1;
+		
+		if (aEditorState.Keys.HasFlag(tKeys.MouseLeft) || aEditorState.Keys.HasFlag(tKeys.MouseRight)) {// && aEditorState.Keys.HasFlag(tKeys.Control)) {
 			// Remove Area Marker
 			
-			var Size = aEditorState.TargetBlock.GetSize();
-			var SizeHalf = Size >> 1;
+			var Mouse2D = aEditorState.MousePos - (aEditorState.Canvas.Size >> 1);
 			var Start3D = aEditorState.StartPos3D;
-			var Mouse2D = aEditorState.MousePos;
-			var End3D = Start3D;
+			var End3D = aEditorState.RenderEnv.Camera.TryGet3DPos(aEditorState.SelectedAxis, Mouse2D, Start3D, out var Result)
+			? Result
+			: Start3D;
 			
-			if (aEditorState.SelectedAxis == mVoxelEditor.tAxis.Z) {
-				if (aEditorState.RenderEnv.TryGet3DOnZ(aEditorState.Canvas, Mouse2D, Start3D.Z, out var hit)) {
-					End3D = hit;
-				}
-			} else if (aEditorState.SelectedAxis == mVoxelEditor.tAxis.X) {
-				if (aEditorState.RenderEnv.TryGet3DOnX(aEditorState.Canvas, Mouse2D, Start3D.X, out var hit)) {
-					End3D = hit;
-				}
-			} else if (aEditorState.SelectedAxis == mVoxelEditor.tAxis.Y) {
-				if (aEditorState.RenderEnv.TryGet3DOnY(aEditorState.Canvas, Mouse2D, Start3D.Y, out var hit)) {
-					End3D = hit;
-				}
+			if (aEditorState.Keys.HasFlag(tKeys.Shift)) {
+				var D = End3D - Start3D;
+				var D_ = aEditorState.SelectedAxis switch {
+					tAxis.X => D.Sign() * V3(D.Abs().YZ().Min()),
+					tAxis.Y => D.Sign() * V3(D.Abs().XZ().Min()),
+					tAxis.Z => D.Sign() * V3(D.Abs().XY().Min()),
+				};
+				
+				End3D = Start3D + D_;
+			}
+			if (aEditorState.Keys.HasFlag(tKeys.Control)) {
+				Start3D -= End3D - Start3D;
 			}
 			
-			var MinX = mMath.Min(Start3D.X, End3D.X) + SizeHalf.X;
-			var MaxX = mMath.Max(Start3D.X, End3D.X) + SizeHalf.X;
-			var MinY = mMath.Min(Start3D.Y, End3D.Y) + SizeHalf.Y;
-			var MaxY = mMath.Max(Start3D.Y, End3D.Y) + SizeHalf.Y;
-			var MinZ = mMath.Min(Start3D.Z, End3D.Z) + SizeHalf.Z;
-			var MaxZ = mMath.Max(Start3D.Z, End3D.Z) + SizeHalf.Z;
+			var Min = mV3.Min(Start3D, End3D) + SizeHalf;
+			var Max = mV3.Max(Start3D, End3D) + SizeHalf;
 			
 			var Map_ = System.Collections.Immutable.ImmutableList.Create<(tV3, tBlock)>();
 			
-			if (aEditorState.SelectedAxis is mVoxelEditor.tAxis.X) {
-				for (var Y = MinY; Y <= MaxY; Y += 1) {
-					for (var Z = MinZ; Z <= MaxZ; Z += 1) {
-						var Pos = V3(Start3D.X + SizeHalf.X, Y, Z);
+			var C = (Max + Min) >> 1;
+			var R = mV3.Max( (Max - Min) >> 1, V3(1));
+			
+			for (var X = Min.X; X <= Max.X; X += 1) {
+				for (var Y = Min.Y; Y <= Max.Y; Y += 1) {
+					for (var Z = Min.Z; Z <= Max.Z; Z += 1) {
+						var Pos = V3(X, Y, Z);
 						if (Pos.IsInRange(V3(), Size - V3(1))) {
-							Map_ = Map_.Add((Pos - SizeHalf, OneTransparentBlock));
-						}
-					}
-				}
-			} else if (aEditorState.SelectedAxis is mVoxelEditor.tAxis.Y) {
-				for (var X = MinX; X <= MaxX; X += 1) {
-					for (var Z = MinZ; Z <= MaxZ; Z += 1) {
-						var Pos = V3(X, Start3D.Y + SizeHalf.Y, Z);
-						if (Pos.IsInRange(V3(), Size - V3(1))) {
-							Map_ = Map_.Add((Pos - SizeHalf, OneTransparentBlock));
-						}
-					}
-				}
-			} else if (aEditorState.SelectedAxis is mVoxelEditor.tAxis.Z) {
-				for (var X = MinX; X <= MaxX; X += 1) {
-					for (var Y = MinY; Y <= MaxY; Y += 1) {
-						var Pos = V3(X, Y, Start3D.Z + SizeHalf.Z);
-						if (Pos.IsInRange(V3(), Size - V3(1))) {
-							Map_ = Map_.Add((Pos - SizeHalf, OneTransparentBlock));
+							if (!aEditorState.Keys.HasFlag(tKeys.Alt) || (100 * (Pos - C).Abs() / R).Length2() <= 100 * 100) {
+								Map_ = Map_.Add((Pos - SizeHalf, OneTransparentBlock));
+							}
 						}
 					}
 				}

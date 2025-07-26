@@ -115,13 +115,6 @@ mVoxelEditor {
 		}
 	);
 	
-	public enum tAxis {
-		None,
-		X,
-		Y,
-		Z
-	}
-	
 	public struct tEditorState {
 		public tInt32 Zoom = 1;
 		public tDebugRenderMode DebugRenderMode;

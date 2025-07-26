@@ -202,13 +202,13 @@ mVoxelEditorWin {
 		
 		Window.KeyDown += (_ , a) => {
 			var Key = (
-				a.KeyCode == Keys.Shift ? tKeys.Shift :
-				a.KeyCode == Keys.ControlKey ? tKeys.Control :
-				a.KeyCode == Keys.Alt ? tKeys.Alt :
-				a.KeyCode == Keys.Up ? tKeys.Up :
-				a.KeyCode == Keys.Down ? tKeys.Down :
-				a.KeyCode == Keys.Left ? tKeys.Left :
-				a.KeyCode == Keys.Right ? tKeys.Right :
+				a.KeyCode is Keys.ShiftKey ? tKeys.Shift :
+				a.KeyCode is Keys.ControlKey ? tKeys.Control :
+				a.KeyCode is Keys.Menu ? tKeys.Alt :
+				a.KeyCode is Keys.Up ? tKeys.Up :
+				a.KeyCode is Keys.Down ? tKeys.Down :
+				a.KeyCode is Keys.Left ? tKeys.Left :
+				a.KeyCode is Keys.Right ? tKeys.Right :
 				tKeys.None
 			);
 			
@@ -229,13 +229,13 @@ mVoxelEditorWin {
 		
 		Window.KeyUp += (_ , a) => {
 			var Key = (
-				a.KeyCode == Keys.Shift ? tKeys.Shift :
-				a.KeyCode == Keys.ControlKey ? tKeys.Control :
-				a.KeyCode == Keys.Alt ? tKeys.Alt :
-				a.KeyCode == Keys.Up ? tKeys.Up :
-				a.KeyCode == Keys.Down ? tKeys.Down :
-				a.KeyCode == Keys.Left ? tKeys.Left :
-				a.KeyCode == Keys.Right ? tKeys.Right :
+				a.KeyCode is Keys.ShiftKey ? tKeys.Shift :
+				a.KeyCode is Keys.ControlKey ? tKeys.Control :
+				a.KeyCode is Keys.Menu ? tKeys.Alt :
+				a.KeyCode is Keys.Up ? tKeys.Up :
+				a.KeyCode is Keys.Down ? tKeys.Down :
+				a.KeyCode is Keys.Left ? tKeys.Left :
+				a.KeyCode is Keys.Right ? tKeys.Right :
 				tKeys.None
 			);
 			

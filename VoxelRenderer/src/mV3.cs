@@ -305,9 +305,15 @@ mV3 {
 	
 	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tInt32
-	Abs2(
+	Length2(
 		this tV3 a
 	) => a.X*a.X + a.Y*a.Y + a.Z*a.Z;
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tInt32
+	Length(
+		this tV3 a
+	) => (tInt32)System.MathF.Round(System.MathF.Sqrt(a.Length2()));
 	
 	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV3
@@ -315,7 +321,7 @@ mV3 {
 		this tV3 a,
 		tInt32 aScale
 	) {
-		var Length = System.MathF.Sqrt(a.Abs2()) / aScale;
+		var Length = System.MathF.Sqrt(a.Length2()) / aScale;
 		return V3(
 			Floor(a.X / Length),
 			Floor(a.Y / Length),

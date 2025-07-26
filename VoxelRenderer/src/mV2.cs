@@ -148,6 +148,18 @@ mV2 {
 	);
 	
 	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tInt32
+	Min(
+		this tV2 a
+	) => mMath.Min(a.X, a.Y);
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static tInt32
+	Max(
+		this tV2 a
+	) => mMath.Max(a.X, a.Y);
+	
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static tV2
 	Min(
 		tV2 a1,
