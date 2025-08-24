@@ -72,7 +72,10 @@ mVoxelEditor_HotReload {
 					aEditorState.Zoom = cZoomScaleLevels[Index].Zoom;
 					
 					aEditorState.RenderEnv.PatternFileWatcher.SetFile(
-						new System.IO.FileInfo("./Patterns4_6x9.txt")
+						//new System.IO.FileInfo("./Patterns1_2x5.txt")
+						//new System.IO.FileInfo("./Patterns2_3x7.txt")
+						new System.IO.FileInfo("./Patterns3_4x7.txt")
+						//new System.IO.FileInfo("./Patterns4_6x9.txt")
 					);
 					aEditorState.RenderEnv._SetScale(cZoomScaleLevels[Index].Upscale);
 					break;

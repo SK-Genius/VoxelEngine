@@ -273,85 +273,93 @@ mVoxelRenderer {
 		var DeepPattern = new List<tInt16[]>();
 		
 		var IsFirstLine = true;
-		foreach (var Line in File.ReadAllLines(aRenderEnv.PatternFileWatcher.File.FullName)) {
-			if (IsFirstLine) {
-				IsFirstLine = false;
-				
-				var Parts = Line.Split('x');
-				AngelParts = int.Parse(Parts[0]);
-				QuoterParts = int.Parse(Parts[1]);
-				aRenderEnv.Matrixes = new tM3x3[AngelParts, QuoterParts];
-				aRenderEnv.DeepPatterns = new tInt16[AngelParts, QuoterParts][,];
-				aRenderEnv.NormalPatterns = new tAxis[AngelParts, QuoterParts][,];
-			} else if (Line.StartsWith('#') || string.IsNullOrWhiteSpace(Line)) {
-				if (Dir < 0) {
-					Dir += 1;
-					continue;
-				}
-				
-				aRenderEnv.Matrixes[Dir, Angel] = M;
-				MRow = 0;
-				
-				aRenderEnv.DeepPatterns[Dir, Angel] = DeepPattern.ToArray2D();
-				DeepPattern.Clear();
-				
-				aRenderEnv.NormalPatterns[Dir, Angel] = NormalPattern.ToArray2D();
-				NormalPattern.Clear();
-				
-				if (Line.StartsWith('#')) {
-					Angel = 0;
-					Dir += 1;
-				} else {
-					Angel += 1;
-				}
-			} else if (Line.StartsWith('|')) {
-				var Row = Line
-				.Substring(1)
-				.Split(' ', System.StringSplitOptions.RemoveEmptyEntries | System.StringSplitOptions.TrimEntries)
-				.Select(int.Parse)
-				.ToArray()
-				;
-				
-				M = MRow switch {
-					0 => M3x3(
-						V3(Row[0], Row[1], Row[2]),
-						M.Y,
-						M.Z
-					),
-					1 => M3x3(
-						M.X,
-						V3(Row[0], Row[1], Row[2]),
-						M.Z
-					),
-					2 => M3x3(
-						M.X,
-						M.Y,
-						V3(Row[0], Row[1], Row[2])
-					),
-					_ => M
-				};
-				MRow += 1;
-			} else {
-				var Row = Line
-				.Split(' ', System.StringSplitOptions.RemoveEmptyEntries | System.StringSplitOptions.TrimEntries)
-				.Select(
-					_ => (
-						Axis: _[0] switch {
-							'x' => tAxis.X,
-							'y' => tAxis.Y,
-							'z' => tAxis.Z,
-							_ => tAxis._,
-						},
-						Deep: (tInt16)(_[1] - '0')
-					)
-				)
-				.ToArray();
-				
-				NormalPattern.Add(Row.Select(_ => _.Axis).ToArray());
-				DeepPattern.Add(Row.Select(_ => _.Deep).ToArray());
-			}
-		}
+		var LineNr = 1;
 		
+		try {
+			foreach (var Line in File.ReadAllLines(aRenderEnv.PatternFileWatcher.File.FullName)) {
+				if (IsFirstLine) {
+					IsFirstLine = false;
+					
+					var Parts = Line.Split('x');
+					AngelParts = int.Parse(Parts[0]);
+					QuoterParts = int.Parse(Parts[1]);
+					aRenderEnv.Matrixes = new tM3x3[AngelParts, QuoterParts];
+					aRenderEnv.DeepPatterns = new tInt16[AngelParts, QuoterParts][,];
+					aRenderEnv.NormalPatterns = new tAxis[AngelParts, QuoterParts][,];
+				} else if (Line.StartsWith('#') || string.IsNullOrWhiteSpace(Line)) {
+					if (Dir < 0) {
+						Dir += 1;
+						continue;
+					}
+					
+					aRenderEnv.Matrixes[Dir, Angel] = M;
+					MRow = 0;
+					
+					aRenderEnv.DeepPatterns[Dir, Angel] = DeepPattern.ToArray2D();
+					DeepPattern.Clear();
+					
+					aRenderEnv.NormalPatterns[Dir, Angel] = NormalPattern.ToArray2D();
+					NormalPattern.Clear();
+					
+					if (Line.StartsWith('#')) {
+						Angel = 0;
+						Dir += 1;
+					} else {
+						Angel += 1;
+					}
+				} else if (Line.StartsWith('|')) {
+					var Row = Line
+					.Substring(1)
+					.Split(' ', System.StringSplitOptions.RemoveEmptyEntries | System.StringSplitOptions.TrimEntries)
+					.Select(int.Parse)
+					.ToArray()
+					;
+					
+					M = MRow switch {
+						0 => M3x3(
+							V3(Row[0], Row[1], Row[2]),
+							M.Y,
+							M.Z
+						),
+						1 => M3x3(
+							M.X,
+							V3(Row[0], Row[1], Row[2]),
+							M.Z
+						),
+						2 => M3x3(
+							M.X,
+							M.Y,
+							V3(Row[0], Row[1], Row[2])
+						),
+						_ => M
+					};
+					MRow += 1;
+				} else {
+					var Row = Line
+					.Split(' ', System.StringSplitOptions.RemoveEmptyEntries | System.StringSplitOptions.TrimEntries)
+					.Select(
+						_ => (
+							Axis: _[0] switch {
+								'x' => tAxis.X,
+								'y' => tAxis.Y,
+								'z' => tAxis.Z,
+								_ => tAxis._,
+							},
+							Deep: (tInt16)(_[1] - '0')
+						)
+					)
+					.ToArray();
+					
+					NormalPattern.Add(Row.Select(_ => _.Axis).ToArray());
+					DeepPattern.Add(Row.Select(_ => _.Deep).ToArray());
+				}
+				
+				LineNr += 1;
+			}
+		} catch (System.Exception e) {
+			System.Console.Error.WriteLine($"Error in {aRenderEnv.PatternFileWatcher.File.FullName}:{LineNr}: {e.Message}");
+			throw;
+		}		
 		aRenderEnv.PatternFileWatcher.HasUpdated = false;
 		
 		aRenderEnv._ScalePatterns(aRenderEnv.PatternScale);

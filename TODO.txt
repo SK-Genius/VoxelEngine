@@ -10,6 +10,7 @@ BUGS IN EDITOR:
 	* the 3D position of the mouse pointer includes the preview objects unintentional
 		- [-do i have to draw the scene ones for the mouse and ones for the screen? or-]
 		- draw in different canvas (base on interact with the mouse or not) and compose it later
+	* the second point for an rect selection is off
 
 TODO:
 	* give sprites an material how select witch shaders should be used for rendering to screen
@@ -20,7 +21,6 @@ TODO:
 	* SIMD support
 	* Editor
 		- Undo/Redo
-		- add/remove Voxel
 		- ColorSelector
 		- ViewingModes
 		- EditModes
@@ -41,7 +41,9 @@ DONE:
 	* Layer
 	* Mouse position improvements
 	* Normal + Shading
-
+	* Editor
+		- add/remove Voxel
+		
 NOTES:
 	* Cube Colors:
 		- 7Bits: 5 x 5 x 5 = 125 Colors + Non + PrimaryColor??? + SecondaryColor???  (Two Team or Effects Colors???)

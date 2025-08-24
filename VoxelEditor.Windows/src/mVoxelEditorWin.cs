@@ -115,6 +115,19 @@ mVoxelEditorWin {
 			}
 			
 			a.Graphics.DrawString($"({P3D.X}, {P3D.Y}, {P3D.Z})", DefaultFont, Brushes.Black, 200, 0);
+			var P2D_ = P2D * 1;//EditorState.Zoom;
+			a.Graphics.DrawString($"({P2D_.X}, {P2D_.Y})", DefaultFont, Brushes.Black, 300, 0);
+			if (P2D.IsInRange(V2(), EditorState.Canvas.Size - V2(1))) {
+				try {
+					
+					var Color = EditorState.Canvas.Color[P2D_.X, P2D_.Y];
+					a.Graphics.DrawString($"{Color.Value} ({Color.Value % 5}, {(Color.Value / 5) % 5}, {(Color.Value / (5 * 5)) % 5})", DefaultFont, Brushes.Black, 200, 10);
+					
+					var Deep = EditorState.Canvas.Deep[P2D_.X, P2D_.Y];
+					a.Graphics.DrawString($"({P2D_.X}, {P2D_.Y}, {Deep})", DefaultFont, Brushes.Black, 200, 20);
+				} catch {
+				}
+			}			
 			LastTimeRender = NewTime;
 		};
 		

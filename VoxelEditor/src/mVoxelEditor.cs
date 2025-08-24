@@ -460,7 +460,7 @@ mVoxelEditor {
 			}
 		);
 		
-		var BlockSize = 9;
+		var BlockSize = 3 * 3 * 3;
 		var Upscale = 3;
 		
 		var RenderEnv = CreateEnv();

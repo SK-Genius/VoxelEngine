@@ -624,13 +624,37 @@ mVoxelRenderer_HotReload {
 		(
 			tDebugRenderMode.None,
 			(tShaderInput a) => {
+				var D = a.Sprite.Deep[a.U, a.V];
+				var F = 0;
+				try {
+					var D_N = (a.Sprite.Deep[a.U, a.V - 1] - D) >> 0;
+					var D_S = (a.Sprite.Deep[a.U, a.V + 1] - D) >> 0;
+					var D_E = (a.Sprite.Deep[a.U + 1, a.V] - D) >> 0;
+					var D_W = (a.Sprite.Deep[a.U - 1, a.V] - D) >> 0;
+					
+					if ((D_N - D_S).Abs() is 1) {
+						D_S = 0;
+						D_N = 0;
+					}
+					
+					if ((D_E - D_W).Abs() is 1) {
+						D_W = 0;
+						D_E = 0;
+					}
+					
+					F = (D_N + D_S + D_E + D_W) >> 0;
+					F <<= 6;
+					F = F.Clamp(-32, 32);
+					//F = 0;
+				} catch {
+				}
 				var ColorIndex = a.Sprite.Color[a.U, a.V];
 				var C = ToRGB(ColorIndex) * a.H >> 8;
 				return (tNat32)(
 					(0xFF << 24) |
-					((C.X & 0xFF) << 16) |
-					((C.Y & 0xFF) << 8) |
-					((C.Z & 0xFF) << 0)
+					(((C.X + F).Clamp(0, 255) & 0xFF) << 16) |
+					(((C.Y + F).Clamp(0, 255) & 0xFF) << 8) |
+					(((C.Z + F).Clamp(0, 255) & 0xFF) << 0)
 				);
 			}
 		), (
@@ -643,7 +667,7 @@ mVoxelRenderer_HotReload {
 					_ => d	
 				};
 				return (tNat32)(
-					0x_FF_00_00_00 |
+					0x_FF_00_00_00 | 
 					c
 				);
 			}

@@ -32,7 +32,7 @@ mSIMD {
 		public static tV<t>
 		operator+(
 			tV<t> a1,
-			tV<t> a2
+			tV<t> a2 
 		) => a1.Value + a2.Value;
 		
 		[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]

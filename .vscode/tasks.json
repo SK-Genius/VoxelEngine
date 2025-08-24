@@ -41,7 +41,19 @@
 			],
 			"problemMatcher": "$msCompile"
 		},
-		
-		
+		{
+			"label": "watchHotRenderer",
+			"type": "process",
+			"options": {
+				"cwd": "${workspaceFolder}/VoxelRenderer.HotReload/"
+			},
+			"command": "dotnet",
+			"args": [
+				"watch",
+				"build",
+				"-c:Debug"
+			],
+			"problemMatcher": "$msCompile"
+		}
 	]
 }
